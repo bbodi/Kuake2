@@ -22,7 +22,6 @@ package kuake2.qcommon;
  * cmd_function_t
  */
 public final class cmd_function_t {
-    public cmd_function_t next = null;
     public String name = null;
     public xcommand_t function;
 }

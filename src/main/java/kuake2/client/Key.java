@@ -29,6 +29,7 @@ import kuake2.util.Lib;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -679,7 +680,7 @@ public class Key extends Globals {
 
     }
 
-    private static void printCompletions(String type, Vector<String> compl) {
+    private static void printCompletions(String type, List<String> compl) {
         Com.Printf(type);
         for (int i = 0; i < compl.size(); i++) {
             Com.Printf((String) compl.get(i) + " ");
@@ -698,8 +699,8 @@ public class Key extends Globals {
 
         String s = new String(key_lines[edit_line], start, end - start);
 
-        Vector<String> cmds = Cmd.CompleteCommand(s);
-        Vector<String> vars = Cvar.CompleteVariable(s);
+        List<String> cmds = Cmd.CompleteCommand(s);
+        List<String> vars = Cvar.CompleteVariable(s);
 
         int c = cmds.size();
         int v = vars.size();

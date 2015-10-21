@@ -1338,6 +1338,7 @@ public final class CL {
         Cmd.AddCommand("info", null);
         Cmd.AddCommand("prog", null);
         Cmd.AddCommand("give", null);
+        Cmd.AddCommand("spawn", null);
         Cmd.AddCommand("god", null);
         Cmd.AddCommand("notarget", null);
         Cmd.AddCommand("noclip", null);
