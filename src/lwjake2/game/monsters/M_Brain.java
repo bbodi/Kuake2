@@ -19,19 +19,7 @@
 package lwjake2.game.monsters;
 
 import lwjake2.Defines;
-import lwjake2.game.EntDieAdapter;
-import lwjake2.game.EntDodgeAdapter;
-import lwjake2.game.EntInteractAdapter;
-import lwjake2.game.EntPainAdapter;
-import lwjake2.game.EntThinkAdapter;
-import lwjake2.game.GameAI;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameMisc;
-import lwjake2.game.GameUtil;
-import lwjake2.game.GameWeapon;
-import lwjake2.game.edict_t;
-import lwjake2.game.mframe_t;
-import lwjake2.game.mmove_t;
+import lwjake2.game.*;
 import lwjake2.util.Lib;
 import lwjake2.util.Math3D;
 
@@ -512,7 +500,10 @@ public class M_Brain {
     static int sound_melee3;
 
     static EntInteractAdapter brain_sight = new EntInteractAdapter() {
-    	public String getID() { return "brain_sight"; }
+        public String getID() {
+            return "brain_sight";
+        }
+
         public boolean interact(edict_t self, edict_t other) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_sight, 1,
                     Defines.ATTN_NORM, 0);
@@ -521,7 +512,10 @@ public class M_Brain {
     };
 
     static EntThinkAdapter brain_search = new EntThinkAdapter() {
-    	public String getID() { return "brain_search"; }
+        public String getID() {
+            return "brain_search";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_search, 1,
                     Defines.ATTN_NORM, 0);
@@ -533,7 +527,7 @@ public class M_Brain {
     //	   STAND
     //
 
-    static mframe_t brain_frames_stand[] = new mframe_t[] {
+    static mframe_t brain_frames_stand[] = new mframe_t[]{
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
@@ -563,13 +557,16 @@ public class M_Brain {
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null) };
+            new mframe_t(GameAI.ai_stand, 0, null)};
 
     static mmove_t brain_move_stand = new mmove_t(FRAME_stand01, FRAME_stand30,
             brain_frames_stand, null);
 
     static EntThinkAdapter brain_stand = new EntThinkAdapter() {
-    	public String getID() { return "brain_stand"; }
+        public String getID() {
+            return "brain_stand";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.currentmove = brain_move_stand;
             return true;
@@ -580,7 +577,7 @@ public class M_Brain {
     //	   IDLE
     //
 
-    static mframe_t brain_frames_idle[] = new mframe_t[] {
+    static mframe_t brain_frames_idle[] = new mframe_t[]{
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
@@ -610,13 +607,16 @@ public class M_Brain {
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null) };
+            new mframe_t(GameAI.ai_stand, 0, null)};
 
     static mmove_t brain_move_idle = new mmove_t(FRAME_stand31, FRAME_stand60,
             brain_frames_idle, brain_stand);
 
     static EntThinkAdapter brain_idle = new EntThinkAdapter() {
-    	public String getID() { return "brain_idle"; }
+        public String getID() {
+            return "brain_idle";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_AUTO, sound_idle3, 1,
                     Defines.ATTN_IDLE, 0);
@@ -628,7 +628,7 @@ public class M_Brain {
     //
     //	   WALK
     //
-    static mframe_t brain_frames_walk1[] = new mframe_t[] {
+    static mframe_t brain_frames_walk1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 7, null),
             new mframe_t(GameAI.ai_walk, 2, null),
             new mframe_t(GameAI.ai_walk, 3, null),
@@ -639,7 +639,7 @@ public class M_Brain {
             new mframe_t(GameAI.ai_walk, 9, null),
             new mframe_t(GameAI.ai_walk, -4, null),
             new mframe_t(GameAI.ai_walk, -1, null),
-            new mframe_t(GameAI.ai_walk, 2, null) };
+            new mframe_t(GameAI.ai_walk, 2, null)};
 
     static mmove_t brain_move_walk1 = new mmove_t(FRAME_walk101, FRAME_walk111,
             brain_frames_walk1, null);
@@ -677,7 +677,10 @@ public class M_Brain {
      *  # endif
      */
     static EntThinkAdapter brain_walk = new EntThinkAdapter() {
-    	public String getID() { return "brain_walk"; }
+        public String getID() {
+            return "brain_walk";
+        }
+
         public boolean think(edict_t self) {
             //			if (random() <= 0.5)
             self.monsterinfo.currentmove = brain_move_walk1;
@@ -692,7 +695,10 @@ public class M_Brain {
     //
 
     static EntThinkAdapter brain_duck_down = new EntThinkAdapter() {
-    	public String getID() { return "brain_duck_down"; }
+        public String getID() {
+            return "brain_duck_down";
+        }
+
         public boolean think(edict_t self) {
 
             if ((self.monsterinfo.aiflags & Defines.AI_DUCKED) != 0)
@@ -706,7 +712,10 @@ public class M_Brain {
     };
 
     static EntThinkAdapter brain_duck_hold = new EntThinkAdapter() {
-    	public String getID() { return "brain_duck_hold"; }
+        public String getID() {
+            return "brain_duck_hold";
+        }
+
         public boolean think(edict_t self) {
             if (GameBase.level.time >= self.monsterinfo.pausetime)
                 self.monsterinfo.aiflags &= ~Defines.AI_HOLD_FRAME;
@@ -717,7 +726,10 @@ public class M_Brain {
     };
 
     static EntThinkAdapter brain_duck_up = new EntThinkAdapter() {
-    	public String getID() { return "brain_duck_up"; }
+        public String getID() {
+            return "brain_duck_up";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.aiflags &= ~Defines.AI_DUCKED;
             self.maxs[2] += 32;
@@ -726,31 +738,17 @@ public class M_Brain {
             return true;
         }
     };
-
-    static EntDodgeAdapter brain_dodge = new EntDodgeAdapter() {
-    	public String getID() { return "brain_dodge"; }
-        public void dodge(edict_t self, edict_t attacker, float eta) {
-            if (Lib.random() > 0.25)
-                return;
-
-            if (self.enemy == null)
-                self.enemy = attacker;
-
-            self.monsterinfo.pausetime = GameBase.level.time + eta + 0.5f;
-            self.monsterinfo.currentmove = brain_move_duck;
-            return;
-        }
-    };
-
-    static mframe_t brain_frames_death2[] = new mframe_t[] {
+    static mframe_t brain_frames_death2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 9, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static EntThinkAdapter brain_dead = new EntThinkAdapter() {
-    	public String getID() { return "brain_dead"; }
+        public String getID() {
+            return "brain_dead";
+        }
+
         public boolean think(edict_t self) {
             Math3D.VectorSet(self.mins, -16, -16, -24);
             Math3D.VectorSet(self.maxs, 16, 16, -8);
@@ -761,11 +759,9 @@ public class M_Brain {
             return true;
         }
     };
-
     static mmove_t brain_move_death2 = new mmove_t(FRAME_death201,
             FRAME_death205, brain_frames_death2, brain_dead);
-
-    static mframe_t brain_frames_death1[] = new mframe_t[] {
+    static mframe_t brain_frames_death1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, -2, null),
@@ -783,17 +779,14 @@ public class M_Brain {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t brain_move_death1 = new mmove_t(FRAME_death101,
             FRAME_death118, brain_frames_death1, brain_dead);
-
-    //
-    //	   MELEE
-    //
-
     static EntThinkAdapter brain_swing_right = new EntThinkAdapter() {
-    	public String getID() { return "brain_swing_right"; }
+        public String getID() {
+            return "brain_swing_right";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_BODY, sound_melee1, 1,
                     Defines.ATTN_NORM, 0);
@@ -801,10 +794,16 @@ public class M_Brain {
         }
     };
 
+    //
+    //	   MELEE
+    //
     static EntThinkAdapter brain_hit_right = new EntThinkAdapter() {
-    	public String getID() { return "brain_hit_right"; }
+        public String getID() {
+            return "brain_hit_right";
+        }
+
         public boolean think(edict_t self) {
-            float[] aim = { 0, 0, 0 };
+            float[] aim = {0, 0, 0};
 
             Math3D.VectorSet(aim, Defines.MELEE_DISTANCE, self.maxs[0], 8);
             if (GameWeapon.fire_hit(self, aim, (15 + (Lib.rand() % 5)), 40))
@@ -813,9 +812,11 @@ public class M_Brain {
             return true;
         }
     };
-
     static EntThinkAdapter brain_swing_left = new EntThinkAdapter() {
-    	public String getID() { return "brain_swing_left"; }
+        public String getID() {
+            return "brain_swing_left";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_BODY, sound_melee2, 1,
                     Defines.ATTN_NORM, 0);
@@ -823,11 +824,13 @@ public class M_Brain {
             return true;
         }
     };
-
     static EntThinkAdapter brain_hit_left = new EntThinkAdapter() {
-    	public String getID() { return "brain_hit_left"; }
+        public String getID() {
+            return "brain_hit_left";
+        }
+
         public boolean think(edict_t self) {
-            float[] aim = { 0, 0, 0 };
+            float[] aim = {0, 0, 0};
 
             Math3D.VectorSet(aim, Defines.MELEE_DISTANCE, self.mins[0], 8);
             if (GameWeapon.fire_hit(self, aim, (15 + (Lib.rand() % 5)), 40))
@@ -837,9 +840,11 @@ public class M_Brain {
             return true;
         }
     };
-
     static EntThinkAdapter brain_chest_open = new EntThinkAdapter() {
-    	public String getID() { return "brain_chest_open"; }
+        public String getID() {
+            return "brain_chest_open";
+        }
+
         public boolean think(edict_t self) {
             self.spawnflags &= ~65536;
             self.monsterinfo.power_armor_type = Defines.POWER_ARMOR_NONE;
@@ -848,12 +853,14 @@ public class M_Brain {
             return true;
         }
     };
-
     static EntThinkAdapter brain_tentacle_attack = new EntThinkAdapter() {
-    	public String getID() { return "brain_tentacle_attack"; }
+        public String getID() {
+            return "brain_tentacle_attack";
+        }
+
         public boolean think(edict_t self) {
 
-            float[] aim = { 0, 0, 0 };
+            float[] aim = {0, 0, 0};
 
             Math3D.VectorSet(aim, Defines.MELEE_DISTANCE, 0, 8);
             if (GameWeapon.fire_hit(self, aim, (10 + (Lib.rand() % 5)), -600)
@@ -864,8 +871,7 @@ public class M_Brain {
             return true;
         }
     };
-
-    static mframe_t brain_frames_attack1[] = new mframe_t[] {
+    static mframe_t brain_frames_attack1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 8, null),
             new mframe_t(GameAI.ai_charge, 3, null),
             new mframe_t(GameAI.ai_charge, 5, null),
@@ -883,22 +889,8 @@ public class M_Brain {
             new mframe_t(GameAI.ai_charge, -1, null),
             new mframe_t(GameAI.ai_charge, -3, null),
             new mframe_t(GameAI.ai_charge, 2, null),
-            new mframe_t(GameAI.ai_charge, -11, null) };
-
-    static EntThinkAdapter brain_chest_closed = new EntThinkAdapter() {
-    	public String getID() { return "brain_chest_closed"; }
-        public boolean think(edict_t self) {
-
-            self.monsterinfo.power_armor_type = Defines.POWER_ARMOR_SCREEN;
-            if ((self.spawnflags & 65536) != 0) {
-                self.spawnflags &= ~65536;
-                self.monsterinfo.currentmove = brain_move_attack1;
-            }
-            return true;
-        }
-    };
-
-    static mframe_t brain_frames_attack2[] = new mframe_t[] {
+            new mframe_t(GameAI.ai_charge, -11, null)};
+    static mframe_t brain_frames_attack2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 5, null),
             new mframe_t(GameAI.ai_charge, -4, null),
             new mframe_t(GameAI.ai_charge, -4, null),
@@ -915,25 +907,8 @@ public class M_Brain {
             new mframe_t(GameAI.ai_charge, 3, null),
             new mframe_t(GameAI.ai_charge, 2, null),
             new mframe_t(GameAI.ai_charge, -3, null),
-            new mframe_t(GameAI.ai_charge, -6, null) };
-
-    static EntThinkAdapter brain_melee = new EntThinkAdapter() {
-    	public String getID() { return "brain_melee"; }
-        public boolean think(edict_t self) {
-            if (Lib.random() <= 0.5)
-                self.monsterinfo.currentmove = brain_move_attack1;
-            else
-                self.monsterinfo.currentmove = brain_move_attack2;
-
-            return true;
-        }
-    };
-
-    //
-    //	   RUN
-    //
-
-    static mframe_t brain_frames_run[] = new mframe_t[] {
+            new mframe_t(GameAI.ai_charge, -6, null)};
+    static mframe_t brain_frames_run[] = new mframe_t[]{
             new mframe_t(GameAI.ai_run, 9, null),
             new mframe_t(GameAI.ai_run, 2, null),
             new mframe_t(GameAI.ai_run, 3, null),
@@ -944,13 +919,14 @@ public class M_Brain {
             new mframe_t(GameAI.ai_run, 10, null),
             new mframe_t(GameAI.ai_run, -4, null),
             new mframe_t(GameAI.ai_run, -1, null),
-            new mframe_t(GameAI.ai_run, 2, null) };
-
+            new mframe_t(GameAI.ai_run, 2, null)};
     static mmove_t brain_move_run = new mmove_t(FRAME_walk101, FRAME_walk111,
             brain_frames_run, null);
-
     static EntThinkAdapter brain_run = new EntThinkAdapter() {
-    	public String getID() { return "brain_run"; }
+        public String getID() {
+            return "brain_run";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.power_armor_type = Defines.POWER_ARMOR_SCREEN;
             if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
@@ -961,7 +937,10 @@ public class M_Brain {
         }
     };
 
-    static mframe_t brain_frames_defense[] = new mframe_t[] {
+    //
+    //	   RUN
+    //
+    static mframe_t brain_frames_defense[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -970,23 +949,19 @@ public class M_Brain {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t brain_move_defense = new mmove_t(FRAME_defens01,
             FRAME_defens08, brain_frames_defense, null);
-
-    static mframe_t brain_frames_pain3[] = new mframe_t[] {
+    static mframe_t brain_frames_pain3[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, -2, null),
             new mframe_t(GameAI.ai_move, 2, null),
             new mframe_t(GameAI.ai_move, 1, null),
             new mframe_t(GameAI.ai_move, 3, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, -4, null) };
-
+            new mframe_t(GameAI.ai_move, -4, null)};
     static mmove_t brain_move_pain3 = new mmove_t(FRAME_pain301, FRAME_pain306,
             brain_frames_pain3, brain_run);
-
-    static mframe_t brain_frames_pain2[] = new mframe_t[] {
+    static mframe_t brain_frames_pain2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, -2, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -994,12 +969,10 @@ public class M_Brain {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 3, null),
             new mframe_t(GameAI.ai_move, 1, null),
-            new mframe_t(GameAI.ai_move, -2, null) };
-
+            new mframe_t(GameAI.ai_move, -2, null)};
     static mmove_t brain_move_pain2 = new mmove_t(FRAME_pain201, FRAME_pain208,
             brain_frames_pain2, brain_run);
-
-    static mframe_t brain_frames_pain1[] = new mframe_t[] {
+    static mframe_t brain_frames_pain1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, -6, null),
             new mframe_t(GameAI.ai_move, -2, null),
             new mframe_t(GameAI.ai_move, -6, null),
@@ -1020,12 +993,10 @@ public class M_Brain {
             new mframe_t(GameAI.ai_move, 7, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 3, null),
-            new mframe_t(GameAI.ai_move, -1, null) };
-
+            new mframe_t(GameAI.ai_move, -1, null)};
     static mmove_t brain_move_pain1 = new mmove_t(FRAME_pain101, FRAME_pain121,
             brain_frames_pain1, brain_run);
-
-    static mframe_t brain_frames_duck[] = new mframe_t[] {
+    static mframe_t brain_frames_duck[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, -2, brain_duck_down),
             new mframe_t(GameAI.ai_move, 17, brain_duck_hold),
@@ -1033,13 +1004,31 @@ public class M_Brain {
             new mframe_t(GameAI.ai_move, -1, brain_duck_up),
             new mframe_t(GameAI.ai_move, -5, null),
             new mframe_t(GameAI.ai_move, -6, null),
-            new mframe_t(GameAI.ai_move, -6, null) };
-
+            new mframe_t(GameAI.ai_move, -6, null)};
     static mmove_t brain_move_duck = new mmove_t(FRAME_duck01, FRAME_duck08,
             brain_frames_duck, brain_run);
+    static EntDodgeAdapter brain_dodge = new EntDodgeAdapter() {
+        public String getID() {
+            return "brain_dodge";
+        }
 
+        public void dodge(edict_t self, edict_t attacker, float eta) {
+            if (Lib.random() > 0.25)
+                return;
+
+            if (self.enemy == null)
+                self.enemy = attacker;
+
+            self.monsterinfo.pausetime = GameBase.level.time + eta + 0.5f;
+            self.monsterinfo.currentmove = brain_move_duck;
+            return;
+        }
+    };
     static EntPainAdapter brain_pain = new EntPainAdapter() {
-    	public String getID() { return "brain_pain"; }
+        public String getID() {
+            return "brain_pain";
+        }
+
         public void pain(edict_t self, edict_t other, float kick, int damage) {
             float r;
 
@@ -1070,11 +1059,13 @@ public class M_Brain {
         }
 
     };
-
     static EntDieAdapter brain_die = new EntDieAdapter() {
-    	public String getID() { return "brain_die"; }
+        public String getID() {
+            return "brain_die";
+        }
+
         public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
+                        int damage, float[] point) {
             int n;
 
             self.s.effects = 0;
@@ -1084,7 +1075,7 @@ public class M_Brain {
             if (self.health <= self.gib_health) {
                 GameBase.gi
                         .sound(self, Defines.CHAN_VOICE, GameBase.gi
-                                .soundindex("misc/udeath.wav"), 1,
+                                        .soundindex("misc/udeath.wav"), 1,
                                 Defines.ATTN_NORM, 0);
                 for (n = 0; n < 2; n++)
                     GameMisc.ThrowGib(self, "models/objects/gibs/bone/tris.md2",
@@ -1113,12 +1104,39 @@ public class M_Brain {
                 self.monsterinfo.currentmove = brain_move_death2;
         }
     };
-
     static mmove_t brain_move_attack1 = new mmove_t(FRAME_attak101,
             FRAME_attak118, brain_frames_attack1, brain_run);
+    static EntThinkAdapter brain_chest_closed = new EntThinkAdapter() {
+        public String getID() {
+            return "brain_chest_closed";
+        }
 
+        public boolean think(edict_t self) {
+
+            self.monsterinfo.power_armor_type = Defines.POWER_ARMOR_SCREEN;
+            if ((self.spawnflags & 65536) != 0) {
+                self.spawnflags &= ~65536;
+                self.monsterinfo.currentmove = brain_move_attack1;
+            }
+            return true;
+        }
+    };
     static mmove_t brain_move_attack2 = new mmove_t(FRAME_attak201,
             FRAME_attak217, brain_frames_attack2, brain_run);
+    static EntThinkAdapter brain_melee = new EntThinkAdapter() {
+        public String getID() {
+            return "brain_melee";
+        }
+
+        public boolean think(edict_t self) {
+            if (Lib.random() <= 0.5)
+                self.monsterinfo.currentmove = brain_move_attack1;
+            else
+                self.monsterinfo.currentmove = brain_move_attack2;
+
+            return true;
+        }
+    };
 
     /*
      * QUAKED monster_brain (1 .5 0) (-16 -16 -24) (16 16 32) Ambush

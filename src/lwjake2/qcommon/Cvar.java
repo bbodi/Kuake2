@@ -35,6 +35,71 @@ import java.util.Vector;
 public class Cvar extends Globals {
 
     /**
+     * Set command, sets variables.
+     */
+
+    static xcommand_t Set_f = new xcommand_t() {
+        public void execute() {
+            int c;
+            int flags;
+
+            c = Cmd.Argc();
+            if (c != 3 && c != 4) {
+                Com.Printf("usage: set <variable> <value> [u / s]\n");
+                return;
+            }
+
+            if (c == 4) {
+                if (Cmd.Argv(3).equals("u"))
+                    flags = CVAR_USERINFO;
+                else if (Cmd.Argv(3).equals("s"))
+                    flags = CVAR_SERVERINFO;
+                else {
+                    Com.Printf("flags can only be 'u' or 's'\n");
+                    return;
+                }
+                Cvar.FullSet(Cmd.Argv(1), Cmd.Argv(2), flags);
+            } else
+                Cvar.Set(Cmd.Argv(1), Cmd.Argv(2));
+
+        }
+
+    };
+    /**
+     * List command, lists all available commands.
+     */
+    static xcommand_t List_f = new xcommand_t() {
+        public void execute() {
+            cvar_t var;
+            int i;
+
+            i = 0;
+            for (var = Globals.cvar_vars; var != null; var = var.next, i++) {
+                if ((var.flags & CVAR_ARCHIVE) != 0)
+                    Com.Printf("*");
+                else
+                    Com.Printf(" ");
+                if ((var.flags & CVAR_USERINFO) != 0)
+                    Com.Printf("U");
+                else
+                    Com.Printf(" ");
+                if ((var.flags & CVAR_SERVERINFO) != 0)
+                    Com.Printf("S");
+                else
+                    Com.Printf(" ");
+                if ((var.flags & CVAR_NOSET) != 0)
+                    Com.Printf("-");
+                else if ((var.flags & CVAR_LATCH) != 0)
+                    Com.Printf("L");
+                else
+                    Com.Printf(" ");
+                Com.Printf(" " + var.name + " \"" + var.string + "\"\n");
+            }
+            Com.Printf(i + " cvars\n");
+        }
+    };
+
+    /**
      * @param var_name
      * @param var_value
      * @param flags
@@ -134,29 +199,29 @@ public class Cvar extends Globals {
         return var;
     }
 
-    /** 
-     * Sets the value of the variable without forcing. 
+    /**
+     * Sets the value of the variable without forcing.
      */
     public static cvar_t Set(String var_name, String value) {
         return Set2(var_name, value, false);
     }
 
-    /** 
-     * Sets the value of the variable with forcing. 
+    /**
+     * Sets the value of the variable with forcing.
      */
     public static cvar_t ForceSet(String var_name, String value) {
         return Cvar.Set2(var_name, value, true);
     }
-    
+
     /**
-     * Gereric set function, sets the value of the variable, with forcing its even possible to 
-     * override the variables write protection. 
+     * Gereric set function, sets the value of the variable, with forcing its even possible to
+     * override the variables write protection.
      */
     static cvar_t Set2(String var_name, String value, boolean force) {
 
         cvar_t var = Cvar.FindVar(var_name);
-        if (var == null) { 
-        	// create it
+        if (var == null) {
+            // create it
             return Cvar.Get(var_name, value, 0);
         }
 
@@ -224,78 +289,10 @@ public class Cvar extends Globals {
         return var;
     }
 
-    /** 
-     * Set command, sets variables.
-     */
-    
-    static xcommand_t Set_f = new xcommand_t() {
-        public void execute() {
-            int c;
-            int flags;
-
-            c = Cmd.Argc();
-            if (c != 3 && c != 4) {
-                Com.Printf("usage: set <variable> <value> [u / s]\n");
-                return;
-            }
-
-            if (c == 4) {
-                if (Cmd.Argv(3).equals("u"))
-                    flags = CVAR_USERINFO;
-                else if (Cmd.Argv(3).equals("s"))
-                    flags = CVAR_SERVERINFO;
-                else {
-                    Com.Printf("flags can only be 'u' or 's'\n");
-                    return;
-                }
-                Cvar.FullSet(Cmd.Argv(1), Cmd.Argv(2), flags);
-            } else
-                Cvar.Set(Cmd.Argv(1), Cmd.Argv(2));
-
-        }
-
-    };
-
     /**
-     * List command, lists all available commands.
-     */
-    static xcommand_t List_f = new xcommand_t() {
-        public void execute() {
-            cvar_t var;
-            int i;
-
-            i = 0;
-            for (var = Globals.cvar_vars; var != null; var = var.next, i++) {
-                if ((var.flags & CVAR_ARCHIVE) != 0)
-                    Com.Printf("*");
-                else
-                    Com.Printf(" ");
-                if ((var.flags & CVAR_USERINFO) != 0)
-                    Com.Printf("U");
-                else
-                    Com.Printf(" ");
-                if ((var.flags & CVAR_SERVERINFO) != 0)
-                    Com.Printf("S");
-                else
-                    Com.Printf(" ");
-                if ((var.flags & CVAR_NOSET) != 0)
-                    Com.Printf("-");
-                else if ((var.flags & CVAR_LATCH) != 0)
-                    Com.Printf("L");
-                else
-                    Com.Printf(" ");
-                Com.Printf(" " + var.name + " \"" + var.string + "\"\n");
-            }
-            Com.Printf(i + " cvars\n");
-        }
-    };
-
-
-
-    /** 
      * Sets a float value of a variable.
-     * 
-     * The overloading is very important, there was a problem with 
+     * <p/>
+     * The overloading is very important, there was a problem with
      * networt "rate" string --> 10000 became "10000.0" and that wasn't right.
      */
     public static void SetValue(String var_name, int value) {
@@ -303,8 +300,8 @@ public class Cvar extends Globals {
     }
 
     public static void SetValue(String var_name, float value) {
-        if (value == (int)value) {
-            Cvar.Set(var_name, "" + (int)value);
+        if (value == (int) value) {
+            Cvar.Set(var_name, "" + (int) value);
         } else {
             Cvar.Set(var_name, "" + value);
         }
@@ -360,13 +357,13 @@ public class Cvar extends Globals {
     }
 
     /**
-     * Returns an info string containing all the CVAR_SERVERINFO cvars. 
+     * Returns an info string containing all the CVAR_SERVERINFO cvars.
      */
     public static String Serverinfo() {
         return BitInfo(Defines.CVAR_SERVERINFO);
     }
 
-    
+
     /**
      * Any variables with latched values will be updated.
      */
@@ -396,10 +393,10 @@ public class Cvar extends Globals {
     public static String Userinfo() {
         return BitInfo(CVAR_USERINFO);
     }
-    
+
     /**
      * Appends lines containing \"set vaqriable value\" for all variables
-     * with the archive flag set true. 
+     * with the archive flag set true.
      */
 
     public static void WriteVariables(String path) {

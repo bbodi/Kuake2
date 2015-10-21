@@ -20,23 +20,45 @@ package lwjake2.game;
 
 public class gitem_t {
     private static int id = 0;
+    public int index;
+    String classname; // spawning name
+    EntInteractAdapter pickup;
+    ItemUseAdapter use;
+    ItemDropAdapter drop;
+    EntThinkAdapter weaponthink;
+    String pickup_sound;
+    String world_model;
+    int world_model_flags;
+    String view_model;
+    // client side info
+    String icon;
+    String pickup_name; // for printing on pickup
+    int count_width; // number of digits to display by icon
+    int quantity; // for ammo how much, for weapons how much is used per shot
+    String ammo; // for weapons
+    int flags; // IT_* flags
+    int weapmodel; // weapon model index (for weapons)
+    Object info;
+    int tag;
+    String precaches; // string of all models, sounds, and images this item will
 
     public gitem_t(int xxx) {
         index = xxx;
     }
 
     public gitem_t(String classname, EntInteractAdapter pickup,
-            ItemUseAdapter use, ItemDropAdapter drop,
-            EntThinkAdapter weaponthink) {
+                   ItemUseAdapter use, ItemDropAdapter drop,
+                   EntThinkAdapter weaponthink) {
     }
+    // use
 
     public gitem_t(String classname, EntInteractAdapter pickup,
-            ItemUseAdapter use, ItemDropAdapter drop,
-            EntThinkAdapter weaponthink, String pickup_sound,
-            String world_model, int world_model_flags, String view_model,
-            String icon, String pickup_name, int count_width, int quantity,
-            String ammo, int flags, int weapmodel, gitem_armor_t info, int tag,
-            String precaches) {
+                   ItemUseAdapter use, ItemDropAdapter drop,
+                   EntThinkAdapter weaponthink, String pickup_sound,
+                   String world_model, int world_model_flags, String view_model,
+                   String icon, String pickup_name, int count_width, int quantity,
+                   String ammo, int flags, int weapmodel, gitem_armor_t info, int tag,
+                   String precaches) {
         this.classname = classname;
         this.pickup = pickup;
         this.use = use;
@@ -59,46 +81,4 @@ public class gitem_t {
 
         this.index = id++;
     }
-
-    String classname; // spawning name
-
-    EntInteractAdapter pickup;
-
-    ItemUseAdapter use;
-
-    ItemDropAdapter drop;
-
-    EntThinkAdapter weaponthink;
-
-    String pickup_sound;
-
-    String world_model;
-
-    int world_model_flags;
-
-    String view_model;
-
-    // client side info
-    String icon;
-
-    String pickup_name; // for printing on pickup
-
-    int count_width; // number of digits to display by icon
-
-    int quantity; // for ammo how much, for weapons how much is used per shot
-
-    String ammo; // for weapons
-
-    int flags; // IT_* flags
-
-    int weapmodel; // weapon model index (for weapons)
-
-    Object info;
-
-    int tag;
-
-    String precaches; // string of all models, sounds, and images this item will
-                      // use
-
-    public int index;
 }

@@ -18,25 +18,25 @@
 
 package lwjake2.sys;
 
-import java.awt.AWTEvent;
+import java.awt.*;
 
 /**
  * LWJake2InputEvent
  */
 class LWJake2InputEvent {
-	static final int KeyPress = 0;
-	static final int KeyRelease = 1;
-	static final int MotionNotify = 2;
-	static final int ButtonPress = 3;
-	static final int ButtonRelease = 4;
-	static final int CreateNotify = 5;
-	static final int ConfigureNotify = 6;
-	static final int WheelMoved = 7;
-	int type;
-	AWTEvent ev;
-	
-	LWJake2InputEvent(int type, AWTEvent ev) {
-		this.type = type;
-		this.ev = ev;
-	}
+    static final int KeyPress = 0;
+    static final int KeyRelease = 1;
+    static final int MotionNotify = 2;
+    static final int ButtonPress = 3;
+    static final int ButtonRelease = 4;
+    static final int CreateNotify = 5;
+    static final int ConfigureNotify = 6;
+    static final int WheelMoved = 7;
+    int type;
+    AWTEvent ev;
+
+    LWJake2InputEvent(int type, AWTEvent ev) {
+        this.type = type;
+        this.ev = ev;
+    }
 }

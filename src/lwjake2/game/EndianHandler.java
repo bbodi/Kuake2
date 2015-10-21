@@ -18,52 +18,53 @@
 
 package lwjake2.game;
 
-public abstract class EndianHandler
-{
-	private static final int mask = 0xFF;
+public abstract class EndianHandler {
+    private static final int mask = 0xFF;
 
-	abstract public float BigFloat(float f);
-	abstract public short BigShort(short s);
-	abstract public int BigLong(int i);
-	abstract public float LittleFloat(float f);
-	abstract public short LittleShort(short s);
-	abstract public int LittleLong(int i);
+    public static float swapFloat(float f) {
+        int i = Float.floatToRawIntBits(f);
+        i = swapInt(i);
+        f = Float.intBitsToFloat(i);
 
-	public static float swapFloat(float f)
-	{
-		int i = Float.floatToRawIntBits(f);
-		i = swapInt(i);
-		f = Float.intBitsToFloat(i);
+        return f;
+    }
 
-		return f;
-	}
+    public static int swapInt(int i) {
 
-	public static int swapInt(int i)
-	{
+        int a = i & mask;
+        i >>>= 8;
 
-		int a = i & mask;
-		i >>>= 8;
+        a <<= 24;
 
-		a <<= 24;
+        int b = i & mask;
 
-		int b = i & mask;
+        i >>>= 8;
+        b <<= 16;
 
-		i >>>= 8;
-		b <<= 16;
+        int c = i & mask;
+        i >>>= 8;
+        c <<= 8;
 
-		int c = i & mask;
-		i >>>= 8;
-		c <<= 8;
+        return i | c | b | a;
+    }
 
-		return i | c | b | a;
-	}
+    public static short swapShort(short s) {
+        int a = s & mask;
+        a <<= 8;
+        int b = (s >>> 8) & mask;
 
-	public static short swapShort(short s)
-	{
-		int a = s & mask;
-		a <<= 8;
-		int b = (s >>> 8) & mask;
+        return (short) (b | a);
+    }
 
-		return (short) (b | a);
-	}
+    abstract public float BigFloat(float f);
+
+    abstract public short BigShort(short s);
+
+    abstract public int BigLong(int i);
+
+    abstract public float LittleFloat(float f);
+
+    abstract public short LittleShort(short s);
+
+    abstract public int LittleLong(int i);
 }

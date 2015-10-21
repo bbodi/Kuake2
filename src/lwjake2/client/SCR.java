@@ -22,19 +22,13 @@ import lwjake2.Defines;
 import lwjake2.Globals;
 import lwjake2.game.Cmd;
 import lwjake2.game.cvar_t;
-import lwjake2.qcommon.Com;
-import lwjake2.qcommon.Cvar;
-import lwjake2.qcommon.FS;
-import lwjake2.qcommon.MSG;
-import lwjake2.qcommon.SZ;
-import lwjake2.qcommon.qfiles;
-import lwjake2.qcommon.xcommand_t;
+import lwjake2.qcommon.*;
 import lwjake2.sound.S;
 import lwjake2.sys.Timer;
 import lwjake2.util.Lib;
 import lwjake2.util.Vargs;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -46,11 +40,7 @@ public final class SCR extends Globals {
 
     //	cl_scrn.c -- master for refresh, status bar, console, chat, notify, etc
 
-    static String[][] sb_nums = {
-            { "num_0", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6",
-                    "num_7", "num_8", "num_9", "num_minus" },
-            { "anum_0", "anum_1", "anum_2", "anum_3", "anum_4", "anum_5",
-                    "anum_6", "anum_7", "anum_8", "anum_9", "anum_minus" } };
+    static final int STAT_MINUS = 10; // num frame for '-' stats digit
 
     /*
      * full screen console put up loading plaque blanked background with loading
@@ -59,74 +49,47 @@ public final class SCR extends Globals {
      * 
      * end of unit intermissions
      */
-
-    static float scr_con_current; // aproaches scr_conlines at scr_conspeed
-
-    static float scr_conlines; // 0.0 to 1.0 lines of console to display
-
-    static boolean scr_initialized; // ready to draw
-
-    static int scr_draw_loading;
+    static final int ICON_WIDTH = 24;
+    static final int ICON_HEIGHT = 24;
+    static final int CHAR_WIDTH = 16;
+    static final int ICON_SPACE = 8;
 
     // scr_vrect ist in Globals definiert
     // position of render window on screen
-
-    static cvar_t scr_viewsize;
-
-    static cvar_t scr_conspeed;
-
-    static cvar_t scr_centertime;
-
-    static cvar_t scr_showturtle;
-
-    static cvar_t scr_showpause;
-
-    static cvar_t scr_printspeed;
-
-    static cvar_t scr_netgraph;
-
-    static cvar_t scr_timegraph;
-
-    static cvar_t scr_debuggraph;
-
-    static cvar_t scr_graphheight;
-
-    static cvar_t scr_graphscale;
-
-    static cvar_t scr_graphshift;
-
-    static cvar_t scr_drawall;
-
+    /*
+     * ================ SCR_DrawLayout
+     *
+     * ================
+     */
+    static final int STAT_LAYOUTS = 13;
+    /*
+     * ================== SCR_UpdateScreen
+     *
+     * This is called every frame, and can also be called explicitly to flush
+     * text to the screen. ==================
+     */
+    private static final float[] separation = {0, 0};
     public static cvar_t fps = new cvar_t();
-
-    static dirty_t scr_dirty = new dirty_t();
-
-    static dirty_t[] scr_old_dirty = { new dirty_t(), new dirty_t() };
-
-    static String crosshair_pic;
-
-    static int crosshair_width, crosshair_height;
-
-    static class dirty_t {
-        int x1;
-
-        int x2;
-
-        int y1;
-
-        int y2;
-
-        void set(dirty_t src) {
-            x1 = src.x1;
-            x2 = src.x2;
-            y1 = src.y1;
-            y2 = src.y2;
-        }
-
-        void clear() {
-            x1 = x2 = y1 = y2 = 0;
-        }
-    }
+    static String[][] sb_nums = {
+            {"num_0", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6",
+                    "num_7", "num_8", "num_9", "num_minus"},
+            {"anum_0", "anum_1", "anum_2", "anum_3", "anum_4", "anum_5",
+                    "anum_6", "anum_7", "anum_8", "anum_9", "anum_minus"}};
+    static float scr_con_current; // aproaches scr_conlines at scr_conspeed
+    static float scr_conlines; // 0.0 to 1.0 lines of console to display
+    static boolean scr_initialized; // ready to draw
+    static int scr_draw_loading;
+    static cvar_t scr_viewsize;
+    static cvar_t scr_conspeed;
+    static cvar_t scr_centertime;
+    static cvar_t scr_showturtle;
+    static cvar_t scr_showpause;
+    static cvar_t scr_printspeed;
+    static cvar_t scr_netgraph;
+    static cvar_t scr_timegraph;
+    static cvar_t scr_debuggraph;
+    static cvar_t scr_graphheight;
+    static cvar_t scr_graphscale;
 
     /*
      * ===============================================================================
@@ -135,21 +98,43 @@ public final class SCR extends Globals {
      * 
      * ===============================================================================
      */
+    static cvar_t scr_graphshift;
+    static cvar_t scr_drawall;
+    static dirty_t scr_dirty = new dirty_t();
+    static dirty_t[] scr_old_dirty = {new dirty_t(), new dirty_t()};
+    static String crosshair_pic;
+    static int crosshair_width, crosshair_height;
 
-    //	typedef struct
-    //	{
-    //		float value;
-    //		int color;
-    //	} graphsamp_t;
-    static class graphsamp_t {
-        float value;
-
-        int color;
-    }
-
+    /*
+     * ===============================================================================
+     * 
+     * CENTER PRINTING
+     * 
+     * ===============================================================================
+     */
     static int current;
-
     static graphsamp_t[] values = new graphsamp_t[1024];
+    // char scr_centerstring[1024];
+    static String scr_centerstring;
+    static float scr_centertime_start; // for slow victory printing
+    static float scr_centertime_off;
+    static int scr_center_lines;
+    static int scr_erase_center;
+    static dirty_t clear = new dirty_t();
+
+    // =============================================================================
+    private static int lastframes = 0;
+    private static int lasttime = 0;
+    private static String fpsvalue = "";
+    private static cinematics_t cin = new cinematics_t();
+
+    // ============================================================================
+    private static xcommand_t updateScreenCallback = new xcommand_t() {
+        public void execute() {
+            UpdateScreen2();
+        }
+    };
+    private static byte[] compressed = new byte[0x20000];
 
     static {
         for (int n = 0; n < 1024; n++)
@@ -164,6 +149,8 @@ public final class SCR extends Globals {
         values[current & 1023].color = color;
         current++;
     }
+
+    // =============================================================================
 
     /*
      * ============== SCR_DrawDebugGraph ==============
@@ -197,27 +184,8 @@ public final class SCR extends Globals {
     }
 
     /*
-     * ===============================================================================
-     * 
-     * CENTER PRINTING
-     * 
-     * ===============================================================================
-     */
-
-    // char scr_centerstring[1024];
-    static String scr_centerstring;
-
-    static float scr_centertime_start; // for slow victory printing
-
-    static float scr_centertime_off;
-
-    static int scr_center_lines;
-
-    static int scr_erase_center;
-
-    /*
      * ============== SCR_CenterPrint
-     * 
+     *
      * Called for important messages that should stay in the center of the
      * screen for a few moments ==============
      */
@@ -278,6 +246,8 @@ public final class SCR extends Globals {
         Console.ClearNotify();
     }
 
+    // =============================================================================
+
     static void DrawCenterString() {
         String cs = scr_centerstring + "\0";
         int start;
@@ -285,7 +255,7 @@ public final class SCR extends Globals {
         int j;
         int x, y;
         int remaining;
-        
+
         if (cs == null || cs.length() == 0)
             return;
 
@@ -336,11 +306,9 @@ public final class SCR extends Globals {
         DrawCenterString();
     }
 
-    // =============================================================================
-
     /*
      * ================= SCR_CalcVrect
-     * 
+     *
      * Sets scr_vrect, the coordinates of the rendered window =================
      */
     static void CalcVrect() {
@@ -366,7 +334,7 @@ public final class SCR extends Globals {
 
     /*
      * ================= SCR_SizeUp_f
-     * 
+     *
      * Keybinding command =================
      */
     static void SizeUp_f() {
@@ -375,7 +343,7 @@ public final class SCR extends Globals {
 
     /*
      * ================= SCR_SizeDown_f
-     * 
+     *
      * Keybinding command =================
      */
     static void SizeDown_f() {
@@ -383,13 +351,20 @@ public final class SCR extends Globals {
     }
 
     /*
-     * ================= SCR_Sky_f
+     * ============== SCR_TileClear
      * 
+     * Clear any parts of the tiled background that were drawn on last frame
+     * ==============
+     */
+
+    /*
+     * ================= SCR_Sky_f
+     *
      * Set a specific sky and rotation speed =================
      */
     static void Sky_f() {
         float rotate;
-        float[] axis = { 0, 0, 0 };
+        float[] axis = {0, 0, 0};
 
         if (Cmd.Argc() < 2) {
             Com.Printf("Usage: sky <basename> <rotate> <axis x y z>\n");
@@ -411,8 +386,6 @@ public final class SCR extends Globals {
 
         re.SetSky(Cmd.Argv(1), rotate, axis);
     }
-
-    // ============================================================================
 
     /*
      * ================== SCR_Init ==================
@@ -465,6 +438,8 @@ public final class SCR extends Globals {
         scr_initialized = true;
     }
 
+    // ===============================================================
+
     /*
      * ============== SCR_DrawNet ==============
      */
@@ -507,11 +482,9 @@ public final class SCR extends Globals {
                 (viddef.height - dim.height) / 2, "loading");
     }
 
-    // =============================================================================
-
     /*
      * ================== SCR_RunConsole
-     * 
+     *
      * Scroll it up or down ==================
      */
     static void RunConsole() {
@@ -540,15 +513,15 @@ public final class SCR extends Globals {
         Console.CheckResize();
 
         if (cls.state == ca_disconnected || cls.state == ca_connecting) { // forced
-                                                                          // full
-                                                                          // screen
-                                                                          // console
+            // full
+            // screen
+            // console
             Console.DrawConsole(1.0f);
             return;
         }
 
         if (cls.state != ca_active || !cl.refresh_prepped) { // connected, but
-                                                             // can't render
+            // can't render
             Console.DrawConsole(0.5f);
             re.DrawFill(0, viddef.height / 2, viddef.width, viddef.height / 2,
                     0);
@@ -562,8 +535,6 @@ public final class SCR extends Globals {
                 Console.DrawNotify(); // only draw notify in game
         }
     }
-
-    // =============================================================================
 
     /*
      * ================ SCR_BeginLoadingPlaque ================
@@ -646,15 +617,6 @@ public final class SCR extends Globals {
         AddDirtyPoint(viddef.width - 1, viddef.height - 1);
     }
 
-    /*
-     * ============== SCR_TileClear
-     * 
-     * Clear any parts of the tiled background that were drawn on last frame
-     * ==============
-     */
-
-    static dirty_t clear = new dirty_t();
-
     static void TileClear() {
         int i;
         int top, bottom, left, right;
@@ -732,21 +694,9 @@ public final class SCR extends Globals {
 
     }
 
-    // ===============================================================
-
-    static final int STAT_MINUS = 10; // num frame for '-' stats digit
-
-    static final int ICON_WIDTH = 24;
-
-    static final int ICON_HEIGHT = 24;
-
-    static final int CHAR_WIDTH = 16;
-
-    static final int ICON_SPACE = 8;
-
     /*
      * ================ SizeHUDString
-     * 
+     *
      * Allow embedded \n in the string ================
      */
     static void SizeHUDString(String string, Dimension dim) {
@@ -773,7 +723,7 @@ public final class SCR extends Globals {
     }
 
     static void DrawHUDString(String string, int x, int y, int centerwidth,
-            int xor) {
+                              int xor) {
         int margin;
         //char line[1024];
         StringBuffer line = new StringBuffer(1024);
@@ -781,7 +731,7 @@ public final class SCR extends Globals {
 
         margin = x;
 
-        for (int l = 0; l < string.length();) {
+        for (int l = 0; l < string.length(); ) {
             // scan out one line of text from the string
             line = new StringBuffer(1024);
             while (l < string.length() && string.charAt(l) != '\n') {
@@ -804,6 +754,8 @@ public final class SCR extends Globals {
             }
         }
     }
+
+    // =======================================================
 
     /*
      * ============== SCR_DrawField ==============
@@ -846,7 +798,7 @@ public final class SCR extends Globals {
 
     /*
      * =============== SCR_TouchPics
-     * 
+     *
      * Allows rendering code to cache all needed sbar graphics ===============
      */
     static void TouchPics() {
@@ -872,7 +824,7 @@ public final class SCR extends Globals {
 
     /*
      * ================ SCR_ExecuteLayoutString
-     * 
+     *
      * ================
      */
     static void ExecuteLayoutString(String s) {
@@ -1128,7 +1080,7 @@ public final class SCR extends Globals {
                 value = cl.frame.playerstate.stats[Lib.atoi(token)];
                 if (value == 0) {
                     // skip to endif
-                    while (!ph.isEof() && !(token = Com.Parse(ph)).equals("endif"));
+                    while (!ph.isEof() && !(token = Com.Parse(ph)).equals("endif")) ;
                 }
                 continue;
             }
@@ -1138,7 +1090,7 @@ public final class SCR extends Globals {
 
     /*
      * ================ SCR_DrawStats
-     * 
+     *
      * The status bar is a small layout program that is based on the stats array
      * ================
      */
@@ -1147,28 +1099,11 @@ public final class SCR extends Globals {
         SCR.ExecuteLayoutString(cl.configstrings[CS_STATUSBAR]);
     }
 
-    /*
-     * ================ SCR_DrawLayout
-     * 
-     * ================
-     */
-    static final int STAT_LAYOUTS = 13;
-
     static void DrawLayout() {
         if (cl.frame.playerstate.stats[STAT_LAYOUTS] != 0)
             SCR.ExecuteLayoutString(cl.layout);
     }
 
-    // =======================================================
-
-    /*
-     * ================== SCR_UpdateScreen
-     * 
-     * This is called every frame, and can also be called explicitly to flush
-     * text to the screen. ==================
-     */
-    private static final float[] separation = { 0, 0 };
-    
     static void UpdateScreen2() {
         int numframes;
         int i;
@@ -1300,12 +1235,6 @@ public final class SCR extends Globals {
                 crosshair_pic);
     }
 
-    private static xcommand_t updateScreenCallback = new xcommand_t() {
-        public void execute() {
-            UpdateScreen2();
-        }
-    };
-
     // wird anstelle von der richtigen UpdateScreen benoetigt
     public static void UpdateScreen() {
         Globals.re.updateScreen(updateScreenCallback);
@@ -1324,12 +1253,6 @@ public final class SCR extends Globals {
         if (y > scr_dirty.y2)
             scr_dirty.y2 = y;
     }
-
-    private static int lastframes = 0;
-
-    private static int lasttime = 0;
-
-    private static String fpsvalue = "";
 
     static void DrawFPS() {
         if (fps.value > 0.0f) {
@@ -1365,26 +1288,6 @@ public final class SCR extends Globals {
      * 
      * =================================================================
      */
-
-    private static class cinematics_t {
-        boolean restart_sound;
-        int s_rate;
-        int s_width;
-        int s_channels;
-        
-        int width;
-        int height;
-        byte[] pic;
-        byte[] pic_pending;
-        // order 1 huffman stuff
-        int[] hnodes1; // [256][256][2];
-        int[] numhnodes1 = new int[256];
-        
-        int[] h_used = new int[512];
-        int[] h_count = new int[512];
-    }
-    
-    private static cinematics_t cin = new cinematics_t();
 
     /**
      * LoadPCX
@@ -1440,7 +1343,7 @@ public final class SCR extends Globals {
         int p = 0;
 
         for (y = 0; y < height; y++) {
-            for (x = 0; x < width;) {
+            for (x = 0; x < width; ) {
 
                 dataByte = pcx.data.get(p++);
 
@@ -1482,7 +1385,7 @@ public final class SCR extends Globals {
             if (cin.hnodes1 != null) {
                 cin.hnodes1 = null;
             }
-            
+
             S.disableStreaming();
             cin.restart_sound = false;
         }
@@ -1490,7 +1393,7 @@ public final class SCR extends Globals {
 
     /**
      * FinishCinematic
-     * 
+     * <p/>
      * Called when either the cinematic completes, or it is aborted
      */
     static void FinishCinematic() {
@@ -1499,14 +1402,11 @@ public final class SCR extends Globals {
         SZ.Print(cls.netchan.message, "nextserver " + cl.servercount + '\n');
     }
 
-    // ==========================================================================
-
     /**
      * SmallestNode1
-     * 
      */
     private static int SmallestNode1(int numhnodes) {
-        
+
         int best = 99999999;
         int bestnode = -1;
         for (int i = 0; i < numhnodes; i++) {
@@ -1519,38 +1419,36 @@ public final class SCR extends Globals {
                 bestnode = i;
             }
         }
-        
+
         if (bestnode == -1)
             return -1;
-        
+
         cin.h_used[bestnode] = 1; // true
         return bestnode;
     }
-    
-    
+
     /**
      * Huff1TableInit
-     * 
+     * <p/>
      * Reads the 64k counts table and initializes the node trees.
-     * 
      */
     private static void Huff1TableInit() {
         int[] node;
         byte[] counts = new byte[256];
         int numhnodes;
-        
+
         cin.hnodes1 = new int[256 * 256 * 2];
         Arrays.fill(cin.hnodes1, 0);
-        
+
         for (int prev = 0; prev < 256; prev++) {
             Arrays.fill(cin.h_count, 0);
             Arrays.fill(cin.h_used, 0);
-            
+
             // read a row of counts
             cl.cinematic_file.get(counts);
             for (int j = 0; j < 256; j++)
                 cin.h_count[j] = counts[j] & 0xFF;
-            
+
             // build the nodes
             numhnodes = 256;
             int nodebase = 0 + prev * 256 * 2;
@@ -1558,31 +1456,32 @@ public final class SCR extends Globals {
             node = cin.hnodes1;
             while (numhnodes != 511) {
                 index = nodebase + (numhnodes - 256) * 2;
-                
+
                 // pick two lowest counts
                 node[index] = SmallestNode1(numhnodes);
                 if (node[index] == -1)
                     break; // no more
-                
+
                 node[index + 1] = SmallestNode1(numhnodes);
                 if (node[index + 1] == -1)
                     break;
-                
+
                 cin.h_count[numhnodes] = cin.h_count[node[index]] + cin.h_count[node[index + 1]];
                 numhnodes++;
             }
-            
+
             cin.numhnodes1[prev] = numhnodes - 1;
         }
     }
-    
+
+    // ==========================================================================
+
     /**
      * Huff1Decompress
-     * 
      */
     private static byte[] Huff1Decompress(byte[] in, int size) {
         // get decompressed count
-        int count = (in[0] & 0xFF) | ((in[1] & 0xFF)<< 8) | ((in[2] & 0xFF) << 16) | ((in[3] & 0xFF) << 24);
+        int count = (in[0] & 0xFF) | ((in[1] & 0xFF) << 8) | ((in[2] & 0xFF) << 16) | ((in[3] & 0xFF) << 24);
         // used as index for in[];
         int input = 4;
         byte[] out = new byte[count];
@@ -1686,14 +1585,12 @@ public final class SCR extends Globals {
 
         return out;
     }
-    
-    private static byte[] compressed = new byte[0x20000];
-  
+
     /**
      * ReadNextFrame
-     */ 
-   static byte[] ReadNextFrame() {
-    
+     */
+    static byte[] ReadNextFrame() {
+
         ByteBuffer file = cl.cinematic_file;
 
         // read the next frame
@@ -1725,7 +1622,7 @@ public final class SCR extends Globals {
         S.RawSamples(count, cin.s_rate, cin.s_width, cin.s_channels, file.slice());
         // skip the sound samples
         file.position(file.position() + count * cin.s_width * cin.s_channels);
-        
+
         byte[] pic = Huff1Decompress(compressed, size);
         cl.cinematicframe++;
 
@@ -1753,7 +1650,7 @@ public final class SCR extends Globals {
         }
 
         int frame = (int) ((cls.realtime - cl.cinematictime) * 14.0f / 1000);
-        
+
         if (frame <= cl.cinematicframe)
             return;
 
@@ -1762,7 +1659,7 @@ public final class SCR extends Globals {
                     + (cl.cinematicframe + 1));
             cl.cinematictime = cls.realtime - cl.cinematicframe * 1000 / 14;
         }
-        
+
         cin.pic = cin.pic_pending;
         cin.pic_pending = ReadNextFrame();
 
@@ -1779,7 +1676,7 @@ public final class SCR extends Globals {
 
     /**
      * DrawCinematic
-     * 
+     * <p/>
      * Returns true if a cinematic is active, meaning the view rendering should
      * be skipped.
      */
@@ -1787,24 +1684,24 @@ public final class SCR extends Globals {
         if (cl.cinematictime <= 0) {
             return false;
         }
-        
+
         if (cls.key_dest == key_menu) {
             // blank screen and pause if menu is up
             Globals.re.CinematicSetPalette(null);
             cl.cinematicpalette_active = false;
             return true;
         }
-        
+
         if (!cl.cinematicpalette_active) {
             re.CinematicSetPalette(cl.cinematicpalette);
-        	cl.cinematicpalette_active = true;
+            cl.cinematicpalette_active = true;
         }
-        
+
         if (cin.pic == null)
             return true;
-        
+
         Globals.re.DrawStretchRaw(0, 0, viddef.width, viddef.height, cin.width, cin.height, cin.pic);
-        
+
         return true;
     }
 
@@ -1860,5 +1757,55 @@ public final class SCR extends Globals {
         cl.cinematicframe = 0;
         cin.pic = ReadNextFrame();
         cl.cinematictime = Timer.Milliseconds();
+    }
+
+    static class dirty_t {
+        int x1;
+
+        int x2;
+
+        int y1;
+
+        int y2;
+
+        void set(dirty_t src) {
+            x1 = src.x1;
+            x2 = src.x2;
+            y1 = src.y1;
+            y2 = src.y2;
+        }
+
+        void clear() {
+            x1 = x2 = y1 = y2 = 0;
+        }
+    }
+
+    //	typedef struct
+    //	{
+    //		float value;
+    //		int color;
+    //	} graphsamp_t;
+    static class graphsamp_t {
+        float value;
+
+        int color;
+    }
+
+    private static class cinematics_t {
+        boolean restart_sound;
+        int s_rate;
+        int s_width;
+        int s_channels;
+
+        int width;
+        int height;
+        byte[] pic;
+        byte[] pic_pending;
+        // order 1 huffman stuff
+        int[] hnodes1; // [256][256][2];
+        int[] numhnodes1 = new int[256];
+
+        int[] h_used = new int[512];
+        int[] h_count = new int[512];
     }
 }

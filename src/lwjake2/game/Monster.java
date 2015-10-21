@@ -26,13 +26,90 @@ import lwjake2.util.Math3D;
 
 public class Monster {
 
+    public static EntThinkAdapter monster_think = new EntThinkAdapter() {
+        public String getID() {
+            return "monster_think";
+        }
+
+        public boolean think(edict_t self) {
+
+            M.M_MoveFrame(self);
+            if (self.linkcount != self.monsterinfo.linkcount) {
+                self.monsterinfo.linkcount = self.linkcount;
+                M.M_CheckGround(self);
+            }
+            M.M_CatagorizePosition(self);
+            M.M_WorldEffects(self);
+            M.M_SetEffects(self);
+            return true;
+        }
+    };
+    public static EntThinkAdapter monster_triggered_spawn = new EntThinkAdapter() {
+        public String getID() {
+            return "monster_trigger_spawn";
+        }
+
+        public boolean think(edict_t self) {
+
+            self.s.origin[2] += 1;
+            GameUtil.KillBox(self);
+
+            self.solid = Defines.SOLID_BBOX;
+            self.movetype = Defines.MOVETYPE_STEP;
+            self.svflags &= ~Defines.SVF_NOCLIENT;
+            self.air_finished = GameBase.level.time + 12;
+            GameBase.gi.linkentity(self);
+
+            Monster.monster_start_go(self);
+
+            if (self.enemy != null && 0 == (self.spawnflags & 1)
+                    && 0 == (self.enemy.flags & Defines.FL_NOTARGET)) {
+                GameUtil.FoundTarget(self);
+            } else {
+                self.enemy = null;
+            }
+            return true;
+        }
+    };
+    //	we have a one frame delay here so we don't telefrag the guy who activated
+    // us
+    public static EntUseAdapter monster_triggered_spawn_use = new EntUseAdapter() {
+        public String getID() {
+            return "monster_trigger_spawn_use";
+        }
+
+        public void use(edict_t self, edict_t other, edict_t activator) {
+            self.think = monster_triggered_spawn;
+            self.nextthink = GameBase.level.time + Defines.FRAMETIME;
+            if (activator.client != null)
+                self.enemy = activator;
+            self.use = GameUtil.monster_use;
+        }
+    };
+    public static EntThinkAdapter monster_triggered_start = new EntThinkAdapter() {
+        public String getID() {
+            return "monster_triggered_start";
+        }
+
+        public boolean think(edict_t self) {
+            if (self.index == 312)
+                Com.Printf("monster_triggered_start\n");
+            self.solid = Defines.SOLID_NOT;
+            self.movetype = Defines.MOVETYPE_NONE;
+            self.svflags |= Defines.SVF_NOCLIENT;
+            self.nextthink = 0;
+            self.use = monster_triggered_spawn_use;
+            return true;
+        }
+    };
+
     // FIXME monsters should call these with a totally accurate direction
     //	and we can mess it up based on skill. Spread should be for normal
     //	and we can tighten or loosen based on skill. We could muck with
     //	the damages too, but I'm not sure that's such a good idea.
     public static void monster_fire_bullet(edict_t self, float[] start,
-            float[] dir, int damage, int kick, int hspread, int vspread,
-            int flashtype) {
+                                           float[] dir, int damage, int kick, int hspread, int vspread,
+                                           int flashtype) {
         GameWeapon.fire_bullet(self, start, dir, damage, kick, hspread, vspread,
                 Defines.MOD_UNKNOWN);
 
@@ -42,10 +119,12 @@ public class Monster {
         GameBase.gi.multicast(start, Defines.MULTICAST_PVS);
     }
 
-    /** The Moster fires the shotgun. */
+    /**
+     * The Moster fires the shotgun.
+     */
     public static void monster_fire_shotgun(edict_t self, float[] start,
-            float[] aimdir, int damage, int kick, int hspread, int vspread,
-            int count, int flashtype) {
+                                            float[] aimdir, int damage, int kick, int hspread, int vspread,
+                                            int count, int flashtype) {
         GameWeapon.fire_shotgun(self, start, aimdir, damage, kick, hspread, vspread,
                 count, Defines.MOD_UNKNOWN);
 
@@ -55,9 +134,11 @@ public class Monster {
         GameBase.gi.multicast(start, Defines.MULTICAST_PVS);
     }
 
-    /** The Moster fires the blaster. */
+    /**
+     * The Moster fires the blaster.
+     */
     public static void monster_fire_blaster(edict_t self, float[] start,
-            float[] dir, int damage, int speed, int flashtype, int effect) {
+                                            float[] dir, int damage, int speed, int flashtype, int effect) {
         GameWeapon.fire_blaster(self, start, dir, damage, speed, effect, false);
 
         GameBase.gi.WriteByte(Defines.svc_muzzleflash2);
@@ -66,9 +147,11 @@ public class Monster {
         GameBase.gi.multicast(start, Defines.MULTICAST_PVS);
     }
 
-    /** The Moster fires the grenade. */
+    /**
+     * The Moster fires the grenade.
+     */
     public static void monster_fire_grenade(edict_t self, float[] start,
-            float[] aimdir, int damage, int speed, int flashtype) {
+                                            float[] aimdir, int damage, int speed, int flashtype) {
         GameWeapon
                 .fire_grenade(self, start, aimdir, damage, speed, 2.5f,
                         damage + 40);
@@ -79,9 +162,11 @@ public class Monster {
         GameBase.gi.multicast(start, Defines.MULTICAST_PVS);
     }
 
-    /** The Moster fires the rocket. */
+    /**
+     * The Moster fires the rocket.
+     */
     public static void monster_fire_rocket(edict_t self, float[] start,
-            float[] dir, int damage, int speed, int flashtype) {
+                                           float[] dir, int damage, int speed, int flashtype) {
         GameWeapon.fire_rocket(self, start, dir, damage, speed, damage + 20, damage);
 
         GameBase.gi.WriteByte(Defines.svc_muzzleflash2);
@@ -90,9 +175,11 @@ public class Monster {
         GameBase.gi.multicast(start, Defines.MULTICAST_PVS);
     }
 
-    /** The Moster fires the railgun. */
+    /**
+     * The Moster fires the railgun.
+     */
     public static void monster_fire_railgun(edict_t self, float[] start,
-            float[] aimdir, int damage, int kick, int flashtype) {
+                                            float[] aimdir, int damage, int kick, int flashtype) {
         GameWeapon.fire_rail(self, start, aimdir, damage, kick);
 
         GameBase.gi.WriteByte(Defines.svc_muzzleflash2);
@@ -101,10 +188,12 @@ public class Monster {
         GameBase.gi.multicast(start, Defines.MULTICAST_PVS);
     }
 
-    /** The Moster fires the bfg. */
+    /**
+     * The Moster fires the bfg.
+     */
     public static void monster_fire_bfg(edict_t self, float[] start,
-            float[] aimdir, int damage, int speed, int kick,
-            float damage_radius, int flashtype) {
+                                        float[] aimdir, int damage, int speed, int kick,
+                                        float damage_radius, int flashtype) {
         GameWeapon.fire_bfg(self, start, aimdir, damage, speed, damage_radius);
 
         GameBase.gi.WriteByte(Defines.svc_muzzleflash2);
@@ -115,7 +204,7 @@ public class Monster {
 
     /*
      * ================ monster_death_use
-     * 
+     *
      * When a monster dies, it fires all of its targets with the current enemy
      * as activator. ================
      */
@@ -184,14 +273,14 @@ public class Monster {
         if (self.monsterinfo.currentmove != null)
             self.s.frame = self.monsterinfo.currentmove.firstframe
                     + (Lib.rand() % (self.monsterinfo.currentmove.lastframe
-                            - self.monsterinfo.currentmove.firstframe + 1));
+                    - self.monsterinfo.currentmove.firstframe + 1));
 
         return true;
     }
 
     public static void monster_start_go(edict_t self) {
 
-        float[] v = { 0, 0, 0 };
+        float[] v = {0, 0, 0};
 
         if (self.health <= 0)
             return;
@@ -205,7 +294,7 @@ public class Monster {
             fixup = false;
             /*
              * if (true) { Com.Printf("all entities:\n");
-             * 
+             *
              * for (int n = 0; n < Game.globals.num_edicts; n++) { edict_t ent =
              * GameBase.g_edicts[n]; Com.Printf( "|%4i | %25s
              * |%8.2f|%8.2f|%8.2f||%8.2f|%8.2f|%8.2f||%8.2f|%8.2f|%8.2f|\n", new
@@ -286,72 +375,4 @@ public class Monster {
         self.think = Monster.monster_think;
         self.nextthink = GameBase.level.time + Defines.FRAMETIME;
     }
-
-    public static EntThinkAdapter monster_think = new EntThinkAdapter() {
-        public String getID() { return "monster_think";}
-        public boolean think(edict_t self) {
-
-            M.M_MoveFrame(self);
-            if (self.linkcount != self.monsterinfo.linkcount) {
-                self.monsterinfo.linkcount = self.linkcount;
-                M.M_CheckGround(self);
-            }
-            M.M_CatagorizePosition(self);
-            M.M_WorldEffects(self);
-            M.M_SetEffects(self);
-            return true;
-        }
-    };
-
-    public static EntThinkAdapter monster_triggered_spawn = new EntThinkAdapter() {
-        public String getID() { return "monster_trigger_spawn";}
-        public boolean think(edict_t self) {
-
-            self.s.origin[2] += 1;
-            GameUtil.KillBox(self);
-
-            self.solid = Defines.SOLID_BBOX;
-            self.movetype = Defines.MOVETYPE_STEP;
-            self.svflags &= ~Defines.SVF_NOCLIENT;
-            self.air_finished = GameBase.level.time + 12;
-            GameBase.gi.linkentity(self);
-
-            Monster.monster_start_go(self);
-
-            if (self.enemy != null && 0 == (self.spawnflags & 1)
-                    && 0 == (self.enemy.flags & Defines.FL_NOTARGET)) {
-                GameUtil.FoundTarget(self);
-            } else {
-                self.enemy = null;
-            }
-            return true;
-        }
-    };
-
-    //	we have a one frame delay here so we don't telefrag the guy who activated
-    // us
-    public static EntUseAdapter monster_triggered_spawn_use = new EntUseAdapter() {
-        public String getID() { return "monster_trigger_spawn_use";}
-        public void use(edict_t self, edict_t other, edict_t activator) {
-            self.think = monster_triggered_spawn;
-            self.nextthink = GameBase.level.time + Defines.FRAMETIME;
-            if (activator.client != null)
-                self.enemy = activator;
-            self.use = GameUtil.monster_use;
-        }
-    };
-
-    public static EntThinkAdapter monster_triggered_start = new EntThinkAdapter() {
-        public String getID() { return "monster_triggered_start";}
-        public boolean think(edict_t self) {
-            if (self.index == 312)
-                Com.Printf("monster_triggered_start\n");
-            self.solid = Defines.SOLID_NOT;
-            self.movetype = Defines.MOVETYPE_NONE;
-            self.svflags |= Defines.SVF_NOCLIENT;
-            self.nextthink = 0;
-            self.use = monster_triggered_spawn_use;
-            return true;
-        }
-    };
 }

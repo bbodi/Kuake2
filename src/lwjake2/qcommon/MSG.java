@@ -30,6 +30,9 @@ public class MSG extends Globals {
     // writing functions
     //
 
+    // 2k read buffer.
+    public static byte readbuf[] = new byte[2048];
+
     //ok.
     public static void WriteChar(sizebuf_t sb, int c) {
         sb.data[SZ.GetSpace(sb, 1)] = (byte) (c & 0xFF);
@@ -113,7 +116,7 @@ public class MSG extends Globals {
     }
 
     public static void WriteDeltaUsercmd(sizebuf_t buf, usercmd_t from,
-            usercmd_t cmd) {
+                                         usercmd_t cmd) {
         int bits;
 
         //
@@ -194,14 +197,20 @@ public class MSG extends Globals {
         Math3D.VectorCopy(bytedirs[b], dir);
     }
 
+    //============================================================
+
+    //
+    // reading functions
+    //
+
     /*
      * ================== WriteDeltaEntity
-     * 
+     *
      * Writes part of a packetentities message. Can delta from either a baseline
      * or a previous packet_entity ==================
      */
     public static void WriteDeltaEntity(entity_state_t from, entity_state_t to,
-            sizebuf_t msg, boolean force, boolean newentity) {
+                                        sizebuf_t msg, boolean force, boolean newentity) {
         int bits;
 
         if (0 == to.number)
@@ -335,7 +344,7 @@ public class MSG extends Globals {
             WriteShort(msg, to.frame);
 
         if ((bits & U_SKIN8) != 0 && (bits & U_SKIN16) != 0) //used for laser
-                                                             // colors
+            // colors
             WriteInt(msg, to.skinnum);
         else if ((bits & U_SKIN8) != 0)
             WriteByte(msg, to.skinnum);
@@ -384,12 +393,6 @@ public class MSG extends Globals {
             WriteShort(msg, to.solid);
     }
 
-    //============================================================
-
-    //
-    // reading functions
-    //
-
     public static void BeginReading(sizebuf_t msg) {
         msg.readcount = 0;
     }
@@ -414,7 +417,7 @@ public class MSG extends Globals {
             c = -1;
         else
             c = msg_read.data[msg_read.readcount] & 0xff;
-        
+
         msg_read.readcount++;
 
         return c;
@@ -439,9 +442,7 @@ public class MSG extends Globals {
         if (msg_read.readcount + 4 > msg_read.cursize) {
             Com.Printf("buffer underrun in ReadLong!");
             c = -1;
-        }
-
-        else
+        } else
             c = (msg_read.data[msg_read.readcount] & 0xff)
                     | ((msg_read.data[msg_read.readcount + 1] & 0xff) << 8)
                     | ((msg_read.data[msg_read.readcount + 2] & 0xff) << 16)
@@ -457,9 +458,6 @@ public class MSG extends Globals {
         return Float.intBitsToFloat(n);
     }
 
-    // 2k read buffer.
-    public static byte readbuf[] = new byte[2048];
-
     public static String ReadString(sizebuf_t msg_read) {
 
         byte c;
@@ -472,7 +470,7 @@ public class MSG extends Globals {
             readbuf[l] = c;
             l++;
         } while (l < 2047);
-        
+
         String ret = new String(readbuf, 0, l);
         // Com.dprintln("MSG.ReadString:[" + ret + "]");
         return ret;
@@ -491,7 +489,7 @@ public class MSG extends Globals {
             readbuf[l] = c;
             l++;
         } while (l < 2047);
-        
+
         String ret = new String(readbuf, 0, l).trim();
         Com.dprintln("MSG.ReadStringLine:[" + ret.replace('\0', '@') + "]");
         return ret;
@@ -517,7 +515,7 @@ public class MSG extends Globals {
     }
 
     public static void ReadDeltaUsercmd(sizebuf_t msg_read, usercmd_t from,
-            usercmd_t move) {
+                                        usercmd_t move) {
         int bits;
 
         //memcpy(move, from, sizeof(* move));
@@ -559,6 +557,6 @@ public class MSG extends Globals {
     public static void ReadData(sizebuf_t msg_read, byte data[], int len) {
         for (int i = 0; i < len; i++)
             data[i] = (byte) ReadByte(msg_read);
-    }    
-            
+    }
+
 }

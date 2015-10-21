@@ -20,31 +20,34 @@ package lwjake2.game;
 
 import lwjake2.util.Math3D;
 
-public class cplane_t
-{
-	public float normal[] = new float[3];
-	public float dist;
-	/** This is for fast side tests, 0=xplane, 1=yplane, 2=zplane and 3=arbitrary. */
-	public byte type;
-	/** This represents signx + (signy<<1) + (signz << 1). */
-	public byte signbits; // signx + (signy<<1) + (signz<<1)
-	public byte pad[] = { 0, 0 };
-	
-	public void set(cplane_t c) {
-		Math3D.set(normal, c.normal);
-		dist = c.dist;
-		type = c.type;
-		signbits = c.signbits;
-		pad[0] = c.pad[0];
-		pad[1] = c.pad[1];
-	}
+public class cplane_t {
+    public float normal[] = new float[3];
+    public float dist;
+    /**
+     * This is for fast side tests, 0=xplane, 1=yplane, 2=zplane and 3=arbitrary.
+     */
+    public byte type;
+    /**
+     * This represents signx + (signy<<1) + (signz << 1).
+     */
+    public byte signbits; // signx + (signy<<1) + (signz<<1)
+    public byte pad[] = {0, 0};
 
-	public void clear() {
-		Math3D.VectorClear(normal);
-		dist = 0;
-		type = 0;
-		signbits = 0;
-		pad[0] = 0;
-		pad[1] = 0;
-	}
+    public void set(cplane_t c) {
+        Math3D.set(normal, c.normal);
+        dist = c.dist;
+        type = c.type;
+        signbits = c.signbits;
+        pad[0] = c.pad[0];
+        pad[1] = c.pad[1];
+    }
+
+    public void clear() {
+        Math3D.VectorClear(normal);
+        dist = 0;
+        type = 0;
+        signbits = 0;
+        pad[0] = 0;
+        pad[1] = 0;
+    }
 }

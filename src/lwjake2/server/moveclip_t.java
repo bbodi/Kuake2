@@ -22,27 +22,26 @@ import lwjake2.game.edict_t;
 import lwjake2.game.trace_t;
 import lwjake2.util.Math3D;
 
-public class moveclip_t 
-{
-	float [] boxmins={0,0,0}, boxmaxs={0,0,0};// enclose the test object along entire move
-	float [] mins, maxs;	// size of the moving object
-	float [] mins2={0,0,0}, maxs2={0,0,0};	// size when clipping against mosnters
-	float [] start, end;
-	// mem
-	trace_t	trace	= new trace_t();
-	edict_t	passedict;
-	int contentmask;
-	
-	public void clear() {
-		Math3D.VectorClear(boxmins);
-		Math3D.VectorClear(boxmaxs);
-		Math3D.VectorClear(mins);
-		Math3D.VectorClear(maxs);
-		Math3D.VectorClear(mins2);
-		Math3D.VectorClear(maxs2);
-		start = end = null;
-		trace.clear();
-		passedict = null;
-		contentmask = 0;
-	}
+public class moveclip_t {
+    float[] boxmins = {0, 0, 0}, boxmaxs = {0, 0, 0};// enclose the test object along entire move
+    float[] mins, maxs;    // size of the moving object
+    float[] mins2 = {0, 0, 0}, maxs2 = {0, 0, 0};    // size when clipping against mosnters
+    float[] start, end;
+    // mem
+    trace_t trace = new trace_t();
+    edict_t passedict;
+    int contentmask;
+
+    public void clear() {
+        Math3D.VectorClear(boxmins);
+        Math3D.VectorClear(boxmaxs);
+        Math3D.VectorClear(mins);
+        Math3D.VectorClear(maxs);
+        Math3D.VectorClear(mins2);
+        Math3D.VectorClear(maxs2);
+        start = end = null;
+        trace.clear();
+        passedict = null;
+        contentmask = 0;
+    }
 }

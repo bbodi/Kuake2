@@ -19,5 +19,5 @@
 package lwjake2.client;
 
 public class viddef_t {
-	public int width, height;
+    public int width, height;
 }

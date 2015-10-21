@@ -19,46 +19,48 @@
 package lwjake2.game;
 
 public class usercmd_t implements Cloneable {
-	public byte msec;
-	public byte buttons;
-	public short angles[]= new short[3];
-	public short forwardmove, sidemove, upmove;
-	public byte impulse; // remove?
-	public byte lightlevel; // light level the player is standing on
+    public byte msec;
+    public byte buttons;
+    public short angles[] = new short[3];
+    public short forwardmove, sidemove, upmove;
+    public byte impulse; // remove?
+    public byte lightlevel; // light level the player is standing on
 
-	public void clear() {
-		forwardmove= sidemove= upmove= msec= buttons= impulse= lightlevel= 0;
-		angles[0] = angles[1] = angles[2] = 0;
-	}
+    public usercmd_t() {
+    }
 
-	public usercmd_t() {
-	};
+    public usercmd_t(usercmd_t from) {
+        msec = from.msec;
+        buttons = from.buttons;
+        angles[0] = from.angles[0];
+        angles[1] = from.angles[1];
+        angles[2] = from.angles[2];
+        forwardmove = from.forwardmove;
+        sidemove = from.sidemove;
+        upmove = from.upmove;
+        impulse = from.impulse;
+        lightlevel = from.lightlevel;
+    }
 
-	public usercmd_t(usercmd_t from) {
-		msec= from.msec;
-		buttons= from.buttons;
-		angles[0]= from.angles[0];
-		angles[1]= from.angles[1];
-		angles[2]= from.angles[2];
-		forwardmove= from.forwardmove;
-		sidemove= from.sidemove;
-		upmove= from.upmove;
-		impulse= from.impulse;
-		lightlevel= from.lightlevel;
-	}
+    ;
 
-	public usercmd_t set(usercmd_t from) {
-		msec= from.msec;
-		buttons= from.buttons;
-		angles[0]= from.angles[0];
-		angles[1]= from.angles[1];
-		angles[2]= from.angles[2];
-		forwardmove= from.forwardmove;
-		sidemove= from.sidemove;
-		upmove= from.upmove;
-		impulse= from.impulse;
-		lightlevel= from.lightlevel;
+    public void clear() {
+        forwardmove = sidemove = upmove = msec = buttons = impulse = lightlevel = 0;
+        angles[0] = angles[1] = angles[2] = 0;
+    }
 
-		return this;
-	}
+    public usercmd_t set(usercmd_t from) {
+        msec = from.msec;
+        buttons = from.buttons;
+        angles[0] = from.angles[0];
+        angles[1] = from.angles[1];
+        angles[2] = from.angles[2];
+        forwardmove = from.forwardmove;
+        sidemove = from.sidemove;
+        upmove = from.upmove;
+        impulse = from.impulse;
+        lightlevel = from.lightlevel;
+
+        return this;
+    }
 }

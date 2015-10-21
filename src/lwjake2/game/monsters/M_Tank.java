@@ -19,19 +19,7 @@
 package lwjake2.game.monsters;
 
 import lwjake2.Defines;
-import lwjake2.game.EntDieAdapter;
-import lwjake2.game.EntInteractAdapter;
-import lwjake2.game.EntPainAdapter;
-import lwjake2.game.EntThinkAdapter;
-import lwjake2.game.GameAI;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameMisc;
-import lwjake2.game.GameUtil;
-import lwjake2.game.Monster;
-import lwjake2.game.edict_t;
-import lwjake2.game.mframe_t;
-import lwjake2.game.mmove_t;
-import lwjake2.game.monsters.M_Flash;
+import lwjake2.game.*;
 import lwjake2.util.Lib;
 import lwjake2.util.Math3D;
 
@@ -651,7 +639,10 @@ public class M_Tank {
     //
 
     static EntInteractAdapter tank_sight = new EntInteractAdapter() {
-    	public String getID(){ return "tank_sight"; }
+        public String getID() {
+            return "tank_sight";
+        }
+
         public boolean interact(edict_t self, edict_t other) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_sight, 1,
                     Defines.ATTN_NORM, 0);
@@ -660,7 +651,10 @@ public class M_Tank {
     };
 
     static EntThinkAdapter tank_footstep = new EntThinkAdapter() {
-    	public String getID(){ return "tank_footstep"; }
+        public String getID() {
+            return "tank_footstep";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_BODY, sound_step, 1,
                     Defines.ATTN_NORM, 0);
@@ -669,7 +663,10 @@ public class M_Tank {
     };
 
     static EntThinkAdapter tank_thud = new EntThinkAdapter() {
-    	public String getID(){ return "tank_thud"; }
+        public String getID() {
+            return "tank_thud";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_BODY, sound_thud, 1,
                     Defines.ATTN_NORM, 0);
@@ -678,7 +675,10 @@ public class M_Tank {
     };
 
     static EntThinkAdapter tank_windup = new EntThinkAdapter() {
-    	public String getID(){ return "tank_windup"; }
+        public String getID() {
+            return "tank_windup";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_WEAPON, sound_windup, 1,
                     Defines.ATTN_NORM, 0);
@@ -687,7 +687,10 @@ public class M_Tank {
     };
 
     static EntThinkAdapter tank_idle = new EntThinkAdapter() {
-    	public String getID(){ return "tank_idle"; }
+        public String getID() {
+            return "tank_idle";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_idle, 1,
                     Defines.ATTN_IDLE, 0);
@@ -699,7 +702,7 @@ public class M_Tank {
     // stand
     //
 
-    static mframe_t tank_frames_stand[] = new mframe_t[] {
+    static mframe_t tank_frames_stand[] = new mframe_t[]{
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
@@ -729,24 +732,103 @@ public class M_Tank {
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null) };
+            new mframe_t(GameAI.ai_stand, 0, null)};
 
     static mmove_t tank_move_stand = new mmove_t(FRAME_stand01, FRAME_stand30,
             tank_frames_stand, null);
 
     static EntThinkAdapter tank_stand = new EntThinkAdapter() {
-    	public String getID(){ return "tank_stand"; }
+        public String getID() {
+            return "tank_stand";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.currentmove = tank_move_stand;
             return true;
         }
     };
+    static mframe_t tank_frames_start_walk[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_walk, 0, null),
+            new mframe_t(GameAI.ai_walk, 6, null),
+            new mframe_t(GameAI.ai_walk, 6, null),
+            new mframe_t(GameAI.ai_walk, 11, tank_footstep)};
+    static mmove_t tank_move_start_walk = new mmove_t(FRAME_walk01,
+            FRAME_walk04, tank_frames_start_walk, tank_walk);
+    static mframe_t tank_frames_walk[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_walk, 4, null),
+            new mframe_t(GameAI.ai_walk, 5, null),
+            new mframe_t(GameAI.ai_walk, 3, null),
+            new mframe_t(GameAI.ai_walk, 2, null),
+            new mframe_t(GameAI.ai_walk, 5, null),
+            new mframe_t(GameAI.ai_walk, 5, null),
+            new mframe_t(GameAI.ai_walk, 4, null),
+            new mframe_t(GameAI.ai_walk, 4, tank_footstep),
+            new mframe_t(GameAI.ai_walk, 3, null),
+            new mframe_t(GameAI.ai_walk, 5, null),
+            new mframe_t(GameAI.ai_walk, 4, null),
+            new mframe_t(GameAI.ai_walk, 5, null),
+            new mframe_t(GameAI.ai_walk, 7, null),
+            new mframe_t(GameAI.ai_walk, 7, null),
+            new mframe_t(GameAI.ai_walk, 6, null),
+            new mframe_t(GameAI.ai_walk, 6, tank_footstep)};
+    static mmove_t tank_move_walk = new mmove_t(FRAME_walk05, FRAME_walk20,
+            tank_frames_walk, null);
+    static EntThinkAdapter tank_walk = new EntThinkAdapter() {
+        public String getID() {
+            return "tank_walk";
+        }
 
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = tank_move_walk;
+            return true;
+        }
+    };
+    static mframe_t tank_frames_stop_walk[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_walk, 3, null),
+            new mframe_t(GameAI.ai_walk, 3, null),
+            new mframe_t(GameAI.ai_walk, 2, null),
+            new mframe_t(GameAI.ai_walk, 2, null),
+            new mframe_t(GameAI.ai_walk, 4, tank_footstep)};
+    static mmove_t tank_move_stop_walk = new mmove_t(FRAME_walk21,
+            FRAME_walk25, tank_frames_stop_walk, tank_stand);
+    static mframe_t tank_frames_start_run[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_run, 0, null),
+            new mframe_t(GameAI.ai_run, 6, null),
+            new mframe_t(GameAI.ai_run, 6, null),
+            new mframe_t(GameAI.ai_run, 11, tank_footstep)};
+
+    //
+    // run
+    //
+    static mmove_t tank_move_start_run = new mmove_t(FRAME_walk01,
+            FRAME_walk04, tank_frames_start_run, tank_run);
+    static mframe_t tank_frames_run[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_run, 4, null),
+            new mframe_t(GameAI.ai_run, 5, null),
+            new mframe_t(GameAI.ai_run, 3, null),
+            new mframe_t(GameAI.ai_run, 2, null),
+            new mframe_t(GameAI.ai_run, 5, null),
+            new mframe_t(GameAI.ai_run, 5, null),
+            new mframe_t(GameAI.ai_run, 4, null),
+            new mframe_t(GameAI.ai_run, 4, tank_footstep),
+            new mframe_t(GameAI.ai_run, 3, null),
+            new mframe_t(GameAI.ai_run, 5, null),
+            new mframe_t(GameAI.ai_run, 4, null),
+            new mframe_t(GameAI.ai_run, 5, null),
+            new mframe_t(GameAI.ai_run, 7, null),
+            new mframe_t(GameAI.ai_run, 7, null),
+            new mframe_t(GameAI.ai_run, 6, null),
+            new mframe_t(GameAI.ai_run, 6, tank_footstep)};
+    static mmove_t tank_move_run = new mmove_t(FRAME_walk05, FRAME_walk20,
+            tank_frames_run, null);
     //
     // walk
     //
     static EntThinkAdapter tank_run = new EntThinkAdapter() {
-    	public String getID(){ return "tank_run"; }
+        public String getID() {
+            return "tank_run";
+        }
+
         public boolean think(edict_t self) {
             if (self.enemy != null && self.enemy.client != null)
                 self.monsterinfo.aiflags |= Defines.AI_BRUTAL;
@@ -767,95 +849,12 @@ public class M_Tank {
             return true;
         }
     };
-
-    static EntThinkAdapter tank_walk = new EntThinkAdapter() {
-    	public String getID(){ return "tank_walk"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = tank_move_walk;
-            return true;
-        }
-    };
-
-    static mframe_t tank_frames_start_walk[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_walk, 0, null),
-            new mframe_t(GameAI.ai_walk, 6, null),
-            new mframe_t(GameAI.ai_walk, 6, null),
-            new mframe_t(GameAI.ai_walk, 11, tank_footstep) };
-
-    static mmove_t tank_move_start_walk = new mmove_t(FRAME_walk01,
-            FRAME_walk04, tank_frames_start_walk, tank_walk);
-
-    static mframe_t tank_frames_walk[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_walk, 4, null),
-            new mframe_t(GameAI.ai_walk, 5, null),
-            new mframe_t(GameAI.ai_walk, 3, null),
-            new mframe_t(GameAI.ai_walk, 2, null),
-            new mframe_t(GameAI.ai_walk, 5, null),
-            new mframe_t(GameAI.ai_walk, 5, null),
-            new mframe_t(GameAI.ai_walk, 4, null),
-            new mframe_t(GameAI.ai_walk, 4, tank_footstep),
-            new mframe_t(GameAI.ai_walk, 3, null),
-            new mframe_t(GameAI.ai_walk, 5, null),
-            new mframe_t(GameAI.ai_walk, 4, null),
-            new mframe_t(GameAI.ai_walk, 5, null),
-            new mframe_t(GameAI.ai_walk, 7, null),
-            new mframe_t(GameAI.ai_walk, 7, null),
-            new mframe_t(GameAI.ai_walk, 6, null),
-            new mframe_t(GameAI.ai_walk, 6, tank_footstep) };
-
-    static mmove_t tank_move_walk = new mmove_t(FRAME_walk05, FRAME_walk20,
-            tank_frames_walk, null);
-
-    static mframe_t tank_frames_stop_walk[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_walk, 3, null),
-            new mframe_t(GameAI.ai_walk, 3, null),
-            new mframe_t(GameAI.ai_walk, 2, null),
-            new mframe_t(GameAI.ai_walk, 2, null),
-            new mframe_t(GameAI.ai_walk, 4, tank_footstep) };
-
-    static mmove_t tank_move_stop_walk = new mmove_t(FRAME_walk21,
-            FRAME_walk25, tank_frames_stop_walk, tank_stand);
-
-    //
-    // run
-    //
-
-    static mframe_t tank_frames_start_run[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_run, 0, null),
-            new mframe_t(GameAI.ai_run, 6, null),
-            new mframe_t(GameAI.ai_run, 6, null),
-            new mframe_t(GameAI.ai_run, 11, tank_footstep) };
-
-    static mmove_t tank_move_start_run = new mmove_t(FRAME_walk01,
-            FRAME_walk04, tank_frames_start_run, tank_run);
-
-    static mframe_t tank_frames_run[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_run, 4, null),
-            new mframe_t(GameAI.ai_run, 5, null),
-            new mframe_t(GameAI.ai_run, 3, null),
-            new mframe_t(GameAI.ai_run, 2, null),
-            new mframe_t(GameAI.ai_run, 5, null),
-            new mframe_t(GameAI.ai_run, 5, null),
-            new mframe_t(GameAI.ai_run, 4, null),
-            new mframe_t(GameAI.ai_run, 4, tank_footstep),
-            new mframe_t(GameAI.ai_run, 3, null),
-            new mframe_t(GameAI.ai_run, 5, null),
-            new mframe_t(GameAI.ai_run, 4, null),
-            new mframe_t(GameAI.ai_run, 5, null),
-            new mframe_t(GameAI.ai_run, 7, null),
-            new mframe_t(GameAI.ai_run, 7, null),
-            new mframe_t(GameAI.ai_run, 6, null),
-            new mframe_t(GameAI.ai_run, 6, tank_footstep) };
-
-    static mmove_t tank_move_run = new mmove_t(FRAME_walk05, FRAME_walk20,
-            tank_frames_run, null);
-
-    static mframe_t tank_frames_stop_run[] = new mframe_t[] {
+    static mframe_t tank_frames_stop_run[] = new mframe_t[]{
             new mframe_t(GameAI.ai_run, 3, null),
             new mframe_t(GameAI.ai_run, 3, null),
             new mframe_t(GameAI.ai_run, 2, null),
             new mframe_t(GameAI.ai_run, 2, null),
-            new mframe_t(GameAI.ai_run, 4, tank_footstep) };
+            new mframe_t(GameAI.ai_run, 4, tank_footstep)};
 
     static mmove_t tank_move_stop_run = new mmove_t(FRAME_walk21, FRAME_walk25,
             tank_frames_stop_run, tank_walk);
@@ -864,26 +863,26 @@ public class M_Tank {
     // pain
     //
 
-    static mframe_t tank_frames_pain1[] = new mframe_t[] {
+    static mframe_t tank_frames_pain1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t tank_move_pain1 = new mmove_t(FRAME_pain101, FRAME_pain104,
             tank_frames_pain1, tank_run);
 
-    static mframe_t tank_frames_pain2[] = new mframe_t[] {
+    static mframe_t tank_frames_pain2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t tank_move_pain2 = new mmove_t(FRAME_pain201, FRAME_pain205,
             tank_frames_pain2, tank_run);
 
-    static mframe_t tank_frames_pain3[] = new mframe_t[] {
+    static mframe_t tank_frames_pain3[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, -7, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -899,13 +898,16 @@ public class M_Tank {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, tank_footstep) };
+            new mframe_t(GameAI.ai_move, 0, tank_footstep)};
 
     static mmove_t tank_move_pain3 = new mmove_t(FRAME_pain301, FRAME_pain316,
             tank_frames_pain3, tank_run);
 
     static EntPainAdapter tank_pain = new EntPainAdapter() {
-    	public String getID(){ return "tank_pain"; }
+        public String getID() {
+            return "tank_pain";
+        }
+
         public void pain(edict_t self, edict_t other, float kick, int damage) {
             if (self.health < (self.max_health / 2))
                 self.s.skinnum |= 1;
@@ -951,12 +953,15 @@ public class M_Tank {
     //
 
     static EntThinkAdapter TankBlaster = new EntThinkAdapter() {
-    	public String getID(){ return "TankBlaster"; }
+        public String getID() {
+            return "TankBlaster";
+        }
+
         public boolean think(edict_t self) {
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-            float[] start = { 0, 0, 0 };
-            float[] end = { 0, 0, 0 };
-            float[] dir = { 0, 0, 0 };
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+            float[] start = {0, 0, 0};
+            float[] end = {0, 0, 0};
+            float[] dir = {0, 0, 0};
             int flash_number;
 
             if (self.s.frame == FRAME_attak110)
@@ -984,7 +989,10 @@ public class M_Tank {
     };
 
     static EntThinkAdapter TankStrike = new EntThinkAdapter() {
-    	public String getID(){ return "TankStrike"; }
+        public String getID() {
+            return "TankStrike";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_WEAPON, sound_strike, 1,
                     Defines.ATTN_NORM, 0);
@@ -994,12 +1002,15 @@ public class M_Tank {
     };
 
     static EntThinkAdapter TankRocket = new EntThinkAdapter() {
-    	public String getID(){ return "TankRocket"; }
+        public String getID() {
+            return "TankRocket";
+        }
+
         public boolean think(edict_t self) {
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-            float[] start = { 0, 0, 0 };
-            float[] dir = { 0, 0, 0 };
-            float[] vec = { 0, 0, 0 };
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+            float[] start = {0, 0, 0};
+            float[] dir = {0, 0, 0};
+            float[] vec = {0, 0, 0};
             int flash_number;
 
             if (self.s.frame == FRAME_attak324)
@@ -1028,13 +1039,16 @@ public class M_Tank {
     };
 
     static EntThinkAdapter TankMachineGun = new EntThinkAdapter() {
-    	public String getID(){ return "TankMachineGun"; }
+        public String getID() {
+            return "TankMachineGun";
+        }
+
         public boolean think(edict_t self) {
 
-            float[] dir = { 0, 0, 0 };
-            float[] vec = { 0, 0, 0 };
-            float[] start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
+            float[] dir = {0, 0, 0};
+            float[] vec = {0, 0, 0};
+            float[] start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
             int flash_number;
 
             flash_number = Defines.MZ2_TANK_MACHINEGUN_1
@@ -1069,23 +1083,7 @@ public class M_Tank {
             return true;
         }
     };
-
-    static EntThinkAdapter tank_reattack_blaster = new EntThinkAdapter() {
-    	public String getID(){ return "tank_reattack_blaster"; }
-        public boolean think(edict_t self) {
-            if (GameBase.skill.value >= 2)
-                if (GameUtil.visible(self, self.enemy))
-                    if (self.enemy.health > 0)
-                        if (Lib.random() <= 0.6) {
-                            self.monsterinfo.currentmove = tank_move_reattack_blast;
-                            return true;
-                        }
-            self.monsterinfo.currentmove = tank_move_attack_post_blast;
-            return true;
-        }
-    };
-
-    static mframe_t tank_frames_attack_blast[] = new mframe_t[] {
+    static mframe_t tank_frames_attack_blast[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
@@ -1104,11 +1102,9 @@ public class M_Tank {
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, TankBlaster) // 16
     };
-
     static mmove_t tank_move_attack_blast = new mmove_t(FRAME_attak101,
             FRAME_attak116, tank_frames_attack_blast, tank_reattack_blaster);
-
-    static mframe_t tank_frames_reattack_blast[] = new mframe_t[] {
+    static mframe_t tank_frames_reattack_blast[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, TankBlaster),
@@ -1116,11 +1112,9 @@ public class M_Tank {
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, TankBlaster) // 16)
     };
-
     static mmove_t tank_move_reattack_blast = new mmove_t(FRAME_attak111,
             FRAME_attak116, tank_frames_reattack_blast, tank_reattack_blaster);
-
-    static mframe_t tank_frames_attack_post_blast[] = new mframe_t[] {
+    static mframe_t tank_frames_attack_post_blast[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null), // 17)
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 2, null),
@@ -1128,44 +1122,37 @@ public class M_Tank {
             new mframe_t(GameAI.ai_move, 2, null),
             new mframe_t(GameAI.ai_move, -2, tank_footstep) // 22
     };
-
     static mmove_t tank_move_attack_post_blast = new mmove_t(FRAME_attak117,
             FRAME_attak122, tank_frames_attack_post_blast, tank_run);
+    static EntThinkAdapter tank_reattack_blaster = new EntThinkAdapter() {
+        public String getID() {
+            return "tank_reattack_blaster";
+        }
 
+        public boolean think(edict_t self) {
+            if (GameBase.skill.value >= 2)
+                if (GameUtil.visible(self, self.enemy))
+                    if (self.enemy.health > 0)
+                        if (Lib.random() <= 0.6) {
+                            self.monsterinfo.currentmove = tank_move_reattack_blast;
+                            return true;
+                        }
+            self.monsterinfo.currentmove = tank_move_attack_post_blast;
+            return true;
+        }
+    };
     static EntThinkAdapter tank_poststrike = new EntThinkAdapter() {
-    	public String getID(){ return "tank_poststrike"; }
+        public String getID() {
+            return "tank_poststrike";
+        }
+
         public boolean think(edict_t self) {
             self.enemy = null;
             tank_run.think(self);
             return true;
         }
     };
-
-    static EntThinkAdapter tank_doattack_rocket = new EntThinkAdapter() {
-    	public String getID(){ return "tank_doattack_rocket"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = tank_move_attack_fire_rocket;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter tank_refire_rocket = new EntThinkAdapter() {
-    	public String getID(){ return "tank_refire_rocket"; }
-        public boolean think(edict_t self) {
-            // Only on hard or nightmare
-            if (GameBase.skill.value >= 2)
-                if (self.enemy.health > 0)
-                    if (GameUtil.visible(self, self.enemy))
-                        if (Lib.random() <= 0.4) {
-                            self.monsterinfo.currentmove = tank_move_attack_fire_rocket;
-                            return true;
-                        }
-            self.monsterinfo.currentmove = tank_move_attack_post_rocket;
-            return true;
-        }
-    };
-
-    static mframe_t tank_frames_attack_strike[] = new mframe_t[] {
+    static mframe_t tank_frames_attack_strike[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 3, null),
             new mframe_t(GameAI.ai_move, 2, null),
             new mframe_t(GameAI.ai_move, 2, null),
@@ -1203,12 +1190,10 @@ public class M_Tank {
             new mframe_t(GameAI.ai_move, -10, null),
             new mframe_t(GameAI.ai_move, -2, null),
             new mframe_t(GameAI.ai_move, -3, null),
-            new mframe_t(GameAI.ai_move, -2, tank_footstep) };
-
+            new mframe_t(GameAI.ai_move, -2, tank_footstep)};
     static mmove_t tank_move_attack_strike = new mmove_t(FRAME_attak201,
             FRAME_attak238, tank_frames_attack_strike, tank_poststrike);
-
-    static mframe_t tank_frames_attack_pre_rocket[] = new mframe_t[] {
+    static mframe_t tank_frames_attack_pre_rocket[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
@@ -1233,12 +1218,10 @@ public class M_Tank {
             new mframe_t(GameAI.ai_charge, 0, null),
             // 20)
 
-            new mframe_t(GameAI.ai_charge, -3, null) };
-
+            new mframe_t(GameAI.ai_charge, -3, null)};
     static mmove_t tank_move_attack_pre_rocket = new mmove_t(FRAME_attak301,
             FRAME_attak321, tank_frames_attack_pre_rocket, tank_doattack_rocket);
-
-    static mframe_t tank_frames_attack_fire_rocket[] = new mframe_t[] {
+    static mframe_t tank_frames_attack_fire_rocket[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, -3, null), // Loop Start 22 )
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, TankRocket), // 24)
@@ -1249,11 +1232,19 @@ public class M_Tank {
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, -1, TankRocket) // 30 Loop End
     };
-
     static mmove_t tank_move_attack_fire_rocket = new mmove_t(FRAME_attak322,
             FRAME_attak330, tank_frames_attack_fire_rocket, tank_refire_rocket);
+    static EntThinkAdapter tank_doattack_rocket = new EntThinkAdapter() {
+        public String getID() {
+            return "tank_doattack_rocket";
+        }
 
-    static mframe_t tank_frames_attack_post_rocket[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = tank_move_attack_fire_rocket;
+            return true;
+        }
+    };
+    static mframe_t tank_frames_attack_post_rocket[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, null), // 31)
             new mframe_t(GameAI.ai_charge, -1, null),
             new mframe_t(GameAI.ai_charge, -1, null),
@@ -1280,12 +1271,28 @@ public class M_Tank {
 
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null) };
-
+            new mframe_t(GameAI.ai_charge, 0, null)};
     static mmove_t tank_move_attack_post_rocket = new mmove_t(FRAME_attak331,
             FRAME_attak353, tank_frames_attack_post_rocket, tank_run);
+    static EntThinkAdapter tank_refire_rocket = new EntThinkAdapter() {
+        public String getID() {
+            return "tank_refire_rocket";
+        }
 
-    static mframe_t tank_frames_attack_chain[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            // Only on hard or nightmare
+            if (GameBase.skill.value >= 2)
+                if (self.enemy.health > 0)
+                    if (GameUtil.visible(self, self.enemy))
+                        if (Lib.random() <= 0.4) {
+                            self.monsterinfo.currentmove = tank_move_attack_fire_rocket;
+                            return true;
+                        }
+            self.monsterinfo.currentmove = tank_move_attack_post_rocket;
+            return true;
+        }
+    };
+    static mframe_t tank_frames_attack_chain[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
@@ -1314,15 +1321,18 @@ public class M_Tank {
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null) };
+            new mframe_t(GameAI.ai_charge, 0, null)};
 
     static mmove_t tank_move_attack_chain = new mmove_t(FRAME_attak401,
             FRAME_attak429, tank_frames_attack_chain, tank_run);
 
     static EntThinkAdapter tank_attack = new EntThinkAdapter() {
-    	public String getID(){ return "tank_attack"; }
+        public String getID() {
+            return "tank_attack";
+        }
+
         public boolean think(edict_t self) {
-            float[] vec = { 0, 0, 0 };
+            float[] vec = {0, 0, 0};
             float range;
             float r;
 
@@ -1353,10 +1363,10 @@ public class M_Tank {
                 else if (r < 0.66) {
                     self.monsterinfo.currentmove = tank_move_attack_pre_rocket;
                     self.pain_debounce_time = GameBase.level.time + 5.0f; // no
-                                                                          // pain
-                                                                          // for
-                                                                          // a
-                                                                          // while
+                    // pain
+                    // for
+                    // a
+                    // while
                 } else
                     self.monsterinfo.currentmove = tank_move_attack_blast;
             }
@@ -1368,7 +1378,10 @@ public class M_Tank {
     // death
     //
     static EntThinkAdapter tank_dead = new EntThinkAdapter() {
-    	public String getID(){ return "tank_dead"; }
+        public String getID() {
+            return "tank_dead";
+        }
+
         public boolean think(edict_t self) {
             Math3D.VectorSet(self.mins, -16, -16, -16);
             Math3D.VectorSet(self.maxs, 16, 16, -0);
@@ -1380,7 +1393,7 @@ public class M_Tank {
         }
     };
 
-    static mframe_t tank_frames_death1[] = new mframe_t[] {
+    static mframe_t tank_frames_death1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, -7, null),
             new mframe_t(GameAI.ai_move, -2, null),
             new mframe_t(GameAI.ai_move, -2, null),
@@ -1412,22 +1425,25 @@ public class M_Tank {
             new mframe_t(GameAI.ai_move, -5, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t tank_move_death = new mmove_t(FRAME_death101,
             FRAME_death132, tank_frames_death1, tank_dead);
 
     static EntDieAdapter tank_die = new EntDieAdapter() {
-    	public String getID(){ return "tank_die"; }
+        public String getID() {
+            return "tank_die";
+        }
+
         public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
+                        int damage, float[] point) {
             int n;
 
             // check for gib
             if (self.health <= self.gib_health) {
                 GameBase.gi
                         .sound(self, Defines.CHAN_VOICE, GameBase.gi
-                                .soundindex("misc/udeath.wav"), 1,
+                                        .soundindex("misc/udeath.wav"), 1,
                                 Defines.ATTN_NORM, 0);
                 for (n = 0; n < 1 /* 4 */; n++)
                     GameMisc.ThrowGib(self,
@@ -1472,7 +1488,10 @@ public class M_Tank {
      * Trigger_Spawn Sight
      */
     public static EntThinkAdapter SP_monster_tank = new EntThinkAdapter() {
-    	public String getID(){ return "SP_monster_tank"; }
+        public String getID() {
+            return "SP_monster_tank";
+        }
+
         public boolean think(edict_t self) {
             if (GameBase.deathmatch.value != 0) {
                 GameUtil.G_FreeEdict(self);

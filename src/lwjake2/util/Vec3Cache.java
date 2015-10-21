@@ -25,25 +25,25 @@ package lwjake2.util;
  * @author cwei
  */
 public final class Vec3Cache {
-    
+
     //private static Stack cache = new Stack();
     private static final float[][] cache = new float[64][3];
     private static int index = 0;
     private static int max = 0;
-    
+
     public static final float[] get() {
         //max = Math.max(index, max);
         return cache[index++];
     }
-    
+
     public static final void release() {
         index--;
     }
 
     public static final void release(int count) {
-        index-=count;
+        index -= count;
     }
-    
+
     public static final void debug() {
         System.err.println("Vec3Cache: max. " + (max + 1) + " vectors used.");
     }

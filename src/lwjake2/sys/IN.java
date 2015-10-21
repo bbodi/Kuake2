@@ -67,12 +67,12 @@ public final class IN extends Globals {
     }
 
     private static void install_grabs() {
-		Globals.re.getKeyboardHandler().installGrabs();
-		ignorefirst = true;
+        Globals.re.getKeyboardHandler().installGrabs();
+        ignorefirst = true;
     }
 
     private static void uninstall_grabs() {
-		Globals.re.getKeyboardHandler().uninstallGrabs();
+        Globals.re.getKeyboardHandler().uninstallGrabs();
     }
 
     public static void toggleMouse() {
@@ -133,20 +133,20 @@ public final class IN extends Globals {
     }
 
     public static void Commands() {
-		int i;
-	
-		if (!IN.mouse_avail) 
-			return;
-	
-		KBD kbd=Globals.re.getKeyboardHandler();
-		for (i=0 ; i<3 ; i++) {
-			if ( (IN.mouse_buttonstate & (1<<i)) != 0 && (IN.mouse_oldbuttonstate & (1<<i)) == 0 )
-				kbd.Do_Key_Event(Key.K_MOUSE1 + i, true);
-	
-			if ( (IN.mouse_buttonstate & (1<<i)) == 0 && (IN.mouse_oldbuttonstate & (1<<i)) != 0 )
-				kbd.Do_Key_Event(Key.K_MOUSE1 + i, false);
-		}
-		IN.mouse_oldbuttonstate = IN.mouse_buttonstate;		
+        int i;
+
+        if (!IN.mouse_avail)
+            return;
+
+        KBD kbd = Globals.re.getKeyboardHandler();
+        for (i = 0; i < 3; i++) {
+            if ((IN.mouse_buttonstate & (1 << i)) != 0 && (IN.mouse_oldbuttonstate & (1 << i)) == 0)
+                kbd.Do_Key_Event(Key.K_MOUSE1 + i, true);
+
+            if ((IN.mouse_buttonstate & (1 << i)) == 0 && (IN.mouse_oldbuttonstate & (1 << i)) != 0)
+                kbd.Do_Key_Event(Key.K_MOUSE1 + i, false);
+        }
+        IN.mouse_oldbuttonstate = IN.mouse_buttonstate;
     }
 
     public static void Frame() {

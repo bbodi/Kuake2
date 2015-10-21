@@ -20,19 +20,7 @@ package lwjake2.game.monsters;
 
 import lwjake2.Defines;
 import lwjake2.Globals;
-import lwjake2.game.EntDieAdapter;
-import lwjake2.game.EntInteractAdapter;
-import lwjake2.game.EntPainAdapter;
-import lwjake2.game.EntThinkAdapter;
-import lwjake2.game.GameAI;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameCombat;
-import lwjake2.game.GameMisc;
-import lwjake2.game.GameUtil;
-import lwjake2.game.edict_t;
-import lwjake2.game.mframe_t;
-import lwjake2.game.mmove_t;
-import lwjake2.game.trace_t;
+import lwjake2.game.*;
 import lwjake2.util.Lib;
 import lwjake2.util.Math3D;
 
@@ -301,7 +289,10 @@ public class M_Parasite {
     static int sound_search;
 
     static EntThinkAdapter parasite_launch = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_launch"; }
+        public String getID() {
+            return "parasite_launch";
+        }
+
         public boolean think(edict_t self) {
 
             GameBase.gi.sound(self, Defines.CHAN_WEAPON, sound_launch, 1,
@@ -311,7 +302,10 @@ public class M_Parasite {
     };
 
     static EntThinkAdapter parasite_reel_in = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_reel_in"; }
+        public String getID() {
+            return "parasite_reel_in";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_WEAPON, sound_reelin, 1,
                     Defines.ATTN_NORM, 0);
@@ -320,7 +314,10 @@ public class M_Parasite {
     };
 
     static EntInteractAdapter parasite_sight = new EntInteractAdapter() {
-    	public String getID(){ return "parasite_sight"; }
+        public String getID() {
+            return "parasite_sight";
+        }
+
         public boolean interact(edict_t self, edict_t other) {
             GameBase.gi.sound(self, Defines.CHAN_WEAPON, sound_sight, 1,
                     Defines.ATTN_NORM, 0);
@@ -329,7 +326,10 @@ public class M_Parasite {
     };
 
     static EntThinkAdapter parasite_tap = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_tap"; }
+        public String getID() {
+            return "parasite_tap";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_WEAPON, sound_tap, 1,
                     Defines.ATTN_IDLE, 0);
@@ -338,7 +338,10 @@ public class M_Parasite {
     };
 
     static EntThinkAdapter parasite_scratch = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_scratch"; }
+        public String getID() {
+            return "parasite_scratch";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_WEAPON, sound_scratch, 1,
                     Defines.ATTN_IDLE, 0);
@@ -347,56 +350,78 @@ public class M_Parasite {
     };
 
     static EntThinkAdapter parasite_search = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_search"; }
+        public String getID() {
+            return "parasite_search";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_WEAPON, sound_search, 1,
                     Defines.ATTN_IDLE, 0);
             return true;
         }
     };
+    static mframe_t parasite_frames_start_fidget[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null)};
+    static mmove_t parasite_move_start_fidget = new mmove_t(FRAME_stand18,
+            FRAME_stand21, parasite_frames_start_fidget, parasite_do_fidget);
+    static EntThinkAdapter parasite_idle = new EntThinkAdapter() {
+        public String getID() {
+            return "parasite_idle";
+        }
 
-    static EntThinkAdapter parasite_start_walk = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_start_walk"; }
         public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = parasite_move_start_walk;
+            self.monsterinfo.currentmove = parasite_move_start_fidget;
             return true;
         }
     };
-
-    static EntThinkAdapter parasite_walk = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_walk"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = parasite_move_walk;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter parasite_stand = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_stand"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = parasite_move_stand;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter parasite_end_fidget = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_end_fidget"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = parasite_move_end_fidget;
-            return true;
-        }
-    };
-
+    static mframe_t parasite_frames_fidget[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_stand, 0, parasite_scratch),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, parasite_scratch),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null)};
+    static mmove_t parasite_move_fidget = new mmove_t(FRAME_stand22,
+            FRAME_stand27, parasite_frames_fidget, parasite_refidget);
     static EntThinkAdapter parasite_do_fidget = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_do_fidget"; }
+        public String getID() {
+            return "parasite_do_fidget";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.currentmove = parasite_move_fidget;
             return true;
         }
     };
+    static mframe_t parasite_frames_end_fidget[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_stand, 0, parasite_scratch),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null)};
+    static mmove_t parasite_move_end_fidget = new mmove_t(FRAME_stand28,
+            FRAME_stand35, parasite_frames_end_fidget, parasite_stand);
+    static EntThinkAdapter parasite_end_fidget = new EntThinkAdapter() {
+        public String getID() {
+            return "parasite_end_fidget";
+        }
 
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = parasite_move_end_fidget;
+            return true;
+        }
+    };
     static EntThinkAdapter parasite_refidget = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_refidget"; }
+        public String getID() {
+            return "parasite_refidget";
+        }
+
         public boolean think(edict_t self) {
             if (Lib.random() <= 0.8)
                 self.monsterinfo.currentmove = parasite_move_fidget;
@@ -405,28 +430,51 @@ public class M_Parasite {
             return true;
         }
     };
+    static mframe_t parasite_frames_stand[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, parasite_tap),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, parasite_tap),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, parasite_tap),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, parasite_tap),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, parasite_tap),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, parasite_tap)};
+    static mmove_t parasite_move_stand = new mmove_t(FRAME_stand01,
+            FRAME_stand17, parasite_frames_stand, parasite_stand);
+    static EntThinkAdapter parasite_stand = new EntThinkAdapter() {
+        public String getID() {
+            return "parasite_stand";
+        }
 
-    static EntThinkAdapter parasite_idle = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_idle"; }
         public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = parasite_move_start_fidget;
+            self.monsterinfo.currentmove = parasite_move_stand;
             return true;
         }
     };
-
-    static EntThinkAdapter parasite_start_run = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_start_run"; }
-        public boolean think(edict_t self) {
-            if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
-                self.monsterinfo.currentmove = parasite_move_stand;
-            else
-                self.monsterinfo.currentmove = parasite_move_start_run;
-            return true;
-        }
-    };
-
+    static mframe_t parasite_frames_run[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_run, 30, null),
+            new mframe_t(GameAI.ai_run, 30, null),
+            new mframe_t(GameAI.ai_run, 22, null),
+            new mframe_t(GameAI.ai_run, 19, null),
+            new mframe_t(GameAI.ai_run, 24, null),
+            new mframe_t(GameAI.ai_run, 28, null),
+            new mframe_t(GameAI.ai_run, 25, null)};
+    static mmove_t parasite_move_run = new mmove_t(FRAME_run03, FRAME_run09,
+            parasite_frames_run, null);
     static EntThinkAdapter parasite_run = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_run"; }
+        public String getID() {
+            return "parasite_run";
+        }
+
         public boolean think(edict_t self) {
             if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
                 self.monsterinfo.currentmove = parasite_move_stand;
@@ -435,123 +483,80 @@ public class M_Parasite {
             return true;
         }
     };
-
-    static mframe_t parasite_frames_start_fidget[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null) };
-
-    static mmove_t parasite_move_start_fidget = new mmove_t(FRAME_stand18,
-            FRAME_stand21, parasite_frames_start_fidget, parasite_do_fidget);
-
-    static mframe_t parasite_frames_fidget[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_stand, 0, parasite_scratch),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, parasite_scratch),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null) };
-
-    static mmove_t parasite_move_fidget = new mmove_t(FRAME_stand22,
-            FRAME_stand27, parasite_frames_fidget, parasite_refidget);
-
-    static mframe_t parasite_frames_end_fidget[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_stand, 0, parasite_scratch),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null) };
-
-    static mmove_t parasite_move_end_fidget = new mmove_t(FRAME_stand28,
-            FRAME_stand35, parasite_frames_end_fidget, parasite_stand);
-
-    static mframe_t parasite_frames_stand[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, parasite_tap),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, parasite_tap),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, parasite_tap),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, parasite_tap),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, parasite_tap),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, parasite_tap) };
-
-    static mmove_t parasite_move_stand = new mmove_t(FRAME_stand01,
-            FRAME_stand17, parasite_frames_stand, parasite_stand);
-
-    static mframe_t parasite_frames_run[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_run, 30, null),
-            new mframe_t(GameAI.ai_run, 30, null),
-            new mframe_t(GameAI.ai_run, 22, null),
-            new mframe_t(GameAI.ai_run, 19, null),
-            new mframe_t(GameAI.ai_run, 24, null),
-            new mframe_t(GameAI.ai_run, 28, null),
-            new mframe_t(GameAI.ai_run, 25, null) };
-
-    static mmove_t parasite_move_run = new mmove_t(FRAME_run03, FRAME_run09,
-            parasite_frames_run, null);
-
-    static mframe_t parasite_frames_start_run[] = new mframe_t[] {
+    static mframe_t parasite_frames_start_run[] = new mframe_t[]{
             new mframe_t(GameAI.ai_run, 0, null),
-            new mframe_t(GameAI.ai_run, 30, null), };
-
+            new mframe_t(GameAI.ai_run, 30, null),};
     static mmove_t parasite_move_start_run = new mmove_t(FRAME_run01,
             FRAME_run02, parasite_frames_start_run, parasite_run);
+    static EntThinkAdapter parasite_start_run = new EntThinkAdapter() {
+        public String getID() {
+            return "parasite_start_run";
+        }
 
-    static mframe_t parasite_frames_stop_run[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
+                self.monsterinfo.currentmove = parasite_move_stand;
+            else
+                self.monsterinfo.currentmove = parasite_move_start_run;
+            return true;
+        }
+    };
+    static mframe_t parasite_frames_stop_run[] = new mframe_t[]{
             new mframe_t(GameAI.ai_run, 20, null),
             new mframe_t(GameAI.ai_run, 20, null),
             new mframe_t(GameAI.ai_run, 12, null),
             new mframe_t(GameAI.ai_run, 10, null),
             new mframe_t(GameAI.ai_run, 0, null),
-            new mframe_t(GameAI.ai_run, 0, null) };
-
+            new mframe_t(GameAI.ai_run, 0, null)};
     static mmove_t parasite_move_stop_run = new mmove_t(FRAME_run10,
             FRAME_run15, parasite_frames_stop_run, null);
-
-    static mframe_t parasite_frames_walk[] = new mframe_t[] {
+    static mframe_t parasite_frames_walk[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 30, null),
             new mframe_t(GameAI.ai_walk, 30, null),
             new mframe_t(GameAI.ai_walk, 22, null),
             new mframe_t(GameAI.ai_walk, 19, null),
             new mframe_t(GameAI.ai_walk, 24, null),
             new mframe_t(GameAI.ai_walk, 28, null),
-            new mframe_t(GameAI.ai_walk, 25, null) };
-
+            new mframe_t(GameAI.ai_walk, 25, null)};
     static mmove_t parasite_move_walk = new mmove_t(FRAME_run03, FRAME_run09,
             parasite_frames_walk, parasite_walk);
+    static EntThinkAdapter parasite_walk = new EntThinkAdapter() {
+        public String getID() {
+            return "parasite_walk";
+        }
 
-    static mframe_t parasite_frames_start_walk[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = parasite_move_walk;
+            return true;
+        }
+    };
+    static mframe_t parasite_frames_start_walk[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 0, null),
-            new mframe_t(GameAI.ai_walk, 30, parasite_walk) };
-
+            new mframe_t(GameAI.ai_walk, 30, parasite_walk)};
     static mmove_t parasite_move_start_walk = new mmove_t(FRAME_run01,
             FRAME_run02, parasite_frames_start_walk, null);
+    static EntThinkAdapter parasite_start_walk = new EntThinkAdapter() {
+        public String getID() {
+            return "parasite_start_walk";
+        }
 
-    static mframe_t parasite_frames_stop_walk[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = parasite_move_start_walk;
+            return true;
+        }
+    };
+    static mframe_t parasite_frames_stop_walk[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 20, null),
             new mframe_t(GameAI.ai_walk, 20, null),
             new mframe_t(GameAI.ai_walk, 12, null),
             new mframe_t(GameAI.ai_walk, 10, null),
             new mframe_t(GameAI.ai_walk, 0, null),
-            new mframe_t(GameAI.ai_walk, 0, null) };
+            new mframe_t(GameAI.ai_walk, 0, null)};
 
     static mmove_t parasite_move_stop_walk = new mmove_t(FRAME_run10,
             FRAME_run15, parasite_frames_stop_walk, null);
 
-    static mframe_t parasite_frames_pain1[] = new mframe_t[] {
+    static mframe_t parasite_frames_pain1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -562,13 +567,16 @@ public class M_Parasite {
             new mframe_t(GameAI.ai_move, 16, null),
             new mframe_t(GameAI.ai_move, -6, null),
             new mframe_t(GameAI.ai_move, -7, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t parasite_move_pain1 = new mmove_t(FRAME_pain101,
             FRAME_pain111, parasite_frames_pain1, parasite_start_run);
 
     static EntPainAdapter parasite_pain = new EntPainAdapter() {
-    	public String getID(){ return "parasite_pain"; }
+        public String getID() {
+            return "parasite_pain";
+        }
+
         public void pain(edict_t self, edict_t other, float kick, int damage) {
             if (self.health < (self.max_health / 2))
                 self.s.skinnum = 1;
@@ -593,10 +601,13 @@ public class M_Parasite {
     };
 
     static EntThinkAdapter parasite_drain_attack = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_drain_attack"; }
+        public String getID() {
+            return "parasite_drain_attack";
+        }
+
         public boolean think(edict_t self) {
-            float[] offset = { 0, 0, 0 }, start = { 0, 0, 0 }, f = { 0, 0, 0 }, r = {
-                    0, 0, 0 }, end = { 0, 0, 0 }, dir = { 0, 0, 0 };
+            float[] offset = {0, 0, 0}, start = {0, 0, 0}, f = {0, 0, 0}, r = {
+                    0, 0, 0}, end = {0, 0, 0}, dir = {0, 0, 0};
             trace_t tr;
             int damage;
 
@@ -647,7 +658,7 @@ public class M_Parasite {
         }
     };
 
-    static mframe_t parasite_frames_drain[] = new mframe_t[] {
+    static mframe_t parasite_frames_drain[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, parasite_launch),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 15, parasite_drain_attack),
@@ -666,12 +677,12 @@ public class M_Parasite {
             new mframe_t(GameAI.ai_charge, -2, null),
             new mframe_t(GameAI.ai_charge, -2, null),
             new mframe_t(GameAI.ai_charge, -3, null),
-            new mframe_t(GameAI.ai_charge, 0, null) };
+            new mframe_t(GameAI.ai_charge, 0, null)};
 
     static mmove_t parasite_move_drain = new mmove_t(FRAME_drain01,
             FRAME_drain18, parasite_frames_drain, parasite_start_run);
 
-    static mframe_t parasite_frames_break[] = new mframe_t[] {
+    static mframe_t parasite_frames_break[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, -3, null),
             new mframe_t(GameAI.ai_charge, 1, null),
@@ -704,7 +715,7 @@ public class M_Parasite {
             new mframe_t(GameAI.ai_charge, 11, null),
             new mframe_t(GameAI.ai_charge, -2, null),
             new mframe_t(GameAI.ai_charge, -5, null),
-            new mframe_t(GameAI.ai_charge, 1, null) };
+            new mframe_t(GameAI.ai_charge, 1, null)};
 
     static mmove_t parasite_move_break = new mmove_t(FRAME_break01,
             FRAME_break32, parasite_frames_break, parasite_start_run);
@@ -714,7 +725,10 @@ public class M_Parasite {
      */
 
     static EntThinkAdapter parasite_attack = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_attack"; }
+        public String getID() {
+            return "parasite_attack";
+        }
+
         public boolean think(edict_t self) {
             //	if (random() <= 0.2)
             //		self.monsterinfo.currentmove = &parasite_move_break;
@@ -729,7 +743,10 @@ public class M_Parasite {
      */
 
     static EntThinkAdapter parasite_dead = new EntThinkAdapter() {
-    	public String getID(){ return "parasite_dead"; }
+        public String getID() {
+            return "parasite_dead";
+        }
+
         public boolean think(edict_t self) {
             Math3D.VectorSet(self.mins, -16, -16, -24);
             Math3D.VectorSet(self.maxs, 16, 16, -8);
@@ -741,29 +758,32 @@ public class M_Parasite {
         }
     };
 
-    static mframe_t parasite_frames_death[] = new mframe_t[] {
+    static mframe_t parasite_frames_death[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t parasite_move_death = new mmove_t(FRAME_death101,
             FRAME_death107, parasite_frames_death, parasite_dead);
 
     static EntDieAdapter parasite_die = new EntDieAdapter() {
-    	public String getID(){ return "parasite_die"; }
+        public String getID() {
+            return "parasite_die";
+        }
+
         public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
+                        int damage, float[] point) {
             int n;
 
             // check for gib
             if (self.health <= self.gib_health) {
                 GameBase.gi
                         .sound(self, Defines.CHAN_VOICE, GameBase.gi
-                                .soundindex("misc/udeath.wav"), 1,
+                                        .soundindex("misc/udeath.wav"), 1,
                                 Defines.ATTN_NORM, 0);
                 for (n = 0; n < 2; n++)
                     GameMisc.ThrowGib(self, "models/objects/gibs/bone/tris.md2",
@@ -800,7 +820,10 @@ public class M_Parasite {
      */
 
     public static EntThinkAdapter SP_monster_parasite = new EntThinkAdapter() {
-    	public String getID(){ return "SP_monster_parasite"; }
+        public String getID() {
+            return "SP_monster_parasite";
+        }
+
         public boolean think(edict_t self) {
             if (GameBase.deathmatch.value != 0) {
                 GameUtil.G_FreeEdict(self);
@@ -852,7 +875,7 @@ public class M_Parasite {
     };
 
     static boolean parasite_drain_attack_ok(float[] start, float[] end) {
-        float[] dir = { 0, 0, 0 }, angles = { 0, 0, 0 };
+        float[] dir = {0, 0, 0}, angles = {0, 0, 0};
 
         // check for max distance
         Math3D.VectorSubtract(start, end, dir);

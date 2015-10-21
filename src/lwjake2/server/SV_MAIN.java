@@ -20,19 +20,8 @@ package lwjake2.server;
 
 import lwjake2.Defines;
 import lwjake2.Globals;
-import lwjake2.game.Cmd;
-import lwjake2.game.GameBase;
-import lwjake2.game.Info;
-import lwjake2.game.PlayerClient;
-import lwjake2.game.cvar_t;
-import lwjake2.game.edict_t;
-import lwjake2.qcommon.Com;
-import lwjake2.qcommon.Cvar;
-import lwjake2.qcommon.FS;
-import lwjake2.qcommon.MSG;
-import lwjake2.qcommon.Netchan;
-import lwjake2.qcommon.SZ;
-import lwjake2.qcommon.netadr_t;
+import lwjake2.game.*;
+import lwjake2.qcommon.*;
 import lwjake2.sys.NET;
 import lwjake2.sys.Timer;
 import lwjake2.util.Lib;
@@ -41,17 +30,15 @@ import java.io.IOException;
 
 public class SV_MAIN {
 
-	/** Address of group servers. */ 
+    /**
+     * Send a message to the master every few minutes to let it know we are
+     * alive, and log information.
+     */
+    public static final int HEARTBEAT_SECONDS = 300;
+    /**
+     * Address of group servers.
+     */
     public static netadr_t master_adr[] = new netadr_t[Defines.MAX_MASTERS];
-                                                                            
-                                                                            
-                                                                            
-    static {
-        for (int i = 0; i < Defines.MAX_MASTERS; i++) {
-            master_adr[i] = new netadr_t();
-        }
-    }
-
     public static client_t sv_client; // current client
 
     public static cvar_t sv_paused;
@@ -63,7 +50,7 @@ public class SV_MAIN {
     public static cvar_t timeout; // seconds without any message
 
     public static cvar_t zombietime; // seconds to sink messages after
-                                     // disconnect
+    // disconnect
 
     public static cvar_t rcon_password; // password for remote server commands
 
@@ -80,7 +67,7 @@ public class SV_MAIN {
     public static cvar_t sv_airaccelerate;
 
     public static cvar_t sv_noreload; // don't reload level state when
-                                      // reentering
+    // reentering
 
     public static cvar_t maxclients; // FIXME: rename sv_maxclients
 
@@ -91,13 +78,13 @@ public class SV_MAIN {
     public static cvar_t public_server; // should heartbeats be sent
 
     public static cvar_t sv_reconnect_limit; // minimum seconds between connect
-                                             // messages
+    // messages
 
-    /**
-     * Send a message to the master every few minutes to let it know we are
-     * alive, and log information.
-     */
-    public static final int HEARTBEAT_SECONDS = 300;
+    static {
+        for (int i = 0; i < Defines.MAX_MASTERS; i++) {
+            master_adr[i] = new netadr_t();
+        }
+    }
 
     /**
      * Called when the player is totally leaving the server, either willingly or
@@ -129,7 +116,7 @@ public class SV_MAIN {
      * CONNECTIONLESS COMMANDS
      * 
      * ==============================================================================*/
-     
+
     /**
      * Builds the string that is sent as heartbeats and status replies.
      */
@@ -172,7 +159,7 @@ public class SV_MAIN {
     }
 
     /**
-     *  SVC_Ack
+     * SVC_Ack
      */
     public static void SVC_Ack() {
         Com.Printf("Ping acknowledge from " + NET.AdrToString(Globals.net_from)
@@ -216,7 +203,7 @@ public class SV_MAIN {
         Netchan.OutOfBandPrint(Defines.NS_SERVER, Globals.net_from, "ack");
     }
 
-    /** 
+    /**
      * Returns a challenge number that can be used in a subsequent
      * client_connect command. We do this to prevent denial of service attacks
      * that flood the server with invalid connection IPs. With a challenge, they
@@ -358,22 +345,21 @@ public class SV_MAIN {
      * Initializes player structures after successfull connection.
      */
     public static void gotnewcl(int i, int challenge, String userinfo,
-            netadr_t adr, int qport) {
+                                netadr_t adr, int qport) {
         // build a new connection
         // accept the new client
         // this is the only place a client_t is ever initialized
 
         SV_MAIN.sv_client = SV_INIT.svs.clients[i];
-        
+
         int edictnum = i + 1;
-        
+
         edict_t ent = GameBase.g_edicts[edictnum];
         SV_INIT.svs.clients[i].edict = ent;
-        
+
         // save challenge for checksumming
         SV_INIT.svs.clients[i].challenge = challenge;
-        
-        
+
 
         // get the game a chance to reject this connection or modify the
         // userinfo
@@ -403,15 +389,15 @@ public class SV_MAIN {
         SZ.Init(SV_INIT.svs.clients[i].datagram,
                 SV_INIT.svs.clients[i].datagram_buf,
                 SV_INIT.svs.clients[i].datagram_buf.length);
-        
+
         SV_INIT.svs.clients[i].datagram.allowoverflow = true;
         SV_INIT.svs.clients[i].lastmessage = SV_INIT.svs.realtime; // don't timeout
         SV_INIT.svs.clients[i].lastconnect = SV_INIT.svs.realtime;
         Com.DPrintf("new client added.\n");
     }
 
-    
-    /** 
+
+    /**
      * Checks if the rcon password is corect.
      */
     public static int Rcon_Validate() {
@@ -483,7 +469,7 @@ public class SV_MAIN {
         Cmd.TokenizeString(s.toCharArray(), false);
 
         c = Cmd.Argv(0);
-        
+
         //for debugging purposes 
         //Com.Printf("Packet " + NET.AdrToString(Netchan.net_from) + " : " + c + "\n");
         //Com.Printf(Lib.hexDump(net_message.data, 64, false) + "\n");
@@ -622,7 +608,7 @@ public class SV_MAIN {
      * If a packet has not been received from a client for timeout.value
      * seconds, drop the conneciton. Server frames are used instead of realtime
      * to avoid dropping the local client while debugging.
-     * 
+     * <p/>
      * When a client is normally dropped, the client_t goes into a zombie state
      * for a few seconds to make sure any final reliable message gets resent if
      * necessary.
@@ -658,7 +644,7 @@ public class SV_MAIN {
 
     /**
      * SV_PrepWorldFrame
-     * 
+     * <p/>
      * This has to be done before the world logic, because player processing
      * happens outside RunWorldFrame.
      */
@@ -798,7 +784,7 @@ public class SV_MAIN {
                         SV_MAIN.master_adr[i], "heartbeat\n" + string);
             }
     }
-    
+
 
     /**
      * Master_Shutdown, Informs all masters that this server is going down.
@@ -824,7 +810,7 @@ public class SV_MAIN {
                         SV_MAIN.master_adr[i], "shutdown");
             }
     }
-    
+
 
     /**
      * Pull specific info from a newly changed userinfo string into a more C

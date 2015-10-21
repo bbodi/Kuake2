@@ -20,19 +20,19 @@ package lwjake2.sys;
 
 class StandardTimer extends Timer {
 
-	private long base;
-	
-	StandardTimer() {
-		base = System.currentTimeMillis();
-	}
-	
-	public long currentTimeMillis() {
-		long time = System.currentTimeMillis();
-		long delta = time - base;
-		if (delta < 0) {
-			delta += Long.MAX_VALUE + 1;
-		}
-		return delta;
-	}
+    private long base;
+
+    StandardTimer() {
+        base = System.currentTimeMillis();
+    }
+
+    public long currentTimeMillis() {
+        long time = System.currentTimeMillis();
+        long delta = time - base;
+        if (delta < 0) {
+            delta += Long.MAX_VALUE + 1;
+        }
+        return delta;
+    }
 
 }

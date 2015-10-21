@@ -36,7 +36,7 @@ public class netadr_t {
         this.type = Defines.NA_LOOPBACK;
         this.port = 0; // any
         try {
-        	// localhost / 127.0.0.1
+            // localhost / 127.0.0.1
             this.ip = InetAddress.getByName(null).getAddress();
         } catch (UnknownHostException e) {
         }
@@ -44,15 +44,15 @@ public class netadr_t {
 
     public InetAddress getInetAddress() throws UnknownHostException {
         switch (type) {
-        case Defines.NA_BROADCAST:
-            return InetAddress.getByName("255.255.255.255");
-        case Defines.NA_LOOPBACK:
-        	// localhost / 127.0.0.1
-            return InetAddress.getByName(null);
-        case Defines.NA_IP:
-            return InetAddress.getByAddress(ip);
-        default:
-            return null;
+            case Defines.NA_BROADCAST:
+                return InetAddress.getByName("255.255.255.255");
+            case Defines.NA_LOOPBACK:
+                // localhost / 127.0.0.1
+                return InetAddress.getByName(null);
+            case Defines.NA_IP:
+                return InetAddress.getByAddress(ip);
+            default:
+                return null;
         }
     }
 

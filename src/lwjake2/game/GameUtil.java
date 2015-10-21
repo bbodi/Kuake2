@@ -27,6 +27,158 @@ import lwjake2.util.Math3D;
 
 public class GameUtil {
 
+    public static EntThinkAdapter Think_Delay = new EntThinkAdapter() {
+        public String getID() {
+            return "Think_Delay";
+        }
+
+        public boolean think(edict_t ent) {
+            G_UseTargets(ent, ent.activator);
+            G_FreeEdict(ent);
+            return true;
+        }
+    };
+    public static EntThinkAdapter G_FreeEdictA = new EntThinkAdapter() {
+        public String getID() {
+            return "G_FreeEdictA";
+        }
+
+        public boolean think(edict_t ent) {
+            G_FreeEdict(ent);
+            return false;
+        }
+    };
+    public static EntThinkAdapter M_CheckAttack = new EntThinkAdapter() {
+        public String getID() {
+            return "M_CheckAttack";
+        }
+
+        public boolean think(edict_t self) {
+            float[] spot1 = {0, 0, 0};
+
+            float[] spot2 = {0, 0, 0};
+            float chance;
+            trace_t tr;
+
+            if (self.enemy.health > 0) {
+                // see if any entities are in the way of the shot
+                Math3D.VectorCopy(self.s.origin, spot1);
+                spot1[2] += self.viewheight;
+                Math3D.VectorCopy(self.enemy.s.origin, spot2);
+                spot2[2] += self.enemy.viewheight;
+
+                tr = GameBase.gi.trace(spot1, null, null, spot2, self,
+                        Defines.CONTENTS_SOLID | Defines.CONTENTS_MONSTER
+                                | Defines.CONTENTS_SLIME
+                                | Defines.CONTENTS_LAVA
+                                | Defines.CONTENTS_WINDOW);
+
+                // do we have a clear shot?
+                if (tr.ent != self.enemy)
+                    return false;
+            }
+
+            // melee attack
+            if (GameAI.enemy_range == Defines.RANGE_MELEE) {
+                // don't always melee in easy mode
+                if (GameBase.skill.value == 0 && (Lib.rand() & 3) != 0)
+                    return false;
+                if (self.monsterinfo.melee != null)
+                    self.monsterinfo.attack_state = Defines.AS_MELEE;
+                else
+                    self.monsterinfo.attack_state = Defines.AS_MISSILE;
+                return true;
+            }
+
+            // missile attack
+            if (self.monsterinfo.attack == null)
+                return false;
+
+            if (GameBase.level.time < self.monsterinfo.attack_finished)
+                return false;
+
+            if (GameAI.enemy_range == Defines.RANGE_FAR)
+                return false;
+
+            if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0) {
+                chance = 0.4f;
+            } else if (GameAI.enemy_range == Defines.RANGE_MELEE) {
+                chance = 0.2f;
+            } else if (GameAI.enemy_range == Defines.RANGE_NEAR) {
+                chance = 0.1f;
+            } else if (GameAI.enemy_range == Defines.RANGE_MID) {
+                chance = 0.02f;
+            } else {
+                return false;
+            }
+
+            if (GameBase.skill.value == 0)
+                chance *= 0.5;
+            else if (GameBase.skill.value >= 2)
+                chance *= 2;
+
+            if (Lib.random() < chance) {
+                self.monsterinfo.attack_state = Defines.AS_MISSILE;
+                self.monsterinfo.attack_finished = GameBase.level.time + 2
+                        * Lib.random();
+                return true;
+            }
+
+            if ((self.flags & Defines.FL_FLY) != 0) {
+                if (Lib.random() < 0.3f)
+                    self.monsterinfo.attack_state = Defines.AS_SLIDING;
+                else
+                    self.monsterinfo.attack_state = Defines.AS_STRAIGHT;
+            }
+
+            return false;
+
+        }
+    };
+    static EntThinkAdapter MegaHealth_think = new EntThinkAdapter() {
+        public String getID() {
+            return "MegaHealth_think";
+        }
+
+        public boolean think(edict_t self) {
+            if (self.owner.health > self.owner.max_health) {
+                self.nextthink = GameBase.level.time + 1;
+                self.owner.health -= 1;
+                return false;
+            }
+
+            if (!((self.spawnflags & Defines.DROPPED_ITEM) != 0)
+                    && (GameBase.deathmatch.value != 0))
+                GameItems.SetRespawn(self, 20);
+            else
+                G_FreeEdict(self);
+
+            return false;
+        }
+    };
+    static EntUseAdapter monster_use = new EntUseAdapter() {
+        public String getID() {
+            return "monster_use";
+        }
+
+        public void use(edict_t self, edict_t other, edict_t activator) {
+            if (self.enemy != null)
+                return;
+            if (self.health <= 0)
+                return;
+            if ((activator.flags & Defines.FL_NOTARGET) != 0)
+                return;
+            if ((null == activator.client)
+                    && 0 == (activator.monsterinfo.aiflags & Defines.AI_GOOD_GUY))
+                return;
+
+            // delay reaction so if the monster is teleported, its sound is
+            // still heard
+            self.enemy = activator;
+            FoundTarget(self);
+        }
+    };
+
     public static void checkClassname(edict_t ent) {
 
         if (ent.classname == null) {
@@ -34,17 +186,17 @@ public class GameUtil {
         }
     }
 
-    /** 
+    /**
      * Use the targets.
-     * 
+     * <p/>
      * The global "activator" should be set to the entity that initiated the
      * firing.
-     * 
+     * <p/>
      * If self.delay is set, a DelayedUse entity will be created that will
      * actually do the SUB_UseTargets after that many seconds have passed.
-     * 
+     * <p/>
      * Centerprints any self.message to the activator.
-     * 
+     * <p/>
      * Search for (string)targetname in all entities that match
      * (string)self.target and call their .use function
      */
@@ -108,7 +260,7 @@ public class GameUtil {
                 // doors fire area portals in a specific way
                 if (Lib.Q_stricmp("func_areaportal", t.classname) == 0
                         && (Lib.Q_stricmp("func_door", ent.classname) == 0 || Lib
-                                .Q_stricmp("func_door_rotating", ent.classname) == 0))
+                        .Q_stricmp("func_door_rotating", ent.classname) == 0))
                     continue;
 
                 if (t == ent) {
@@ -195,7 +347,6 @@ public class GameUtil {
         GameBase.g_edicts[i] = new edict_t(i);
     }
 
-
     /**
      * Kills all entities that would touch the proposed new positioning of ent.
      * Ent should be unlinked before calling this!
@@ -223,8 +374,8 @@ public class GameUtil {
         return true; // all clear
     }
 
-    /** 
-     * Returns true, if two edicts are on the same team. 
+    /**
+     * Returns true, if two edicts are on the same team.
      */
     public static boolean OnSameTeam(edict_t ent1, edict_t ent2) {
         if (0 == ((int) (GameBase.dmflags.value) & (Defines.DF_MODELTEAMS | Defines.DF_SKINTEAMS)))
@@ -235,9 +386,9 @@ public class GameUtil {
         return false;
     }
 
-    /** 
-     * Returns the team string of an entity 
-     * with respect to rteam_by_model and team_by_skin. 
+    /**
+     * Returns the team string of an entity
+     * with respect to rteam_by_model and team_by_skin.
      */
     static String ClientTeam(edict_t ent) {
         String value;
@@ -277,7 +428,7 @@ public class GameUtil {
      * triggered by damage.
      */
     public static int range(edict_t self, edict_t other) {
-        float[] v = { 0, 0, 0 };
+        float[] v = {0, 0, 0};
         float len;
 
         Math3D.VectorSubtract(self.s.origin, other.s.origin, v);
@@ -299,9 +450,9 @@ public class GameUtil {
      * Returns true if the entity is in front (in sight) of self
      */
     public static boolean infront(edict_t self, edict_t other) {
-        float[] vec = { 0, 0, 0 };
+        float[] vec = {0, 0, 0};
         float dot;
-        float[] forward = { 0, 0, 0 };
+        float[] forward = {0, 0, 0};
 
         Math3D.AngleVectors(self.s.angles, forward, null, null);
         Math3D.VectorSubtract(other.s.origin, self.s.origin, vec);
@@ -317,8 +468,8 @@ public class GameUtil {
      * Returns 1 if the entity is visible to self, even if not infront().
      */
     public static boolean visible(edict_t self, edict_t other) {
-        float[] spot1 = { 0, 0, 0 };
-        float[] spot2 = { 0, 0, 0 };
+        float[] spot1 = {0, 0, 0};
+        float[] spot2 = {0, 0, 0};
         trace_t trace;
 
         Math3D.VectorCopy(self.s.origin, spot1);
@@ -335,15 +486,15 @@ public class GameUtil {
 
     /**
      * Finds a target.
-     * 
+     * <p/>
      * Self is currently not attacking anything, so try to find a target
-     * 
+     * <p/>
      * Returns TRUE if an enemy was sighted
-     * 
+     * <p/>
      * When a player fires a missile, the point of impact becomes a fakeplayer
      * so that monsters that see the impact will respond as if they had seen the
      * player.
-     * 
+     * <p/>
      * To avoid spending too much time, only a single client (or fakeclient) is
      * checked each frame. This means multi player games will have slightly
      * slower noticing monsters.
@@ -359,7 +510,7 @@ public class GameUtil {
                 if (self.goalentity.classname.equals("target_actor"))
                     return false;
             }
-            
+
             //FIXME look for monsters?
             return false;
         }
@@ -377,9 +528,9 @@ public class GameUtil {
         heardit = false;
         if ((GameBase.level.sight_entity_framenum >= (GameBase.level.framenum - 1))
                 && 0 == (self.spawnflags & 1)) {
-            client = GameBase.level.sight_entity;           
-            if (client.enemy == self.enemy)             
-                return false;            
+            client = GameBase.level.sight_entity;
+            if (client.enemy == self.enemy)
+                return false;
         } else if (GameBase.level.sound_entity_framenum >= (GameBase.level.framenum - 1)) {
             client = GameBase.level.sound_entity;
             heardit = true;
@@ -420,26 +571,26 @@ public class GameUtil {
 
             // this is where we would check invisibility
             // is client in an spot too dark to be seen?
-            
+
             if (client.light_level <= 5)
                 return false;
 
-            if (!visible(self, client)) 
+            if (!visible(self, client))
                 return false;
-           
+
 
             if (r == Defines.RANGE_NEAR) {
                 if (client.show_hostile < GameBase.level.time
-                        && !infront(self, client))               
-                    return false;                
+                        && !infront(self, client))
+                    return false;
             } else if (r == Defines.RANGE_MID) {
-                if (!infront(self, client)) 
-                    return false;               
+                if (!infront(self, client))
+                    return false;
             }
 
             if (client == self.enemy)
                 return true; // JDC false;
-            
+
             self.enemy = client;
 
             if (!self.enemy.classname.equals("player_noise")) {
@@ -455,7 +606,7 @@ public class GameUtil {
             }
         } else {
             // heard it
-            float[] temp = { 0, 0, 0 };
+            float[] temp = {0, 0, 0};
 
             if ((self.spawnflags & 1) != 0) {
                 if (!visible(self, client))
@@ -482,13 +633,13 @@ public class GameUtil {
 
             // hunt the sound for a bit; hopefully find the real player
             self.monsterinfo.aiflags |= Defines.AI_SOUND_TARGET;
-            
+
             if (client == self.enemy)
                 return true; // JDC false;
-             
-            self.enemy = client;             
+
+            self.enemy = client;
         }
-        
+
         // got one
         FoundTarget(self);
 
@@ -508,7 +659,7 @@ public class GameUtil {
         }
 
         self.show_hostile = (int) GameBase.level.time + 1; // wake up other
-                                                           // monsters
+        // monsters
 
         Math3D.VectorCopy(self.enemy.s.origin, self.monsterinfo.last_sighting);
         self.monsterinfo.trail_time = GameBase.level.time;
@@ -540,147 +691,4 @@ public class GameUtil {
         // run for it
         self.monsterinfo.run.think(self);
     }
-
-    public static EntThinkAdapter Think_Delay = new EntThinkAdapter() {
-    	public String getID() { return "Think_Delay"; }
-        public boolean think(edict_t ent) {
-            G_UseTargets(ent, ent.activator);
-            G_FreeEdict(ent);
-            return true;
-        }
-    };
-
-    public static EntThinkAdapter G_FreeEdictA = new EntThinkAdapter() {
-    	public String getID() { return "G_FreeEdictA"; }
-        public boolean think(edict_t ent) {
-            G_FreeEdict(ent);
-            return false;
-        }
-    };
-
-    static EntThinkAdapter MegaHealth_think = new EntThinkAdapter() {
-    	public String getID() { return "MegaHealth_think"; }
-        public boolean think(edict_t self) {
-            if (self.owner.health > self.owner.max_health) {
-                self.nextthink = GameBase.level.time + 1;
-                self.owner.health -= 1;
-                return false;
-            }
-
-            if (!((self.spawnflags & Defines.DROPPED_ITEM) != 0)
-                    && (GameBase.deathmatch.value != 0))
-                GameItems.SetRespawn(self, 20);
-            else
-                G_FreeEdict(self);
-
-            return false;
-        }
-    };
-
-
-    public static EntThinkAdapter M_CheckAttack = new EntThinkAdapter() {
-    	public String getID() { return "M_CheckAttack"; }
-
-        public boolean think(edict_t self) {
-            float[] spot1 = { 0, 0, 0 };
-
-            float[] spot2 = { 0, 0, 0 };
-            float chance;
-            trace_t tr;
-
-            if (self.enemy.health > 0) {
-                // see if any entities are in the way of the shot
-                Math3D.VectorCopy(self.s.origin, spot1);
-                spot1[2] += self.viewheight;
-                Math3D.VectorCopy(self.enemy.s.origin, spot2);
-                spot2[2] += self.enemy.viewheight;
-
-                tr = GameBase.gi.trace(spot1, null, null, spot2, self,
-                        Defines.CONTENTS_SOLID | Defines.CONTENTS_MONSTER
-                                | Defines.CONTENTS_SLIME
-                                | Defines.CONTENTS_LAVA
-                                | Defines.CONTENTS_WINDOW);
-
-                // do we have a clear shot?
-                if (tr.ent != self.enemy)
-                    return false;
-            }
-
-            // melee attack
-            if (GameAI.enemy_range == Defines.RANGE_MELEE) {
-                // don't always melee in easy mode
-                if (GameBase.skill.value == 0 && (Lib.rand() & 3) != 0)
-                    return false;
-                if (self.monsterinfo.melee != null)
-                    self.monsterinfo.attack_state = Defines.AS_MELEE;
-                else
-                    self.monsterinfo.attack_state = Defines.AS_MISSILE;
-                return true;
-            }
-
-            // missile attack
-            if (self.monsterinfo.attack == null)
-                return false;
-
-            if (GameBase.level.time < self.monsterinfo.attack_finished)
-                return false;
-
-            if (GameAI.enemy_range == Defines.RANGE_FAR)
-                return false;
-
-            if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0) {
-                chance = 0.4f;
-            } else if (GameAI.enemy_range == Defines.RANGE_MELEE) {
-                chance = 0.2f;
-            } else if (GameAI.enemy_range == Defines.RANGE_NEAR) {
-                chance = 0.1f;
-            } else if (GameAI.enemy_range == Defines.RANGE_MID) {
-                chance = 0.02f;
-            } else {
-                return false;
-            }
-
-            if (GameBase.skill.value == 0)
-                chance *= 0.5;
-            else if (GameBase.skill.value >= 2)
-                chance *= 2;
-
-            if (Lib.random() < chance) {
-                self.monsterinfo.attack_state = Defines.AS_MISSILE;
-                self.monsterinfo.attack_finished = GameBase.level.time + 2
-                        * Lib.random();
-                return true;
-            }
-
-            if ((self.flags & Defines.FL_FLY) != 0) {
-                if (Lib.random() < 0.3f)
-                    self.monsterinfo.attack_state = Defines.AS_SLIDING;
-                else
-                    self.monsterinfo.attack_state = Defines.AS_STRAIGHT;
-            }
-
-            return false;
-
-        }
-    };
-
-    static EntUseAdapter monster_use = new EntUseAdapter() {
-    	public String getID() { return "monster_use"; }
-        public void use(edict_t self, edict_t other, edict_t activator) {
-            if (self.enemy != null)
-                return;
-            if (self.health <= 0)
-                return;
-            if ((activator.flags & Defines.FL_NOTARGET) != 0)
-                return;
-            if ((null == activator.client)
-                    && 0 == (activator.monsterinfo.aiflags & Defines.AI_GOOD_GUY))
-                return;
-
-            // delay reaction so if the monster is teleported, its sound is
-            // still heard
-            self.enemy = activator;
-            FoundTarget(self);
-        }
-    };
 }

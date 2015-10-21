@@ -24,68 +24,71 @@ import java.util.Vector;
 
 /**
  * Renderer
- * 
+ *
  * @author cwei
  */
 public class Renderer {
 
-	static Vector<Ref> drivers = new Vector<Ref>(1);
+    static Vector<Ref> drivers = new Vector<Ref>(1);
 
-	static {
-		try {
-			try {
-				Class.forName("org.lwjgl.opengl.GL11");
-				Class.forName("lwjake2.render.LWJGLRenderer");
-			} catch (ClassNotFoundException e) {
-				// ignore the lwjgl driver if runtime not in classpath
-			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	};
+    static {
+        try {
+            try {
+                Class.forName("org.lwjgl.opengl.GL11");
+                Class.forName("lwjake2.render.LWJGLRenderer");
+            } catch (ClassNotFoundException e) {
+                // ignore the lwjgl driver if runtime not in classpath
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
 
-	public static void register(Ref impl) {
-		if (impl == null) {
-			throw new IllegalArgumentException("Ref implementation can't be null");
-		}
-		if (!drivers.contains(impl)) {
-			drivers.add(impl);
-		}
-	}
+    ;
 
-	/**
-	 * Factory method to get the Renderer implementation.
-	 * @return refexport_t (Renderer singleton)
-	 */
-	public static refexport_t getDriver(String driverName) {
-		// find a driver
-		Ref driver = null;
-		int count = drivers.size();
-		for (int i = 0; i < count; i++) {
-			driver = drivers.get(i);
-			if (driver.getName().equals(driverName)) {
-				return driver.GetRefAPI();
-			}
-		}
-		// null if driver not found
-		return null;
-	}
-	
-	public static String getDefaultName() {
-		return (drivers.isEmpty()) ? null : (drivers.firstElement()).getName();
-	}
+    public static void register(Ref impl) {
+        if (impl == null) {
+            throw new IllegalArgumentException("Ref implementation can't be null");
+        }
+        if (!drivers.contains(impl)) {
+            drivers.add(impl);
+        }
+    }
 
-	public static String getPreferedName() {
-		return (drivers.isEmpty()) ? null :  (drivers.lastElement()).getName();
-	}
+    /**
+     * Factory method to get the Renderer implementation.
+     *
+     * @return refexport_t (Renderer singleton)
+     */
+    public static refexport_t getDriver(String driverName) {
+        // find a driver
+        Ref driver = null;
+        int count = drivers.size();
+        for (int i = 0; i < count; i++) {
+            driver = drivers.get(i);
+            if (driver.getName().equals(driverName)) {
+                return driver.GetRefAPI();
+            }
+        }
+        // null if driver not found
+        return null;
+    }
 
-	public static String[] getDriverNames() {
-		if (drivers.isEmpty()) return null;
-		int count = drivers.size();
-		String[] names = new String[count];
-		for (int i = 0; i < count; i++) {
-			names[i] = (drivers.get(i)).getName();
-		}
-		return names;
-	}
+    public static String getDefaultName() {
+        return (drivers.isEmpty()) ? null : (drivers.firstElement()).getName();
+    }
+
+    public static String getPreferedName() {
+        return (drivers.isEmpty()) ? null : (drivers.lastElement()).getName();
+    }
+
+    public static String[] getDriverNames() {
+        if (drivers.isEmpty()) return null;
+        int count = drivers.size();
+        String[] names = new String[count];
+        for (int i = 0; i < count; i++) {
+            names[i] = (drivers.get(i)).getName();
+        }
+        return names;
+    }
 }

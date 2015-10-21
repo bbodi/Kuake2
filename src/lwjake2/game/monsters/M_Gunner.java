@@ -19,20 +19,7 @@
 package lwjake2.game.monsters;
 
 import lwjake2.Defines;
-import lwjake2.game.EntDieAdapter;
-import lwjake2.game.EntDodgeAdapter;
-import lwjake2.game.EntInteractAdapter;
-import lwjake2.game.EntPainAdapter;
-import lwjake2.game.EntThinkAdapter;
-import lwjake2.game.GameAI;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameMisc;
-import lwjake2.game.GameUtil;
-import lwjake2.game.Monster;
-import lwjake2.game.edict_t;
-import lwjake2.game.mframe_t;
-import lwjake2.game.mmove_t;
-import lwjake2.game.monsters.M_Flash;
+import lwjake2.game.*;
 import lwjake2.util.Lib;
 import lwjake2.util.Math3D;
 
@@ -474,7 +461,10 @@ public class M_Gunner {
     static int sound_sight;
 
     static EntThinkAdapter gunner_idlesound = new EntThinkAdapter() {
-    	public String getID() { return "gunner_idlesound"; }
+        public String getID() {
+            return "gunner_idlesound";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_idle, 1,
                     Defines.ATTN_IDLE, 0);
@@ -483,7 +473,10 @@ public class M_Gunner {
     };
 
     static EntInteractAdapter gunner_sight = new EntInteractAdapter() {
-    	public String getID() { return "gunner_sight"; }
+        public String getID() {
+            return "gunner_sight";
+        }
+
         public boolean interact(edict_t self, edict_t other) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_sight, 1,
                     Defines.ATTN_NORM, 0);
@@ -492,7 +485,10 @@ public class M_Gunner {
     };
 
     static EntThinkAdapter gunner_search = new EntThinkAdapter() {
-    	public String getID() { return "gunner_search"; }
+        public String getID() {
+            return "gunner_search";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_search, 1,
                     Defines.ATTN_NORM, 0);
@@ -500,7 +496,7 @@ public class M_Gunner {
         }
     };
 
-    static mframe_t gunner_frames_fidget[] = new mframe_t[] {
+    static mframe_t gunner_frames_fidget[] = new mframe_t[]{
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
@@ -549,21 +545,14 @@ public class M_Gunner {
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null) };
-
-    static EntThinkAdapter gunner_stand = new EntThinkAdapter() {
-    	public String getID() { return "gunner_stand"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = gunner_move_stand;
-            return true;
-        }
-    };
-
+            new mframe_t(GameAI.ai_stand, 0, null)};
     static mmove_t gunner_move_fidget = new mmove_t(FRAME_stand31,
             FRAME_stand70, gunner_frames_fidget, gunner_stand);
-
     static EntThinkAdapter gunner_fidget = new EntThinkAdapter() {
-    	public String getID() { return "gunner_fidget"; }
+        public String getID() {
+            return "gunner_fidget";
+        }
+
         public boolean think(edict_t self) {
             if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
                 return true;
@@ -572,8 +561,7 @@ public class M_Gunner {
             return true;
         }
     };
-
-    static mframe_t gunner_frames_stand[] = new mframe_t[] {
+    static mframe_t gunner_frames_stand[] = new mframe_t[]{
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
@@ -603,12 +591,20 @@ public class M_Gunner {
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, gunner_fidget) };
-
+            new mframe_t(GameAI.ai_stand, 0, gunner_fidget)};
     static mmove_t gunner_move_stand = new mmove_t(FRAME_stand01,
             FRAME_stand30, gunner_frames_stand, null);
+    static EntThinkAdapter gunner_stand = new EntThinkAdapter() {
+        public String getID() {
+            return "gunner_stand";
+        }
 
-    static mframe_t gunner_frames_walk[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = gunner_move_stand;
+            return true;
+        }
+    };
+    static mframe_t gunner_frames_walk[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 0, null),
             new mframe_t(GameAI.ai_walk, 3, null),
             new mframe_t(GameAI.ai_walk, 4, null),
@@ -621,20 +617,23 @@ public class M_Gunner {
             new mframe_t(GameAI.ai_walk, 7, null),
             new mframe_t(GameAI.ai_walk, 5, null),
             new mframe_t(GameAI.ai_walk, 7, null),
-            new mframe_t(GameAI.ai_walk, 4, null) };
+            new mframe_t(GameAI.ai_walk, 4, null)};
 
     static mmove_t gunner_move_walk = new mmove_t(FRAME_walk07, FRAME_walk19,
             gunner_frames_walk, null);
 
     static EntThinkAdapter gunner_walk = new EntThinkAdapter() {
-    	public String getID() { return "gunner_walk"; }
+        public String getID() {
+            return "gunner_walk";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.currentmove = gunner_move_walk;
             return true;
         }
     };
 
-    static mframe_t gunner_frames_run[] = new mframe_t[] {
+    static mframe_t gunner_frames_run[] = new mframe_t[]{
             new mframe_t(GameAI.ai_run, 26, null),
             new mframe_t(GameAI.ai_run, 9, null),
             new mframe_t(GameAI.ai_run, 9, null),
@@ -642,13 +641,16 @@ public class M_Gunner {
             new mframe_t(GameAI.ai_run, 15, null),
             new mframe_t(GameAI.ai_run, 10, null),
             new mframe_t(GameAI.ai_run, 13, null),
-            new mframe_t(GameAI.ai_run, 6, null) };
+            new mframe_t(GameAI.ai_run, 6, null)};
 
     static mmove_t gunner_move_run = new mmove_t(FRAME_run01, FRAME_run08,
             gunner_frames_run, null);
 
     static EntThinkAdapter gunner_run = new EntThinkAdapter() {
-    	public String getID() { return "gunner_run"; }
+        public String getID() {
+            return "gunner_run";
+        }
+
         public boolean think(edict_t self) {
             if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
                 self.monsterinfo.currentmove = gunner_move_stand;
@@ -658,36 +660,39 @@ public class M_Gunner {
         }
     };
 
-    static mframe_t gunner_frames_runandshoot[] = new mframe_t[] {
+    static mframe_t gunner_frames_runandshoot[] = new mframe_t[]{
             new mframe_t(GameAI.ai_run, 32, null),
             new mframe_t(GameAI.ai_run, 15, null),
             new mframe_t(GameAI.ai_run, 10, null),
             new mframe_t(GameAI.ai_run, 18, null),
             new mframe_t(GameAI.ai_run, 8, null),
-            new mframe_t(GameAI.ai_run, 20, null) };
+            new mframe_t(GameAI.ai_run, 20, null)};
 
     static mmove_t gunner_move_runandshoot = new mmove_t(FRAME_runs01,
             FRAME_runs06, gunner_frames_runandshoot, null);
 
     static EntThinkAdapter gunner_runandshoot = new EntThinkAdapter() {
-    	public String getID() { return "gunner_runandshoot"; }
+        public String getID() {
+            return "gunner_runandshoot";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.currentmove = gunner_move_runandshoot;
             return true;
         }
     };
 
-    static mframe_t gunner_frames_pain3[] = new mframe_t[] {
+    static mframe_t gunner_frames_pain3[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, -3, null),
             new mframe_t(GameAI.ai_move, 1, null),
             new mframe_t(GameAI.ai_move, 1, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 1, null) };
+            new mframe_t(GameAI.ai_move, 1, null)};
 
     static mmove_t gunner_move_pain3 = new mmove_t(FRAME_pain301,
             FRAME_pain305, gunner_frames_pain3, gunner_run);
 
-    static mframe_t gunner_frames_pain2[] = new mframe_t[] {
+    static mframe_t gunner_frames_pain2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, -2, null),
             new mframe_t(GameAI.ai_move, 11, null),
             new mframe_t(GameAI.ai_move, 6, null),
@@ -695,12 +700,12 @@ public class M_Gunner {
             new mframe_t(GameAI.ai_move, -1, null),
             new mframe_t(GameAI.ai_move, -7, null),
             new mframe_t(GameAI.ai_move, -2, null),
-            new mframe_t(GameAI.ai_move, -7, null) };
+            new mframe_t(GameAI.ai_move, -7, null)};
 
     static mmove_t gunner_move_pain2 = new mmove_t(FRAME_pain201,
             FRAME_pain208, gunner_frames_pain2, gunner_run);
 
-    static mframe_t gunner_frames_pain1[] = new mframe_t[] {
+    static mframe_t gunner_frames_pain1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 2, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, -5, null),
@@ -718,13 +723,16 @@ public class M_Gunner {
             new mframe_t(GameAI.ai_move, -2, null),
             new mframe_t(GameAI.ai_move, -2, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t gunner_move_pain1 = new mmove_t(FRAME_pain101,
             FRAME_pain118, gunner_frames_pain1, gunner_run);
 
     static EntPainAdapter gunner_pain = new EntPainAdapter() {
-    	public String getID() { return "gunner_pain"; }
+        public String getID() {
+            return "gunner_pain";
+        }
+
         public void pain(edict_t self, edict_t other, float kick, int damage) {
             if (self.health < (self.max_health / 2))
                 self.s.skinnum = 1;
@@ -755,7 +763,10 @@ public class M_Gunner {
     };
 
     static EntThinkAdapter gunner_dead = new EntThinkAdapter() {
-    	public String getID() { return "gunner_dead"; }
+        public String getID() {
+            return "gunner_dead";
+        }
+
         public boolean think(edict_t self) {
             Math3D.VectorSet(self.mins, -16, -16, -24);
             Math3D.VectorSet(self.maxs, 16, 16, -8);
@@ -767,7 +778,7 @@ public class M_Gunner {
         }
     };
 
-    static mframe_t gunner_frames_death[] = new mframe_t[] {
+    static mframe_t gunner_frames_death[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -778,22 +789,25 @@ public class M_Gunner {
             new mframe_t(GameAI.ai_move, 6, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t gunner_move_death = new mmove_t(FRAME_death01,
             FRAME_death11, gunner_frames_death, gunner_dead);
 
     static EntDieAdapter gunner_die = new EntDieAdapter() {
-    	public String getID() { return "gunner_die"; }
+        public String getID() {
+            return "gunner_die";
+        }
+
         public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
+                        int damage, float[] point) {
             int n;
 
             //	check for gib
             if (self.health <= self.gib_health) {
                 GameBase.gi
                         .sound(self, Defines.CHAN_VOICE, GameBase.gi
-                                .soundindex("misc/udeath.wav"), 1,
+                                        .soundindex("misc/udeath.wav"), 1,
                                 Defines.ATTN_NORM, 0);
                 for (n = 0; n < 2; n++)
                     GameMisc.ThrowGib(self, "models/objects/gibs/bone/tris.md2",
@@ -819,28 +833,11 @@ public class M_Gunner {
             self.monsterinfo.currentmove = gunner_move_death;
         }
     };
-
-    static EntThinkAdapter gunner_duck_down = new EntThinkAdapter() {
-    	public String getID() { return "gunner_duck_down"; }
-        public boolean think(edict_t self) {
-            if ((self.monsterinfo.aiflags & Defines.AI_DUCKED) != 0)
-                return true;
-            self.monsterinfo.aiflags |= Defines.AI_DUCKED;
-            if (GameBase.skill.value >= 2) {
-                if (Lib.random() > 0.5)
-                    GunnerGrenade.think(self);
-            }
-
-            self.maxs[2] -= 32;
-            self.takedamage = Defines.DAMAGE_YES;
-            self.monsterinfo.pausetime = GameBase.level.time + 1;
-            GameBase.gi.linkentity(self);
-            return true;
-        }
-    };
-
     static EntThinkAdapter gunner_duck_hold = new EntThinkAdapter() {
-    	public String getID() { return "gunner_duck_hold"; }
+        public String getID() {
+            return "gunner_duck_hold";
+        }
+
         public boolean think(edict_t self) {
             if (GameBase.level.time >= self.monsterinfo.pausetime)
                 self.monsterinfo.aiflags &= ~Defines.AI_HOLD_FRAME;
@@ -849,9 +846,11 @@ public class M_Gunner {
             return true;
         }
     };
-
     static EntThinkAdapter gunner_duck_up = new EntThinkAdapter() {
-    	public String getID() { return "gunner_duck_up"; }
+        public String getID() {
+            return "gunner_duck_up";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.aiflags &= ~Defines.AI_DUCKED;
             self.maxs[2] += 32;
@@ -860,8 +859,7 @@ public class M_Gunner {
             return true;
         }
     };
-
-    static mframe_t gunner_frames_duck[] = new mframe_t[] {
+    static mframe_t gunner_frames_duck[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 1, gunner_duck_down),
             new mframe_t(GameAI.ai_move, 1, null),
             new mframe_t(GameAI.ai_move, 1, gunner_duck_hold),
@@ -869,13 +867,14 @@ public class M_Gunner {
             new mframe_t(GameAI.ai_move, -1, null),
             new mframe_t(GameAI.ai_move, -1, null),
             new mframe_t(GameAI.ai_move, 0, gunner_duck_up),
-            new mframe_t(GameAI.ai_move, -1, null) };
-
+            new mframe_t(GameAI.ai_move, -1, null)};
     static mmove_t gunner_move_duck = new mmove_t(FRAME_duck01, FRAME_duck08,
             gunner_frames_duck, gunner_run);
-
     static EntDodgeAdapter gunner_dodge = new EntDodgeAdapter() {
-    	public String getID() { return "gunner_dodge"; }
+        public String getID() {
+            return "gunner_dodge";
+        }
+
         public void dodge(edict_t self, edict_t attacker, float eta) {
             if (Lib.random() > 0.25)
                 return;
@@ -886,23 +885,27 @@ public class M_Gunner {
             self.monsterinfo.currentmove = gunner_move_duck;
         }
     };
-
     static EntThinkAdapter gunner_opengun = new EntThinkAdapter() {
-    	public String getID() { return "gunner_opengun"; }
+        public String getID() {
+            return "gunner_opengun";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_open, 1,
                     Defines.ATTN_IDLE, 0);
             return true;
         }
     };
-
     static EntThinkAdapter GunnerFire = new EntThinkAdapter() {
-    	public String getID() { return "GunnerFire"; }
+        public String getID() {
+            return "GunnerFire";
+        }
+
         public boolean think(edict_t self) {
-            float[] start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-            float[] target = { 0, 0, 0 };
-            float[] aim = { 0, 0, 0 };
+            float[] start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+            float[] target = {0, 0, 0};
+            float[] aim = {0, 0, 0};
             int flash_number;
 
             flash_number = Defines.MZ2_GUNNER_MACHINEGUN_1
@@ -927,13 +930,15 @@ public class M_Gunner {
             return true;
         }
     };
-
     static EntThinkAdapter GunnerGrenade = new EntThinkAdapter() {
-    	public String getID() { return "GunnerGrenade"; }
+        public String getID() {
+            return "GunnerGrenade";
+        }
+
         public boolean think(edict_t self) {
-            float[] start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-            float[] aim = { 0, 0, 0 };
+            float[] start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+            float[] aim = {0, 0, 0};
             int flash_number;
 
             if (self.s.frame == FRAME_attak105)
@@ -959,9 +964,113 @@ public class M_Gunner {
             return true;
         }
     };
+    static EntThinkAdapter gunner_duck_down = new EntThinkAdapter() {
+        public String getID() {
+            return "gunner_duck_down";
+        }
 
+        public boolean think(edict_t self) {
+            if ((self.monsterinfo.aiflags & Defines.AI_DUCKED) != 0)
+                return true;
+            self.monsterinfo.aiflags |= Defines.AI_DUCKED;
+            if (GameBase.skill.value >= 2) {
+                if (Lib.random() > 0.5)
+                    GunnerGrenade.think(self);
+            }
+
+            self.maxs[2] -= 32;
+            self.takedamage = Defines.DAMAGE_YES;
+            self.monsterinfo.pausetime = GameBase.level.time + 1;
+            GameBase.gi.linkentity(self);
+            return true;
+        }
+    };
+    static mframe_t gunner_frames_attack_chain[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_charge, 0, gunner_opengun),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null)};
+    static mmove_t gunner_move_attack_chain = new mmove_t(FRAME_attak209,
+            FRAME_attak215, gunner_frames_attack_chain, gunner_fire_chain);
+    static mframe_t gunner_frames_fire_chain[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
+            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
+            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
+            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
+            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
+            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
+            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
+            new mframe_t(GameAI.ai_charge, 0, GunnerFire)};
+    static mmove_t gunner_move_fire_chain = new mmove_t(FRAME_attak216,
+            FRAME_attak223, gunner_frames_fire_chain, gunner_refire_chain);
+    static EntThinkAdapter gunner_fire_chain = new EntThinkAdapter() {
+        public String getID() {
+            return "gunner_fire_chain";
+        }
+
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = gunner_move_fire_chain;
+            return true;
+        }
+    };
+    static mframe_t gunner_frames_endfire_chain[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null)};
+    static mmove_t gunner_move_endfire_chain = new mmove_t(FRAME_attak224,
+            FRAME_attak230, gunner_frames_endfire_chain, gunner_run);
+    static EntThinkAdapter gunner_refire_chain = new EntThinkAdapter() {
+        public String getID() {
+            return "gunner_refire_chain";
+        }
+
+        public boolean think(edict_t self) {
+            if (self.enemy.health > 0)
+                if (GameUtil.visible(self, self.enemy))
+                    if (Lib.random() <= 0.5) {
+                        self.monsterinfo.currentmove = gunner_move_fire_chain;
+                        return true;
+                    }
+            self.monsterinfo.currentmove = gunner_move_endfire_chain;
+            return true;
+        }
+    };
+    static mframe_t gunner_frames_attack_grenade[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, GunnerGrenade),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, GunnerGrenade),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, GunnerGrenade),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, GunnerGrenade),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null),
+            new mframe_t(GameAI.ai_charge, 0, null)};
+    static mmove_t gunner_move_attack_grenade = new mmove_t(FRAME_attak101,
+            FRAME_attak121, gunner_frames_attack_grenade, gunner_run);
     static EntThinkAdapter gunner_attack = new EntThinkAdapter() {
-    	public String getID() { return "gunner_attack"; }
+        public String getID() {
+            return "gunner_attack";
+        }
+
         public boolean think(edict_t self) {
             if (GameUtil.range(self, self.enemy) == Defines.RANGE_MELEE) {
                 self.monsterinfo.currentmove = gunner_move_attack_chain;
@@ -974,91 +1083,6 @@ public class M_Gunner {
             return true;
         }
     };
-
-    static EntThinkAdapter gunner_fire_chain = new EntThinkAdapter() {
-    	public String getID() { return "gunner_fire_chain"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = gunner_move_fire_chain;
-            return true;
-        }
-    };
-
-    static mframe_t gunner_frames_attack_chain[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_charge, 0, gunner_opengun),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null) };
-
-    static mmove_t gunner_move_attack_chain = new mmove_t(FRAME_attak209,
-            FRAME_attak215, gunner_frames_attack_chain, gunner_fire_chain);
-
-    static mframe_t gunner_frames_fire_chain[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
-            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
-            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
-            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
-            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
-            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
-            new mframe_t(GameAI.ai_charge, 0, GunnerFire),
-            new mframe_t(GameAI.ai_charge, 0, GunnerFire) };
-
-    static EntThinkAdapter gunner_refire_chain = new EntThinkAdapter() {
-    	public String getID() { return "gunner_refire_chain"; }
-        public boolean think(edict_t self) {
-            if (self.enemy.health > 0)
-                if (GameUtil.visible(self, self.enemy))
-                    if (Lib.random() <= 0.5) {
-                        self.monsterinfo.currentmove = gunner_move_fire_chain;
-                        return true;
-                    }
-            self.monsterinfo.currentmove = gunner_move_endfire_chain;
-            return true;
-        }
-    };
-
-    static mmove_t gunner_move_fire_chain = new mmove_t(FRAME_attak216,
-            FRAME_attak223, gunner_frames_fire_chain, gunner_refire_chain);
-
-    static mframe_t gunner_frames_endfire_chain[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null) };
-
-    static mmove_t gunner_move_endfire_chain = new mmove_t(FRAME_attak224,
-            FRAME_attak230, gunner_frames_endfire_chain, gunner_run);
-
-    static mframe_t gunner_frames_attack_grenade[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, GunnerGrenade),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, GunnerGrenade),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, GunnerGrenade),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, GunnerGrenade),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null) };
-
-    static mmove_t gunner_move_attack_grenade = new mmove_t(FRAME_attak101,
-            FRAME_attak121, gunner_frames_attack_grenade, gunner_run);
 
     /*
      * QUAKED monster_gunner (1 .5 0) (-16 -16 -24) (16 16 32) Ambush

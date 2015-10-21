@@ -19,17 +19,7 @@
 package lwjake2.game.monsters;
 
 import lwjake2.Defines;
-import lwjake2.game.EntDieAdapter;
-import lwjake2.game.EntPainAdapter;
-import lwjake2.game.EntThinkAdapter;
-import lwjake2.game.GameAI;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameUtil;
-import lwjake2.game.Monster;
-import lwjake2.game.edict_t;
-import lwjake2.game.mframe_t;
-import lwjake2.game.mmove_t;
-import lwjake2.game.trace_t;
+import lwjake2.game.*;
 import lwjake2.util.Lib;
 import lwjake2.util.Math3D;
 
@@ -455,7 +445,10 @@ public class M_Boss31 {
      */
 
     static EntThinkAdapter jorg_search = new EntThinkAdapter() {
-    	public String getID() { return "jorg_search"; }
+        public String getID() {
+            return "jorg_search";
+        }
+
         public boolean think(edict_t self) {
             float r;
 
@@ -475,7 +468,10 @@ public class M_Boss31 {
     };
 
     static EntThinkAdapter jorg_idle = new EntThinkAdapter() {
-    	public String getID() { return "jorg_idle"; }
+        public String getID() {
+            return "jorg_idle";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_idle, 1,
                     Defines.ATTN_NORM, 0);
@@ -484,7 +480,10 @@ public class M_Boss31 {
     };
 
     static EntThinkAdapter jorg_death_hit = new EntThinkAdapter() {
-    	public String getID() { return "jorg_death_hit"; }
+        public String getID() {
+            return "jorg_death_hit";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_BODY, sound_death_hit, 1,
                     Defines.ATTN_NORM, 0);
@@ -493,7 +492,10 @@ public class M_Boss31 {
     };
 
     static EntThinkAdapter jorg_step_left = new EntThinkAdapter() {
-    	public String getID() { return "jorg_step_left"; }
+        public String getID() {
+            return "jorg_step_left";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_BODY, sound_step_left, 1,
                     Defines.ATTN_NORM, 0);
@@ -502,116 +504,27 @@ public class M_Boss31 {
     };
 
     static EntThinkAdapter jorg_step_right = new EntThinkAdapter() {
-    	public String getID() { return "jorg_step_right"; }
+        public String getID() {
+            return "jorg_step_right";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_BODY, sound_step_right, 1,
                     Defines.ATTN_NORM, 0);
             return true;
         }
     };
-
-    static EntThinkAdapter jorg_stand = new EntThinkAdapter() {
-    	public String getID() { return "jorg_stand"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = jorg_move_stand;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter jorg_reattack1 = new EntThinkAdapter() {
-    	public String getID() { return "jorg_reattack1"; }
-        public boolean think(edict_t self) {
-            if (GameUtil.visible(self, self.enemy))
-                if (Lib.random() < 0.9)
-                    self.monsterinfo.currentmove = jorg_move_attack1;
-                else {
-                    self.s.sound = 0;
-                    self.monsterinfo.currentmove = jorg_move_end_attack1;
-                }
-            else {
-                self.s.sound = 0;
-                self.monsterinfo.currentmove = jorg_move_end_attack1;
-            }
-            return true;
-        }
-    };
-
-    static EntThinkAdapter jorg_attack1 = new EntThinkAdapter() {
-    	public String getID() { return "jorg_attack1"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = jorg_move_attack1;
-            return true;
-        }
-    };
-
-    static EntPainAdapter jorg_pain = new EntPainAdapter() {
-    	public String getID() { return "jorg_pain"; }
-        public void pain(edict_t self, edict_t other, float kick, int damage) {
-            if (self.health < (self.max_health / 2))
-                self.s.skinnum = 1;
-
-            self.s.sound = 0;
-
-            if (GameBase.level.time < self.pain_debounce_time)
-                return;
-
-            // Lessen the chance of him going into his pain frames if he takes
-            // little damage
-            if (damage <= 40)
-                if (Lib.random() <= 0.6)
-                    return;
-
-            /*
-             * If he's entering his attack1 or using attack1, lessen the chance
-             * of him going into pain
-             */
-
-            if ((self.s.frame >= FRAME_attak101)
-                    && (self.s.frame <= FRAME_attak108))
-                if (Lib.random() <= 0.005)
-                    return;
-
-            if ((self.s.frame >= FRAME_attak109)
-                    && (self.s.frame <= FRAME_attak114))
-                if (Lib.random() <= 0.00005)
-                    return;
-
-            if ((self.s.frame >= FRAME_attak201)
-                    && (self.s.frame <= FRAME_attak208))
-                if (Lib.random() <= 0.005)
-                    return;
-
-            self.pain_debounce_time = GameBase.level.time + 3;
-            if (GameBase.skill.value == 3)
-                return; // no pain anims in nightmare
-
-            if (damage <= 50) {
-                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain1, 1,
-                        Defines.ATTN_NORM, 0);
-                self.monsterinfo.currentmove = jorg_move_pain1;
-            } else if (damage <= 100) {
-                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain2, 1,
-                        Defines.ATTN_NORM, 0);
-                self.monsterinfo.currentmove = jorg_move_pain2;
-            } else {
-                if (Lib.random() <= 0.3) {
-                    GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain3, 1,
-                            Defines.ATTN_NORM, 0);
-                    self.monsterinfo.currentmove = jorg_move_pain3;
-                }
-            }
-
-        }
-    };
-
     static EntThinkAdapter jorgBFG = new EntThinkAdapter() {
-    	public String getID() { return "jorgBFG"; }
-        public boolean think(edict_t self) {
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
+        public String getID() {
+            return "jorgBFG";
+        }
 
-            float[] start = { 0, 0, 0 };
-            float[] dir = { 0, 0, 0 };
-            float[] vec = { 0, 0, 0 };
+        public boolean think(edict_t self) {
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+
+            float[] start = {0, 0, 0};
+            float[] dir = {0, 0, 0};
+            float[] vec = {0, 0, 0};
 
             Math3D.AngleVectors(self.s.angles, forward, right, null);
             Math3D.G_ProjectSource(self.s.origin,
@@ -634,13 +547,15 @@ public class M_Boss31 {
             return true;
         }
     };
-
     static EntThinkAdapter jorg_firebullet_right = new EntThinkAdapter() {
-    	public String getID() { return "jorg_firebullet_right"; }
+        public String getID() {
+            return "jorg_firebullet_right";
+        }
+
         public boolean think(edict_t self) {
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 }, target = { 0,
-                    0, 0 };
-            float[] start = { 0, 0, 0 };
+            float[] forward = {0, 0, 0}, right = {0, 0, 0}, target = {0,
+                    0, 0};
+            float[] start = {0, 0, 0};
 
             Math3D.AngleVectors(self.s.angles, forward, right, null);
             Math3D
@@ -662,13 +577,15 @@ public class M_Boss31 {
             return true;
         }
     };
-
     static EntThinkAdapter jorg_firebullet_left = new EntThinkAdapter() {
-    	public String getID() { return "jorg_firebullet_left"; }
+        public String getID() {
+            return "jorg_firebullet_left";
+        }
+
         public boolean think(edict_t self) {
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 }, target = { 0,
-                    0, 0 };
-            float[] start = { 0, 0, 0 };
+            float[] forward = {0, 0, 0}, right = {0, 0, 0}, target = {0,
+                    0, 0};
+            float[] start = {0, 0, 0};
 
             Math3D.AngleVectors(self.s.angles, forward, right, null);
             Math3D
@@ -690,81 +607,53 @@ public class M_Boss31 {
             return true;
         }
     };
-
     static EntThinkAdapter jorg_firebullet = new EntThinkAdapter() {
-    	public String getID() { return "jorg_firebullet"; }
+        public String getID() {
+            return "jorg_firebullet";
+        }
+
         public boolean think(edict_t self) {
             jorg_firebullet_left.think(self);
             jorg_firebullet_right.think(self);
             return true;
         }
     };
-
-    static EntThinkAdapter jorg_attack = new EntThinkAdapter() {
-    	public String getID() { return "jorg_attack"; }
-        public boolean think(edict_t self) {
-            float[] vec = { 0, 0, 0 };
-
-            Math3D.VectorSubtract(self.enemy.s.origin, self.s.origin, vec);
-
-            if (Lib.random() <= 0.75) {
-                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_attack1, 1,
-                        Defines.ATTN_NORM, 0);
-                self.s.sound = GameBase.gi.soundindex("boss3/w_loop.wav");
-                self.monsterinfo.currentmove = jorg_move_start_attack1;
-            } else {
-                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_attack2, 1,
-                        Defines.ATTN_NORM, 0);
-                self.monsterinfo.currentmove = jorg_move_attack2;
-            }
-            return true;
-        }
-    };
-
-    /** Was disabled. RST. */
+    /**
+     * Was disabled. RST.
+     */
     static EntThinkAdapter jorg_dead = new EntThinkAdapter() {
-    	public String getID() { return "jorg_dead"; }
+        public String getID() {
+            return "jorg_dead";
+        }
+
         public boolean think(edict_t self) {
             /*
              * edict_t tempent;
-             * 
+             *
              * //VectorSet (self.mins, -16, -16, -24); //VectorSet (self.maxs,
              * 16, 16, -8); // Jorg is on modelindex2. Do not clear him.
              * VectorSet( self.mins, -60, -60, 0); VectorSet(self.maxs, 60, 60,
              * 72); self.movetype= MOVETYPE_TOSS; self.nextthink= 0;
              * gi.linkentity(self);
-             * 
+             *
              * tempent= G_Spawn(); VectorCopy(self.s.origin, tempent.s.origin);
              * VectorCopy(self.s.angles, tempent.s.angles); tempent.killtarget=
              * self.killtarget; tempent.target= self.target; tempent.activator=
              * self.enemy; self.killtarget= 0; self.target= 0;
              * SP_monster_makron(tempent);
-             *  
+             *
              */
             return true;
         }
     };
-
-    static EntDieAdapter jorg_die = new EntDieAdapter() {
-    	public String getID() { return "jorg_die"; }
-        public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
-            GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_death, 1,
-                    Defines.ATTN_NORM, 0);
-            self.deadflag = Defines.DEAD_DEAD;
-            self.takedamage = Defines.DAMAGE_NO;
-            self.s.sound = 0;
-            self.count = 0;
-            self.monsterinfo.currentmove = jorg_move_death;
-            return;
-        }
-    };
-
     static EntThinkAdapter Jorg_CheckAttack = new EntThinkAdapter() {
-    	public String getID() { return "Jorg_CheckAttack"; }
+        public String getID() {
+            return "Jorg_CheckAttack";
+        }
+
         public boolean think(edict_t self) {
-            float[] spot1 = { 0, 0, 0 }, spot2 = { 0, 0, 0 };
-            float[] temp = { 0, 0, 0 };
+            float[] spot1 = {0, 0, 0}, spot2 = {0, 0, 0};
+            float[] temp = {0, 0, 0};
             float chance;
             trace_t tr;
             int enemy_range;
@@ -841,12 +730,7 @@ public class M_Boss31 {
             return false;
         }
     };
-
-    //
-    //	   stand
-    //
-
-    static mframe_t jorg_frames_stand[] = new mframe_t[] {
+    static mframe_t jorg_frames_stand[] = new mframe_t[]{
             new mframe_t(GameAI.ai_stand, 0, jorg_idle),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
@@ -904,11 +788,19 @@ public class M_Boss31 {
             // 50
             new mframe_t(GameAI.ai_stand, -14, jorg_step_right) // 51
     };
-
     static mmove_t jorg_move_stand = new mmove_t(FRAME_stand01, FRAME_stand51,
             jorg_frames_stand, null);
+    static EntThinkAdapter jorg_stand = new EntThinkAdapter() {
+        public String getID() {
+            return "jorg_stand";
+        }
 
-    static mframe_t jorg_frames_run[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = jorg_move_stand;
+            return true;
+        }
+    };
+    static mframe_t jorg_frames_run[] = new mframe_t[]{
             new mframe_t(GameAI.ai_run, 17, jorg_step_left),
             new mframe_t(GameAI.ai_run, 0, null),
             new mframe_t(GameAI.ai_run, 0, null),
@@ -922,26 +814,22 @@ public class M_Boss31 {
             new mframe_t(GameAI.ai_run, 0, null),
             new mframe_t(GameAI.ai_run, 9, null),
             new mframe_t(GameAI.ai_run, 9, null),
-            new mframe_t(GameAI.ai_run, 9, null) };
-
+            new mframe_t(GameAI.ai_run, 9, null)};
     static mmove_t jorg_move_run = new mmove_t(FRAME_walk06, FRAME_walk19,
             jorg_frames_run, null);
-
-    //
-    //	   walk
-    //
-
-    static mframe_t jorg_frames_start_walk[] = new mframe_t[] {
+    static mframe_t jorg_frames_start_walk[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 5, null),
             new mframe_t(GameAI.ai_walk, 6, null),
             new mframe_t(GameAI.ai_walk, 7, null),
             new mframe_t(GameAI.ai_walk, 9, null),
-            new mframe_t(GameAI.ai_walk, 15, null) };
+            new mframe_t(GameAI.ai_walk, 15, null)};
 
+    //
+    //	   stand
+    //
     static mmove_t jorg_move_start_walk = new mmove_t(FRAME_walk01,
             FRAME_walk05, jorg_frames_start_walk, null);
-
-    static mframe_t jorg_frames_walk[] = new mframe_t[] {
+    static mframe_t jorg_frames_walk[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 17, null),
             new mframe_t(GameAI.ai_walk, 0, null),
             new mframe_t(GameAI.ai_walk, 0, null),
@@ -955,32 +843,37 @@ public class M_Boss31 {
             new mframe_t(GameAI.ai_walk, 0, null),
             new mframe_t(GameAI.ai_walk, 9, null),
             new mframe_t(GameAI.ai_walk, 9, null),
-            new mframe_t(GameAI.ai_walk, 9, null) };
-
+            new mframe_t(GameAI.ai_walk, 9, null)};
     static mmove_t jorg_move_walk = new mmove_t(FRAME_walk06, FRAME_walk19,
             jorg_frames_walk, null);
-
-    static mframe_t jorg_frames_end_walk[] = new mframe_t[] {
+    static mframe_t jorg_frames_end_walk[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 11, null),
             new mframe_t(GameAI.ai_walk, 0, null),
             new mframe_t(GameAI.ai_walk, 0, null),
             new mframe_t(GameAI.ai_walk, 0, null),
             new mframe_t(GameAI.ai_walk, 8, null),
-            new mframe_t(GameAI.ai_walk, -8, null) };
+            new mframe_t(GameAI.ai_walk, -8, null)};
 
+    //
+    //	   walk
+    //
     static mmove_t jorg_move_end_walk = new mmove_t(FRAME_walk20, FRAME_walk25,
             jorg_frames_end_walk, null);
-
     static EntThinkAdapter jorg_walk = new EntThinkAdapter() {
-    	public String getID() { return "jorg_walk"; }
+        public String getID() {
+            return "jorg_walk";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.currentmove = jorg_move_walk;
             return true;
         }
     };
-
     static EntThinkAdapter jorg_run = new EntThinkAdapter() {
-    	public String getID() { return "jorg_run"; }
+        public String getID() {
+            return "jorg_run";
+        }
+
         public boolean think(edict_t self) {
             if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
                 self.monsterinfo.currentmove = jorg_move_stand;
@@ -989,8 +882,7 @@ public class M_Boss31 {
             return true;
         }
     };
-
-    static mframe_t jorg_frames_pain3[] = new mframe_t[] {
+    static mframe_t jorg_frames_pain3[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, -28, null),
             new mframe_t(GameAI.ai_move, -6, null),
             new mframe_t(GameAI.ai_move, -3, jorg_step_left),
@@ -1015,28 +907,84 @@ public class M_Boss31 {
             new mframe_t(GameAI.ai_move, 17, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, jorg_step_right) };
-
+            new mframe_t(GameAI.ai_move, 0, jorg_step_right)};
     static mmove_t jorg_move_pain3 = new mmove_t(FRAME_pain301, FRAME_pain325,
             jorg_frames_pain3, jorg_run);
-
-    static mframe_t jorg_frames_pain2[] = new mframe_t[] {
+    static mframe_t jorg_frames_pain2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t jorg_move_pain2 = new mmove_t(FRAME_pain201, FRAME_pain203,
             jorg_frames_pain2, jorg_run);
-
-    static mframe_t jorg_frames_pain1[] = new mframe_t[] {
+    static mframe_t jorg_frames_pain1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t jorg_move_pain1 = new mmove_t(FRAME_pain101, FRAME_pain103,
             jorg_frames_pain1, jorg_run);
+    static EntPainAdapter jorg_pain = new EntPainAdapter() {
+        public String getID() {
+            return "jorg_pain";
+        }
 
-    static mframe_t jorg_frames_death1[] = new mframe_t[] {
+        public void pain(edict_t self, edict_t other, float kick, int damage) {
+            if (self.health < (self.max_health / 2))
+                self.s.skinnum = 1;
+
+            self.s.sound = 0;
+
+            if (GameBase.level.time < self.pain_debounce_time)
+                return;
+
+            // Lessen the chance of him going into his pain frames if he takes
+            // little damage
+            if (damage <= 40)
+                if (Lib.random() <= 0.6)
+                    return;
+
+            /*
+             * If he's entering his attack1 or using attack1, lessen the chance
+             * of him going into pain
+             */
+
+            if ((self.s.frame >= FRAME_attak101)
+                    && (self.s.frame <= FRAME_attak108))
+                if (Lib.random() <= 0.005)
+                    return;
+
+            if ((self.s.frame >= FRAME_attak109)
+                    && (self.s.frame <= FRAME_attak114))
+                if (Lib.random() <= 0.00005)
+                    return;
+
+            if ((self.s.frame >= FRAME_attak201)
+                    && (self.s.frame <= FRAME_attak208))
+                if (Lib.random() <= 0.005)
+                    return;
+
+            self.pain_debounce_time = GameBase.level.time + 3;
+            if (GameBase.skill.value == 3)
+                return; // no pain anims in nightmare
+
+            if (damage <= 50) {
+                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain1, 1,
+                        Defines.ATTN_NORM, 0);
+                self.monsterinfo.currentmove = jorg_move_pain1;
+            } else if (damage <= 100) {
+                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain2, 1,
+                        Defines.ATTN_NORM, 0);
+                self.monsterinfo.currentmove = jorg_move_pain2;
+            } else {
+                if (Lib.random() <= 0.3) {
+                    GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain3, 1,
+                            Defines.ATTN_NORM, 0);
+                    self.monsterinfo.currentmove = jorg_move_pain3;
+                }
+            }
+
+        }
+    };
+    static mframe_t jorg_frames_death1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -1092,11 +1040,26 @@ public class M_Boss31 {
             new mframe_t(GameAI.ai_move, 0, M_Boss32.MakronToss),
             new mframe_t(GameAI.ai_move, 0, M_Supertank.BossExplode) // 50
     };
-
     static mmove_t jorg_move_death = new mmove_t(FRAME_death01, FRAME_death50,
             jorg_frames_death1, jorg_dead);
+    static EntDieAdapter jorg_die = new EntDieAdapter() {
+        public String getID() {
+            return "jorg_die";
+        }
 
-    static mframe_t jorg_frames_attack2[] = new mframe_t[] {
+        public void die(edict_t self, edict_t inflictor, edict_t attacker,
+                        int damage, float[] point) {
+            GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_death, 1,
+                    Defines.ATTN_NORM, 0);
+            self.deadflag = Defines.DEAD_DEAD;
+            self.takedamage = Defines.DAMAGE_NO;
+            self.s.sound = 0;
+            self.count = 0;
+            self.monsterinfo.currentmove = jorg_move_death;
+            return;
+        }
+    };
+    static mframe_t jorg_frames_attack2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
@@ -1109,12 +1072,10 @@ public class M_Boss31 {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t jorg_move_attack2 = new mmove_t(FRAME_attak201,
             FRAME_attak213, jorg_frames_attack2, jorg_run);
-
-    static mframe_t jorg_frames_start_attack1[] = new mframe_t[] {
+    static mframe_t jorg_frames_start_attack1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
@@ -1122,30 +1083,78 @@ public class M_Boss31 {
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null) };
-
+            new mframe_t(GameAI.ai_charge, 0, null)};
     static mmove_t jorg_move_start_attack1 = new mmove_t(FRAME_attak101,
             FRAME_attak108, jorg_frames_start_attack1, jorg_attack1);
+    static EntThinkAdapter jorg_attack = new EntThinkAdapter() {
+        public String getID() {
+            return "jorg_attack";
+        }
 
-    static mframe_t jorg_frames_attack1[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet),
-            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet),
-            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet),
-            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet),
-            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet),
-            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet) };
+        public boolean think(edict_t self) {
+            float[] vec = {0, 0, 0};
 
+            Math3D.VectorSubtract(self.enemy.s.origin, self.s.origin, vec);
+
+            if (Lib.random() <= 0.75) {
+                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_attack1, 1,
+                        Defines.ATTN_NORM, 0);
+                self.s.sound = GameBase.gi.soundindex("boss3/w_loop.wav");
+                self.monsterinfo.currentmove = jorg_move_start_attack1;
+            } else {
+                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_attack2, 1,
+                        Defines.ATTN_NORM, 0);
+                self.monsterinfo.currentmove = jorg_move_attack2;
+            }
+            return true;
+        }
+    };
+    static mframe_t jorg_frames_attack1[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet),
+            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet),
+            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet),
+            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet),
+            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet),
+            new mframe_t(GameAI.ai_charge, 0, jorg_firebullet)};
     static mmove_t jorg_move_attack1 = new mmove_t(FRAME_attak109,
             FRAME_attak114, jorg_frames_attack1, jorg_reattack1);
+    static EntThinkAdapter jorg_attack1 = new EntThinkAdapter() {
+        public String getID() {
+            return "jorg_attack1";
+        }
 
-    static mframe_t jorg_frames_end_attack1[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = jorg_move_attack1;
+            return true;
+        }
+    };
+    static mframe_t jorg_frames_end_attack1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t jorg_move_end_attack1 = new mmove_t(FRAME_attak115,
             FRAME_attak118, jorg_frames_end_attack1, jorg_run);
+    static EntThinkAdapter jorg_reattack1 = new EntThinkAdapter() {
+        public String getID() {
+            return "jorg_reattack1";
+        }
+
+        public boolean think(edict_t self) {
+            if (GameUtil.visible(self, self.enemy))
+                if (Lib.random() < 0.9)
+                    self.monsterinfo.currentmove = jorg_move_attack1;
+                else {
+                    self.s.sound = 0;
+                    self.monsterinfo.currentmove = jorg_move_end_attack1;
+                }
+            else {
+                self.s.sound = 0;
+                self.monsterinfo.currentmove = jorg_move_end_attack1;
+            }
+            return true;
+        }
+    };
 
     /*
      * QUAKED monster_jorg (1 .5 0) (-80 -80 0) (90 90 140) Ambush Trigger_Spawn

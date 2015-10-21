@@ -54,18 +54,18 @@ public class netchan_t {
 
     //	   reliable staging and holding areas
     public sizebuf_t message = new sizebuf_t(); // writing buffer to send to
-                                                // server
+    // server
 
     public byte message_buf[] = new byte[Defines.MAX_MSGLEN - 16]; // leave
-                                                                   // space for
-                                                                   // header
+    // space for
+    // header
 
     //	   message is copied to this buffer when it is first transfered
     public int reliable_length;
 
     public byte reliable_buf[] = new byte[Defines.MAX_MSGLEN - 16]; // unpcked
-                                                                    // reliable
-                                                                    // message
+    // reliable
+    // message
 
     //ok.
     public void clear() {

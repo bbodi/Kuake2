@@ -18,13 +18,11 @@
 
 package lwjake2.qcommon;
 
-public class lump_t
-{
-	public lump_t(int offset, int len)
-	{
-		this.fileofs = offset;
-		this.filelen = len;
-	}
+public class lump_t {
+    public int fileofs, filelen;
 
-	public int fileofs, filelen;
+    public lump_t(int offset, int len) {
+        this.fileofs = offset;
+        this.filelen = len;
+    }
 }

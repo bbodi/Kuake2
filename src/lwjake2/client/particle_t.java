@@ -27,22 +27,21 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 public class particle_t {
-	
-	// lwjgl renderer needs a ByteBuffer
-	private static ByteBuffer colorByteArray = Lib.newByteBuffer(Defines.MAX_PARTICLES * Lib.SIZEOF_INT, ByteOrder.LITTLE_ENDIAN);
 
-	public static FloatBuffer vertexArray = Lib.newFloatBuffer(Defines.MAX_PARTICLES * 3);
-	public static int[] colorTable = new int[256];
-	public static IntBuffer colorArray = colorByteArray.asIntBuffer();  
-	
-	
-	public static void setColorPalette(int[] palette) {
-		for (int i=0; i < 256; i++) {
-			colorTable[i] = palette[i] & 0x00FFFFFF;
-		}
-	}
-	
-	public static ByteBuffer getColorAsByteBuffer() {
-		return colorByteArray;
-	}
+    public static FloatBuffer vertexArray = Lib.newFloatBuffer(Defines.MAX_PARTICLES * 3);
+    public static int[] colorTable = new int[256];
+    // lwjgl renderer needs a ByteBuffer
+    private static ByteBuffer colorByteArray = Lib.newByteBuffer(Defines.MAX_PARTICLES * Lib.SIZEOF_INT, ByteOrder.LITTLE_ENDIAN);
+    public static IntBuffer colorArray = colorByteArray.asIntBuffer();
+
+
+    public static void setColorPalette(int[] palette) {
+        for (int i = 0; i < 256; i++) {
+            colorTable[i] = palette[i] & 0x00FFFFFF;
+        }
+    }
+
+    public static ByteBuffer getColorAsByteBuffer() {
+        return colorByteArray;
+    }
 }

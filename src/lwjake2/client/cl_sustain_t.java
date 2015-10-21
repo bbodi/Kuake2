@@ -22,27 +22,26 @@ package lwjake2.client;
  * cl_sustain_t
  */
 public class cl_sustain_t {
-	static abstract class ThinkAdapter {
-		abstract void think(cl_sustain_t self);
-	}
-	
-	int id;
-	int type;
-	int endtime;
-	int nextthink;
-	int thinkinterval;
-	float[] org = new float[3];
-	float[] dir = new float[3];
-	int color;
-	int count;
-	int magnitude;
-	
-	ThinkAdapter think;
-	
-	void clear() { 
-		org[0] = org[1] = org[2] = 
-		dir[0] = dir[1] = dir[2] = 
-		id = type = endtime = nextthink = thinkinterval = color = count = magnitude = 0;
-		think = null;
-	}
+    int id;
+    int type;
+    int endtime;
+    int nextthink;
+    int thinkinterval;
+    float[] org = new float[3];
+    float[] dir = new float[3];
+    int color;
+    int count;
+    int magnitude;
+    ThinkAdapter think;
+
+    void clear() {
+        org[0] = org[1] = org[2] =
+                dir[0] = dir[1] = dir[2] =
+                        id = type = endtime = nextthink = thinkinterval = color = count = magnitude = 0;
+        think = null;
+    }
+
+    static abstract class ThinkAdapter {
+        abstract void think(cl_sustain_t self);
+    }
 }

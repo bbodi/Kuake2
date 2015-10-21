@@ -24,11 +24,7 @@ import lwjake2.game.Cmd;
 import lwjake2.game.cvar_t;
 import lwjake2.sys.Sys;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -39,7 +35,7 @@ import java.util.List;
 
 /**
  * FS
- * 
+ *
  * @author cwei
  */
 public final class FS extends Globals {
@@ -52,65 +48,24 @@ public final class FS extends Globals {
      * ==================================================
      */
 
-    public static class packfile_t {
-        static final int SIZE = 64;
-
-        static final int NAME_SIZE = 56;
-
-        String name; // char name[56]
-
-        int filepos, filelen;
-
-        public String toString() {
-            return name + " [ length: " + filelen + " pos: " + filepos + " ]";
-        }
-    }
-
-    public static class pack_t {
-        String filename;
-
-        RandomAccessFile handle;
-        
-        ByteBuffer backbuffer;
-
-        int numfiles;
-
-        Hashtable<String, packfile_t> files; // with packfile_t entries
-    }
-
+    // read in blocks of 64k
+    public static final int MAX_READ = 0x10000;
+    static final int IDPAKHEADER = (('K' << 24) + ('C' << 16) + ('A' << 8) + 'P');
+    static final int MAX_FILES_IN_PACK = 4096;
     public static String fs_gamedir;
-
-    private static String fs_userdir;
-
     public static cvar_t fs_basedir;
 
     public static cvar_t fs_cddir;
 
     public static cvar_t fs_gamedirvar;
-
-    public static class filelink_t {
-        String from;
-
-        int fromlength;
-
-        String to;
-    }
-
     // with filelink_t entries
     public static List<filelink_t> fs_links = new LinkedList<filelink_t>();
-
-    public static class searchpath_t {
-        String filename;
-
-        pack_t pack; // only one of filename or pack will be used
-
-        searchpath_t next;
-    }
-
     public static searchpath_t fs_searchpaths;
-
     // without gamedirs
     public static searchpath_t fs_base_searchpaths;
+    public static int file_from_pak = 0;
+    // buffer for C-Strings char[56]
+    static byte[] tmpText = new byte[packfile_t.NAME_SIZE];
 
     /*
      * All of Quake's data access is through a hierchal file system, but the
@@ -131,10 +86,11 @@ public final class FS extends Globals {
      * instruct clients to write files over areas they shouldn't.
      *  
      */
+    private static String fs_userdir;
 
     /*
      * CreatePath
-     * 
+     *
      * Creates any directories needed to store the given filename.
      */
     public static void CreatePath(String path) {
@@ -150,7 +106,7 @@ public final class FS extends Globals {
 
     /*
      * FCloseFile
-     * 
+     *
      * For some reason, other dll's can't just call fclose() on files returned
      * by FS_FOpenFile...
      */
@@ -171,7 +127,7 @@ public final class FS extends Globals {
         file_from_pak = 0;
 
         // check for links first
-        for (Iterator<filelink_t> it = fs_links.iterator(); it.hasNext();) {
+        for (Iterator<filelink_t> it = fs_links.iterator(); it.hasNext(); ) {
             link = it.next();
 
             if (filename.regionMatches(0, link.from, 0, link.fromlength)) {
@@ -225,8 +181,6 @@ public final class FS extends Globals {
         return -1;
     }
 
-    public static int file_from_pak = 0;
-
     /*
      * FOpenFile
      * 
@@ -244,7 +198,7 @@ public final class FS extends Globals {
         file_from_pak = 0;
 
         // check for links first
-        for (Iterator<filelink_t> it = fs_links.iterator(); it.hasNext();) {
+        for (Iterator<filelink_t> it = fs_links.iterator(); it.hasNext(); ) {
             link = it.next();
 
             //			if (!strncmp (filename, link->from, link->fromlength))
@@ -307,12 +261,9 @@ public final class FS extends Globals {
         return null;
     }
 
-    // read in blocks of 64k
-    public static final int MAX_READ = 0x10000;
-
     /**
      * Read
-     * 
+     * <p/>
      * Properly handles partial reads
      */
     public static void Read(byte[] buffer, int len, RandomAccessFile f) {
@@ -347,7 +298,7 @@ public final class FS extends Globals {
 
     /*
      * LoadFile
-     * 
+     *
      * Filename are reletive to the quake search path a null buffer will just
      * return the file content as byte[]
      */
@@ -382,7 +333,7 @@ public final class FS extends Globals {
 
     /*
      * LoadMappedFile
-     * 
+     *
      * Filename are reletive to the quake search path a null buffer will just
      * return the file content as ByteBuffer (memory mapped)
      */
@@ -402,7 +353,7 @@ public final class FS extends Globals {
 
         try {
             // check for links first
-            for (Iterator<filelink_t> it = fs_links.iterator(); it.hasNext();) {
+            for (Iterator<filelink_t> it = fs_links.iterator(); it.hasNext(); ) {
                 link = it.next();
 
                 if (filename.regionMatches(0, link.from, 0, link.fromlength)) {
@@ -495,26 +446,11 @@ public final class FS extends Globals {
         buffer = null;
     }
 
-    static final int IDPAKHEADER = (('K' << 24) + ('C' << 16) + ('A' << 8) + 'P');
-
-    static class dpackheader_t {
-        int ident; // IDPAKHEADER
-
-        int dirofs;
-
-        int dirlen;
-    }
-
-    static final int MAX_FILES_IN_PACK = 4096;
-
-    // buffer for C-Strings char[56]
-    static byte[] tmpText = new byte[packfile_t.NAME_SIZE];
-
     /*
      * LoadPackFile
-     * 
+     *
      * Takes an explicit (not game tree related) path to a pak file.
-     * 
+     *
      * Loads the header and directory, adding the files at the beginning of the
      * list so they override previous pack files.
      */
@@ -528,13 +464,13 @@ public final class FS extends Globals {
         //		unsigned checksum;
         //
         try {
-        	file = new RandomAccessFile(packfile, "r");
-        	FileChannel fc = file.getChannel();
+            file = new RandomAccessFile(packfile, "r");
+            FileChannel fc = file.getChannel();
             ByteBuffer packhandle = fc.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
             packhandle.order(ByteOrder.LITTLE_ENDIAN);
- 
+
             fc.close();
-            
+
             if (packhandle == null || packhandle.limit() < 1)
                 return null;
             //
@@ -589,7 +525,7 @@ public final class FS extends Globals {
 
     /*
      * AddGameDirectory
-     * 
+     *
      * Sets fs_gamedir, adds the directory to the head of the path, then loads
      * and adds pak1.pak pak2.pak ...
      */
@@ -635,9 +571,9 @@ public final class FS extends Globals {
 
     /*
      * Gamedir
-     * 
+     *
      * Called to find where to write a file (demos, savegames, etc)
-     * this is modified to <user.home>/.lwjake2 
+     * this is modified to <user.home>/.lwjake2
      */
     public static String Gamedir() {
         return (fs_userdir != null) ? fs_userdir : Globals.BASEDIRNAME;
@@ -645,7 +581,7 @@ public final class FS extends Globals {
 
     /*
      * BaseGamedir
-     * 
+     *
      * Called to find where to write a downloaded file
      */
     public static String BaseGamedir() {
@@ -676,7 +612,7 @@ public final class FS extends Globals {
 
     /*
      * SetGamedir
-     * 
+     *
      * Sets the gamedir and path to a different directory.
      */
     public static void SetGamedir(String dir) {
@@ -730,7 +666,7 @@ public final class FS extends Globals {
 
     /*
      * Link_f
-     * 
+     *
      * Creates a filelink_t
      */
     public static void Link_f() {
@@ -742,7 +678,7 @@ public final class FS extends Globals {
         }
 
         // see if the link already exists
-        for (Iterator<filelink_t> it = fs_links.iterator(); it.hasNext();) {
+        for (Iterator<filelink_t> it = fs_links.iterator(); it.hasNext(); ) {
             entry = it.next();
 
             if (entry.from.equals(Cmd.Argv(1))) {
@@ -846,7 +782,7 @@ public final class FS extends Globals {
         }
 
         Com.Printf("\nLinks:\n");
-        for (Iterator<filelink_t> it = fs_links.iterator(); it.hasNext();) {
+        for (Iterator<filelink_t> it = fs_links.iterator(); it.hasNext(); ) {
             link = it.next();
             Com.Printf(link.from + " : " + link.to + '\n');
         }
@@ -854,7 +790,7 @@ public final class FS extends Globals {
 
     /*
      * NextPath
-     * 
+     *
      * Allows enumerating all of the directories in the search path
      */
     public static String NextPath(String prevpath) {
@@ -936,15 +872,17 @@ public final class FS extends Globals {
         if (fs_cddir.string.length() > 0)
             AddGameDirectory(fs_cddir.string + '/' + Globals.BASEDIRNAME);
     }
-    
-    /** Check for "+set game" override - Used to properly set gamedir */
+
+    /**
+     * Check for "+set game" override - Used to properly set gamedir
+     */
     static void checkOverride() {
-    	fs_gamedirvar = Cvar.Get("game", "", CVAR_LATCH | CVAR_SERVERINFO);
+        fs_gamedirvar = Cvar.Get("game", "", CVAR_LATCH | CVAR_SERVERINFO);
 
         if (fs_gamedirvar.string.length() > 0)
             SetGamedir(fs_gamedirvar.string);
     }
-    
+
     static void markBaseSearchPaths() {
         // any set gamedirs will be freed up to here
         fs_base_searchpaths = fs_searchpaths;
@@ -960,7 +898,7 @@ public final class FS extends Globals {
         //	 char *start;
         searchpath_t s;
 
-        
+
         for (s = fs_searchpaths; s != null; s = s.next) {
             if (s.filename.indexOf("xatrix") != -1)
                 return 1;
@@ -970,5 +908,55 @@ public final class FS extends Globals {
         }
 
         return 0;
+    }
+
+    public static class packfile_t {
+        static final int SIZE = 64;
+
+        static final int NAME_SIZE = 56;
+
+        String name; // char name[56]
+
+        int filepos, filelen;
+
+        public String toString() {
+            return name + " [ length: " + filelen + " pos: " + filepos + " ]";
+        }
+    }
+
+    public static class pack_t {
+        String filename;
+
+        RandomAccessFile handle;
+
+        ByteBuffer backbuffer;
+
+        int numfiles;
+
+        Hashtable<String, packfile_t> files; // with packfile_t entries
+    }
+
+    public static class filelink_t {
+        String from;
+
+        int fromlength;
+
+        String to;
+    }
+
+    public static class searchpath_t {
+        String filename;
+
+        pack_t pack; // only one of filename or pack will be used
+
+        searchpath_t next;
+    }
+
+    static class dpackheader_t {
+        int ident; // IDPAKHEADER
+
+        int dirofs;
+
+        int dirlen;
     }
 }

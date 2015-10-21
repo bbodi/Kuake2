@@ -42,6 +42,7 @@ public class PlayerTrail {
     static int trail_head;
 
     static boolean trail_active = false;
+
     static {
         //TODO: potential error
         for (int n = 0; n < TRAIL_LENGTH; n++)
@@ -72,7 +73,7 @@ public class PlayerTrail {
     }
 
     static void Add(float[] spot) {
-        float[] temp = { 0, 0, 0 };
+        float[] temp = {0, 0, 0};
 
         if (!trail_active)
             return;

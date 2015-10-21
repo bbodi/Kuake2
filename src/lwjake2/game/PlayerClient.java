@@ -26,34 +26,37 @@ import lwjake2.util.Math3D;
 public class PlayerClient {
 
     public static int player_die_i = 0;
-    
+
     /**
-     * player_die. 
+     * player_die.
      */
     static EntDieAdapter player_die = new EntDieAdapter() {
-    	public String getID() { return "player_die"; }
+        public String getID() {
+            return "player_die";
+        }
+
         public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
+                        int damage, float[] point) {
             int n;
-    
+
             Math3D.VectorClear(self.avelocity);
-    
+
             self.takedamage = Defines.DAMAGE_YES;
             self.movetype = Defines.MOVETYPE_TOSS;
-    
+
             self.s.modelindex2 = 0; // remove linked weapon model
-    
+
             self.s.angles[0] = 0;
             self.s.angles[2] = 0;
-    
+
             self.s.sound = 0;
             self.client.weapon_sound = 0;
-    
+
             self.maxs[2] = -8;
-    
+
             // self.solid = SOLID_NOT;
             self.svflags |= Defines.SVF_DEADMONSTER;
-    
+
             if (self.deadflag == 0) {
                 self.client.respawn_time = GameBase.level.time + 1.0f;
                 PlayerClient.LookAtKiller(self, inflictor, attacker);
@@ -62,7 +65,7 @@ public class PlayerClient {
                 PlayerClient.TossClientWeapon(self);
                 if (GameBase.deathmatch.value != 0)
                     Cmd.Help_f(self); // show scores
-    
+
                 // clear inventory
                 // this is kind of ugly, but it's how we want to handle keys in
                 // coop
@@ -73,28 +76,28 @@ public class PlayerClient {
                     self.client.pers.inventory[n] = 0;
                 }
             }
-    
+
             // remove powerups
             self.client.quad_framenum = 0;
             self.client.invincible_framenum = 0;
             self.client.breather_framenum = 0;
             self.client.enviro_framenum = 0;
             self.flags &= ~Defines.FL_POWER_ARMOR;
-    
+
             if (self.health < -40) { // gib
                 GameBase.gi
                         .sound(self, Defines.CHAN_BODY, GameBase.gi
-                                .soundindex("misc/udeath.wav"), 1,
+                                        .soundindex("misc/udeath.wav"), 1,
                                 Defines.ATTN_NORM, 0);
                 for (n = 0; n < 4; n++)
                     GameMisc.ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2",
                             damage, Defines.GIB_ORGANIC);
                 GameMisc.ThrowClientHead(self, damage);
-    
+
                 self.takedamage = Defines.DAMAGE_NO;
             } else { // normal death
                 if (self.deadflag == 0) {
-    
+
                     player_die_i = (player_die_i + 1) % 3;
                     // start a death animation
                     self.client.anim_priority = Defines.ANIM_DEATH;
@@ -103,50 +106,53 @@ public class PlayerClient {
                         self.client.anim_end = M_Player.FRAME_crdeath5;
                     } else
                         switch (player_die_i) {
-                        case 0:
-                            self.s.frame = M_Player.FRAME_death101 - 1;
-                            self.client.anim_end = M_Player.FRAME_death106;
-                            break;
-                        case 1:
-                            self.s.frame = M_Player.FRAME_death201 - 1;
-                            self.client.anim_end = M_Player.FRAME_death206;
-                            break;
-                        case 2:
-                            self.s.frame = M_Player.FRAME_death301 - 1;
-                            self.client.anim_end = M_Player.FRAME_death308;
-                            break;
+                            case 0:
+                                self.s.frame = M_Player.FRAME_death101 - 1;
+                                self.client.anim_end = M_Player.FRAME_death106;
+                                break;
+                            case 1:
+                                self.s.frame = M_Player.FRAME_death201 - 1;
+                                self.client.anim_end = M_Player.FRAME_death206;
+                                break;
+                            case 2:
+                                self.s.frame = M_Player.FRAME_death301 - 1;
+                                self.client.anim_end = M_Player.FRAME_death308;
+                                break;
                         }
-    
+
                     GameBase.gi.sound(self, Defines.CHAN_VOICE, GameBase.gi
                             .soundindex("*death" + ((Lib.rand() % 4) + 1)
                                     + ".wav"), 1, Defines.ATTN_NORM, 0);
                 }
             }
-    
+
             self.deadflag = Defines.DEAD_DEAD;
-    
+
             GameBase.gi.linkentity(self);
         }
     };
     static EntThinkAdapter SP_FixCoopSpots = new EntThinkAdapter() {
-    	public String getID() { return "SP_FixCoopSpots"; }
+        public String getID() {
+            return "SP_FixCoopSpots";
+        }
+
         public boolean think(edict_t self) {
-    
+
             edict_t spot;
-            float[] d = { 0, 0, 0 };
-    
+            float[] d = {0, 0, 0};
+
             spot = null;
             EdictIterator es = null;
-    
+
             while (true) {
                 es = GameBase.G_Find(es, GameBase.findByClass,
                         "info_player_start");
-    
+
                 if (es == null)
                     return true;
-                
+
                 spot = es.o;
-                
+
                 if (spot.targetname == null)
                     continue;
                 Math3D.VectorSubtract(self.s.origin, spot.s.origin, d);
@@ -165,11 +171,14 @@ public class PlayerClient {
         }
     };
     static EntThinkAdapter SP_CreateCoopSpots = new EntThinkAdapter() {
-    	public String getID() { return "SP_CreateCoopSpots"; }
+        public String getID() {
+            return "SP_CreateCoopSpots";
+        }
+
         public boolean think(edict_t self) {
-    
+
             edict_t spot;
-    
+
             if (Lib.Q_stricmp(GameBase.level.mapname, "security") == 0) {
                 spot = GameUtil.G_Spawn();
                 spot.classname = "info_player_coop";
@@ -178,7 +187,7 @@ public class PlayerClient {
                 spot.s.origin[2] = 80;
                 spot.targetname = "jail3";
                 spot.s.angles[1] = 90;
-    
+
                 spot = GameUtil.G_Spawn();
                 spot.classname = "info_player_coop";
                 spot.s.origin[0] = 188 + 64;
@@ -186,7 +195,7 @@ public class PlayerClient {
                 spot.s.origin[2] = 80;
                 spot.targetname = "jail3";
                 spot.s.angles[1] = 90;
-    
+
                 spot = GameUtil.G_Spawn();
                 spot.classname = "info_player_coop";
                 spot.s.origin[0] = 188 + 128;
@@ -200,20 +209,26 @@ public class PlayerClient {
     };
     // player pain is handled at the end of the frame in P_DamageFeedback
     static EntPainAdapter player_pain = new EntPainAdapter() {
-    	public String getID() { return "player_pain"; }
+        public String getID() {
+            return "player_pain";
+        }
+
         public void pain(edict_t self, edict_t other, float kick, int damage) {
         }
     };
     static EntDieAdapter body_die = new EntDieAdapter() {
-    	public String getID() { return "body_die"; }
+        public String getID() {
+            return "body_die";
+        }
+
         public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
-    
+                        int damage, float[] point) {
+
             int n;
-    
+
             if (self.health < -40) {
-                GameBase.gi.sound(self, Defines.CHAN_BODY, 
-                		GameBase.gi.soundindex("misc/udeath.wav"), 1, Defines.ATTN_NORM, 0);
+                GameBase.gi.sound(self, Defines.CHAN_BODY,
+                        GameBase.gi.soundindex("misc/udeath.wav"), 1, Defines.ATTN_NORM, 0);
                 for (n = 0; n < 4; n++)
                     GameMisc.ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage,
                             Defines.GIB_ORGANIC);
@@ -226,9 +241,9 @@ public class PlayerClient {
     static edict_t pm_passent;
     // pmove doesn't need to know about passent and contentmask
     public static pmove_t.TraceAdapter PM_trace = new pmove_t.TraceAdapter() {
-    
+
         public trace_t trace(float[] start, float[] mins, float[] maxs,
-                float[] end) {
+                             float[] end) {
             if (pm_passent.health > 0)
                 return GameBase.gi.trace(start, mins, maxs, end, pm_passent,
                         Defines.MASK_PLAYERSOLID);
@@ -236,7 +251,7 @@ public class PlayerClient {
                 return GameBase.gi.trace(start, mins, maxs, end, pm_passent,
                         Defines.MASK_DEADSOLID);
         }
-    
+
     };
 
     /**
@@ -306,7 +321,7 @@ public class PlayerClient {
     }
 
     public static void ClientObituary(edict_t self, edict_t inflictor,
-            edict_t attacker) {
+                                      edict_t attacker) {
         int mod;
         String message;
         String message2;
@@ -322,76 +337,76 @@ public class PlayerClient {
             message2 = "";
 
             switch (mod) {
-            case Defines.MOD_SUICIDE:
-                message = "suicides";
-                break;
-            case Defines.MOD_FALLING:
-                message = "cratered";
-                break;
-            case Defines.MOD_CRUSH:
-                message = "was squished";
-                break;
-            case Defines.MOD_WATER:
-                message = "sank like a rock";
-                break;
-            case Defines.MOD_SLIME:
-                message = "melted";
-                break;
-            case Defines.MOD_LAVA:
-                message = "does a back flip into the lava";
-                break;
-            case Defines.MOD_EXPLOSIVE:
-            case Defines.MOD_BARREL:
-                message = "blew up";
-                break;
-            case Defines.MOD_EXIT:
-                message = "found a way out";
-                break;
-            case Defines.MOD_TARGET_LASER:
-                message = "saw the light";
-                break;
-            case Defines.MOD_TARGET_BLASTER:
-                message = "got blasted";
-                break;
-            case Defines.MOD_BOMB:
-            case Defines.MOD_SPLASH:
-            case Defines.MOD_TRIGGER_HURT:
-                message = "was in the wrong place";
-                break;
+                case Defines.MOD_SUICIDE:
+                    message = "suicides";
+                    break;
+                case Defines.MOD_FALLING:
+                    message = "cratered";
+                    break;
+                case Defines.MOD_CRUSH:
+                    message = "was squished";
+                    break;
+                case Defines.MOD_WATER:
+                    message = "sank like a rock";
+                    break;
+                case Defines.MOD_SLIME:
+                    message = "melted";
+                    break;
+                case Defines.MOD_LAVA:
+                    message = "does a back flip into the lava";
+                    break;
+                case Defines.MOD_EXPLOSIVE:
+                case Defines.MOD_BARREL:
+                    message = "blew up";
+                    break;
+                case Defines.MOD_EXIT:
+                    message = "found a way out";
+                    break;
+                case Defines.MOD_TARGET_LASER:
+                    message = "saw the light";
+                    break;
+                case Defines.MOD_TARGET_BLASTER:
+                    message = "got blasted";
+                    break;
+                case Defines.MOD_BOMB:
+                case Defines.MOD_SPLASH:
+                case Defines.MOD_TRIGGER_HURT:
+                    message = "was in the wrong place";
+                    break;
             }
             if (attacker == self) {
                 switch (mod) {
-                case Defines.MOD_HELD_GRENADE:
-                    message = "tried to put the pin back in";
-                    break;
-                case Defines.MOD_HG_SPLASH:
-                case Defines.MOD_G_SPLASH:
-                    if (PlayerClient.IsNeutral(self))
-                        message = "tripped on its own grenade";
-                    else if (PlayerClient.IsFemale(self))
-                        message = "tripped on her own grenade";
-                    else
-                        message = "tripped on his own grenade";
-                    break;
-                case Defines.MOD_R_SPLASH:
-                    if (PlayerClient.IsNeutral(self))
-                        message = "blew itself up";
-                    else if (PlayerClient.IsFemale(self))
-                        message = "blew herself up";
-                    else
-                        message = "blew himself up";
-                    break;
-                case Defines.MOD_BFG_BLAST:
-                    message = "should have used a smaller gun";
-                    break;
-                default:
-                    if (PlayerClient.IsNeutral(self))
-                        message = "killed itself";
-                    else if (PlayerClient.IsFemale(self))
-                        message = "killed herself";
-                    else
-                        message = "killed himself";
-                    break;
+                    case Defines.MOD_HELD_GRENADE:
+                        message = "tried to put the pin back in";
+                        break;
+                    case Defines.MOD_HG_SPLASH:
+                    case Defines.MOD_G_SPLASH:
+                        if (PlayerClient.IsNeutral(self))
+                            message = "tripped on its own grenade";
+                        else if (PlayerClient.IsFemale(self))
+                            message = "tripped on her own grenade";
+                        else
+                            message = "tripped on his own grenade";
+                        break;
+                    case Defines.MOD_R_SPLASH:
+                        if (PlayerClient.IsNeutral(self))
+                            message = "blew itself up";
+                        else if (PlayerClient.IsFemale(self))
+                            message = "blew herself up";
+                        else
+                            message = "blew himself up";
+                        break;
+                    case Defines.MOD_BFG_BLAST:
+                        message = "should have used a smaller gun";
+                        break;
+                    default:
+                        if (PlayerClient.IsNeutral(self))
+                            message = "killed itself";
+                        else if (PlayerClient.IsFemale(self))
+                            message = "killed herself";
+                        else
+                            message = "killed himself";
+                        break;
                 }
             }
             if (message != null) {
@@ -406,74 +421,74 @@ public class PlayerClient {
             self.enemy = attacker;
             if (attacker != null && attacker.client != null) {
                 switch (mod) {
-                case Defines.MOD_BLASTER:
-                    message = "was blasted by";
-                    break;
-                case Defines.MOD_SHOTGUN:
-                    message = "was gunned down by";
-                    break;
-                case Defines.MOD_SSHOTGUN:
-                    message = "was blown away by";
-                    message2 = "'s super shotgun";
-                    break;
-                case Defines.MOD_MACHINEGUN:
-                    message = "was machinegunned by";
-                    break;
-                case Defines.MOD_CHAINGUN:
-                    message = "was cut in half by";
-                    message2 = "'s chaingun";
-                    break;
-                case Defines.MOD_GRENADE:
-                    message = "was popped by";
-                    message2 = "'s grenade";
-                    break;
-                case Defines.MOD_G_SPLASH:
-                    message = "was shredded by";
-                    message2 = "'s shrapnel";
-                    break;
-                case Defines.MOD_ROCKET:
-                    message = "ate";
-                    message2 = "'s rocket";
-                    break;
-                case Defines.MOD_R_SPLASH:
-                    message = "almost dodged";
-                    message2 = "'s rocket";
-                    break;
-                case Defines.MOD_HYPERBLASTER:
-                    message = "was melted by";
-                    message2 = "'s hyperblaster";
-                    break;
-                case Defines.MOD_RAILGUN:
-                    message = "was railed by";
-                    break;
-                case Defines.MOD_BFG_LASER:
-                    message = "saw the pretty lights from";
-                    message2 = "'s BFG";
-                    break;
-                case Defines.MOD_BFG_BLAST:
-                    message = "was disintegrated by";
-                    message2 = "'s BFG blast";
-                    break;
-                case Defines.MOD_BFG_EFFECT:
-                    message = "couldn't hide from";
-                    message2 = "'s BFG";
-                    break;
-                case Defines.MOD_HANDGRENADE:
-                    message = "caught";
-                    message2 = "'s handgrenade";
-                    break;
-                case Defines.MOD_HG_SPLASH:
-                    message = "didn't see";
-                    message2 = "'s handgrenade";
-                    break;
-                case Defines.MOD_HELD_GRENADE:
-                    message = "feels";
-                    message2 = "'s pain";
-                    break;
-                case Defines.MOD_TELEFRAG:
-                    message = "tried to invade";
-                    message2 = "'s personal space";
-                    break;
+                    case Defines.MOD_BLASTER:
+                        message = "was blasted by";
+                        break;
+                    case Defines.MOD_SHOTGUN:
+                        message = "was gunned down by";
+                        break;
+                    case Defines.MOD_SSHOTGUN:
+                        message = "was blown away by";
+                        message2 = "'s super shotgun";
+                        break;
+                    case Defines.MOD_MACHINEGUN:
+                        message = "was machinegunned by";
+                        break;
+                    case Defines.MOD_CHAINGUN:
+                        message = "was cut in half by";
+                        message2 = "'s chaingun";
+                        break;
+                    case Defines.MOD_GRENADE:
+                        message = "was popped by";
+                        message2 = "'s grenade";
+                        break;
+                    case Defines.MOD_G_SPLASH:
+                        message = "was shredded by";
+                        message2 = "'s shrapnel";
+                        break;
+                    case Defines.MOD_ROCKET:
+                        message = "ate";
+                        message2 = "'s rocket";
+                        break;
+                    case Defines.MOD_R_SPLASH:
+                        message = "almost dodged";
+                        message2 = "'s rocket";
+                        break;
+                    case Defines.MOD_HYPERBLASTER:
+                        message = "was melted by";
+                        message2 = "'s hyperblaster";
+                        break;
+                    case Defines.MOD_RAILGUN:
+                        message = "was railed by";
+                        break;
+                    case Defines.MOD_BFG_LASER:
+                        message = "saw the pretty lights from";
+                        message2 = "'s BFG";
+                        break;
+                    case Defines.MOD_BFG_BLAST:
+                        message = "was disintegrated by";
+                        message2 = "'s BFG blast";
+                        break;
+                    case Defines.MOD_BFG_EFFECT:
+                        message = "couldn't hide from";
+                        message2 = "'s BFG";
+                        break;
+                    case Defines.MOD_HANDGRENADE:
+                        message = "caught";
+                        message2 = "'s handgrenade";
+                        break;
+                    case Defines.MOD_HG_SPLASH:
+                        message = "didn't see";
+                        message2 = "'s handgrenade";
+                        break;
+                    case Defines.MOD_HELD_GRENADE:
+                        message = "feels";
+                        message2 = "'s pain";
+                        break;
+                    case Defines.MOD_TELEFRAG:
+                        message = "tried to invade";
+                        message2 = "'s personal space";
+                        break;
                 }
                 if (message != null) {
                     GameBase.gi.bprintf(Defines.PRINT_MEDIUM,
@@ -499,7 +514,7 @@ public class PlayerClient {
 
     /**
      * This is only called when the game first initializes in single player, but
-     * is called after each death and level change in deathmatch. 
+     * is called after each death and level change in deathmatch.
      */
     public static void InitClientPersistant(gclient_t client) {
         gitem_t item;
@@ -541,7 +556,7 @@ public class PlayerClient {
     /**
      * Some information that should be persistant, like health, is still stored
      * in the edict structure, so it needs to be mirrored out to the client
-     * structure before all the edicts are wiped. 
+     * structure before all the edicts are wiped.
      */
     public static void SaveClientData() {
         int i;
@@ -576,7 +591,7 @@ public class PlayerClient {
     static float PlayersRangeFromSpot(edict_t spot) {
         edict_t player;
         float bestplayerdistance;
-        float[] v = { 0, 0, 0 };
+        float[] v = {0, 0, 0};
         int n;
         float playerdistance;
 
@@ -645,10 +660,10 @@ public class PlayerClient {
         do {
             es = GameBase.G_Find(es, GameBase.findByClass,
                     "info_player_deathmatch");
-            
-            if (es == null) 
+
+            if (es == null)
                 break;
-            
+
             spot = es.o;
             if (spot == spot1 || spot == spot2)
                 selection++;
@@ -657,8 +672,8 @@ public class PlayerClient {
         return spot;
     }
 
-    /** 
-	 * If turned on in the dmflags, select a spawn point far away from other players.
+    /**
+     * If turned on in the dmflags, select a spawn point far away from other players.
      */
     static edict_t SelectFarthestDeathmatchSpawnPoint() {
         edict_t bestspot;
@@ -691,11 +706,11 @@ public class PlayerClient {
                 "info_player_deathmatch");
         if (edit == null)
             return null;
-        
+
         return edit.o;
     }
 
-    
+
     public static edict_t SelectDeathmatchSpawnPoint() {
         if (0 != ((int) (GameBase.dmflags.value) & Defines.DF_SPAWN_FARTHEST))
             return SelectFarthestDeathmatchSpawnPoint();
@@ -723,19 +738,19 @@ public class PlayerClient {
 
             es = GameBase.G_Find(es, GameBase.findByClass,
                     "info_player_coop");
-                    
+
             if (es == null)
                 return null;
-            
+
             spot = es.o;
-                
+
             if (spot == null)
                 return null; // we didn't have enough...
 
             target = spot.targetname;
             if (target == null)
                 target = "";
-            if (Lib.Q_stricmp(GameBase.game.spawnpoint, target) == 0) { 
+            if (Lib.Q_stricmp(GameBase.game.spawnpoint, target) == 0) {
                 // this is a coop spawn point for one of the clients here
                 index--;
                 if (0 == index)
@@ -749,7 +764,7 @@ public class PlayerClient {
      * Chooses a player start, deathmatch start, coop start, etc.
      */
     public static void SelectSpawnPoint(edict_t ent, float[] origin,
-            float[] angles) {
+                                        float[] angles) {
         edict_t spot = null;
 
         if (GameBase.deathmatch.value != 0)
@@ -777,17 +792,16 @@ public class PlayerClient {
             }
 
             if (null == spot) {
-                if (GameBase.game.spawnpoint.length() == 0) { 
+                if (GameBase.game.spawnpoint.length() == 0) {
                     // there wasn't a spawnpoint without a
                     // target, so use any
                     es = GameBase.G_Find(es, GameBase.findByClass,
                             "info_player_start");
-                    
+
                     if (es != null)
                         spot = es.o;
                 }
-                if (null == spot)
-                {
+                if (null == spot) {
                     GameBase.gi.error("Couldn't find spawn point "
                             + GameBase.game.spawnpoint + "\n");
                     return;
@@ -968,10 +982,10 @@ public class PlayerClient {
      * Called when a player connects to a server or respawns in a deathmatch.
      */
     public static void PutClientInServer(edict_t ent) {
-        float[] mins = { -16, -16, -24 };
-        float[] maxs = { 16, 16, 32 };
+        float[] mins = {-16, -16, -24};
+        float[] maxs = {16, 16, 32};
         int index;
-        float[] spawn_origin = { 0, 0, 0 }, spawn_angles = { 0, 0, 0 };
+        float[] spawn_origin = {0, 0, 0}, spawn_angles = {0, 0, 0};
         gclient_t client;
         int i;
         client_persistant_t saved = new client_persistant_t();
@@ -986,14 +1000,14 @@ public class PlayerClient {
         client = ent.client;
 
         // deathmatch wipes most client data every spawn
-        if (GameBase.deathmatch.value != 0) {           
+        if (GameBase.deathmatch.value != 0) {
 
             resp.set(client.resp);
             String userinfo = client.pers.userinfo;
             InitClientPersistant(client);
-            
+
             userinfo = ClientUserinfoChanged(ent, userinfo);
-            
+
         } else if (GameBase.coop.value != 0) {
 
             resp.set(client.resp);
@@ -1048,7 +1062,7 @@ public class PlayerClient {
         Math3D.VectorClear(ent.velocity);
 
         // clear playerstate values
-        ent.client.ps.clear();     
+        ent.client.ps.clear();
 
         client.ps.pmove.origin[0] = (short) (spawn_origin[0] * 8);
         client.ps.pmove.origin[1] = (short) (spawn_origin[1] * 8);
@@ -1121,7 +1135,7 @@ public class PlayerClient {
 
     /**
      * A client has just connected to the server in deathmatch mode, so clear
-     * everything out before starting them. 
+     * everything out before starting them.
      */
     public static void ClientBeginDeathmatch(edict_t ent) {
         GameUtil.G_InitEdict(ent, ent.index);
@@ -1151,7 +1165,7 @@ public class PlayerClient {
 
     /**
      * Called when a client has finished connecting, and is ready to be placed
-     * into the game. This will happen every level load. 
+     * into the game. This will happen every level load.
      */
     public static void ClientBegin(edict_t ent) {
         int i;
@@ -1205,10 +1219,9 @@ public class PlayerClient {
 
     /**
      * Called whenever the player updates a userinfo variable.
-     * 
+     * <p/>
      * The game can override any of the settings in place (forcing skins or
-     * names, etc) before copying it off. 
-     *
+     * names, etc) before copying it off.
      */
     public static String ClientUserinfoChanged(edict_t ent, String userinfo) {
         String s;
@@ -1271,7 +1284,7 @@ public class PlayerClient {
      * entrance to a client by returning false. If the client is allowed, the
      * connection process will continue and eventually get to ClientBegin()
      * Changing levels will NOT cause this to be called again, but loadgames
-     * will. 
+     * will.
      */
     public static boolean ClientConnect(edict_t ent, String userinfo) {
         String value;
@@ -1339,7 +1352,7 @@ public class PlayerClient {
     }
 
     /**
-     * Called when a player drops from the server. Will not be called between levels. 
+     * Called when a player drops from the server. Will not be called between levels.
      */
     public static void ClientDisconnect(edict_t ent) {
         int playernum;
@@ -1561,7 +1574,7 @@ public class PlayerClient {
 
     /**
      * This will be called once for each server frame, before running any other
-     * entities in the world. 
+     * entities in the world.
      */
     public static void ClientBeginServerFrame(edict_t ent) {
         gclient_t client;
@@ -1611,15 +1624,15 @@ public class PlayerClient {
         client.latched_buttons = 0;
     }
 
-    /** 
-     * Returns true, if the players gender flag was set to female. 
+    /**
+     * Returns true, if the players gender flag was set to female.
      */
     public static boolean IsFemale(edict_t ent) {
         char info;
-    
+
         if (null == ent.client)
             return false;
-    
+
         info = Info.Info_ValueForKey(ent.client.pers.userinfo, "gender")
                 .charAt(0);
         if (info == 'f' || info == 'F')
@@ -1633,13 +1646,13 @@ public class PlayerClient {
      */
     public static boolean IsNeutral(edict_t ent) {
         char info;
-    
+
         if (ent.client == null)
             return false;
-    
+
         info = Info.Info_ValueForKey(ent.client.pers.userinfo, "gender")
                 .charAt(0);
-    
+
         if (info != 'f' && info != 'F' && info != 'm' && info != 'M')
             return true;
         return false;
@@ -1649,11 +1662,11 @@ public class PlayerClient {
      * Changes the camera view to look at the killer.
      */
     public static void LookAtKiller(edict_t self, edict_t inflictor,
-            edict_t attacker) {
-        float dir[] = { 0, 0, 0 };
-    
+                                    edict_t attacker) {
+        float dir[] = {0, 0, 0};
+
         edict_t world = GameBase.g_edicts[0];
-    
+
         if (attacker != null && attacker != world && attacker != self) {
             Math3D.VectorSubtract(attacker.s.origin, self.s.origin, dir);
         } else if (inflictor != null && inflictor != world && inflictor != self) {
@@ -1662,7 +1675,7 @@ public class PlayerClient {
             self.client.killer_yaw = self.s.angles[Defines.YAW];
             return;
         }
-    
+
         if (dir[0] != 0)
             self.client.killer_yaw = (float) (180 / Math.PI * Math.atan2(
                     dir[1], dir[0]));
@@ -1675,52 +1688,52 @@ public class PlayerClient {
         }
         if (self.client.killer_yaw < 0)
             self.client.killer_yaw += 360;
-    
+
     }
-    
-    
-    /** 
-     * Drop items and weapons in deathmatch games. 
-     */ 
+
+
+    /**
+     * Drop items and weapons in deathmatch games.
+     */
     public static void TossClientWeapon(edict_t self) {
         gitem_t item;
         edict_t drop;
         boolean quad;
         float spread;
-    
+
         if (GameBase.deathmatch.value == 0)
             return;
-    
+
         item = self.client.pers.weapon;
         if (0 == self.client.pers.inventory[self.client.ammo_index])
             item = null;
         if (item != null && (Lib.strcmp(item.pickup_name, "Blaster") == 0))
             item = null;
-    
+
         if (0 == ((int) (GameBase.dmflags.value) & Defines.DF_QUAD_DROP))
             quad = false;
         else
             quad = (self.client.quad_framenum > (GameBase.level.framenum + 10));
-    
+
         if (item != null && quad)
             spread = 22.5f;
         else
             spread = 0.0f;
-    
+
         if (item != null) {
             self.client.v_angle[Defines.YAW] -= spread;
             drop = GameItems.Drop_Item(self, item);
             self.client.v_angle[Defines.YAW] += spread;
             drop.spawnflags = Defines.DROPPED_PLAYER_ITEM;
         }
-    
+
         if (quad) {
             self.client.v_angle[Defines.YAW] += spread;
             drop = GameItems.Drop_Item(self, GameItems
                     .FindItemByClassname("item_quad"));
             self.client.v_angle[Defines.YAW] -= spread;
             drop.spawnflags |= Defines.DROPPED_PLAYER_ITEM;
-    
+
             drop.touch = GameItems.Touch_Item;
             drop.nextthink = GameBase.level.time
                     + (self.client.quad_framenum - GameBase.level.framenum)

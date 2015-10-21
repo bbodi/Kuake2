@@ -22,14 +22,7 @@ import lwjake2.Defines;
 import lwjake2.Globals;
 import lwjake2.game.Cmd;
 import lwjake2.game.entity_state_t;
-import lwjake2.qcommon.CM;
-import lwjake2.qcommon.Cbuf;
-import lwjake2.qcommon.Com;
-import lwjake2.qcommon.Cvar;
-import lwjake2.qcommon.FS;
-import lwjake2.qcommon.MSG;
-import lwjake2.qcommon.SZ;
-import lwjake2.qcommon.xcommand_t;
+import lwjake2.qcommon.*;
 import lwjake2.render.model_t;
 import lwjake2.sound.S;
 import lwjake2.sys.Sys;
@@ -45,90 +38,19 @@ public class CL_parse {
 
     //// cl_parse.c -- parse a message received from the server
 
-    public static String svc_strings[] = { "svc_bad", "svc_muzzleflash",
+    private static final float[] pos_v = {0, 0, 0};
+
+    //	  =============================================================================
+    public static String svc_strings[] = {"svc_bad", "svc_muzzleflash",
             "svc_muzzlflash2", "svc_temp_entity", "svc_layout",
             "svc_inventory", "svc_nop", "svc_disconnect", "svc_reconnect",
             "svc_sound", "svc_print", "svc_stufftext", "svc_serverdata",
             "svc_configstring", "svc_spawnbaseline", "svc_centerprint",
             "svc_download", "svc_playerinfo", "svc_packetentities",
-            "svc_deltapacketentities", "svc_frame" };
-
-    //	  =============================================================================
-
-    public static String DownloadFileName(String fn) {
-        return FS.Gamedir() + "/" + fn;
-    }
-
-    /*
-     * =============== CL_CheckOrDownloadFile
-     * 
-     * Returns true if the file exists, otherwise it attempts to start a
-     * download from the server. ===============
-     */
-    public static boolean CheckOrDownloadFile(String filename) {
-        RandomAccessFile fp;
-        String name;
-
-        if (filename.indexOf("..") != -1) {
-            Com.Printf("Refusing to download a path with ..\n");
-            return true;
-        }
-
-        if (FS.FileLength(filename) > 0) { // it exists, no need to download
-            return true;
-        }
-
-        Globals.cls.downloadname = filename;
-
-        // download to a temp name, and only rename
-        // to the real name when done, so if interrupted
-        // a runt file wont be left
-        Globals.cls.downloadtempname = Com
-                .StripExtension(Globals.cls.downloadname);
-        Globals.cls.downloadtempname += ".tmp";
-
-        //	  ZOID
-        // check to see if we already have a tmp for this file, if so, try to
-        // resume
-        // open the file if not opened yet
-        name = DownloadFileName(Globals.cls.downloadtempname);
-
-        fp = Lib.fopen(name, "r+b");
-        
-        if (fp != null) { 
-            
-            // it exists
-            long len = 0;
-
-            try {
-                len = fp.length();
-            } 
-            catch (IOException e) {
-            }
-            
-
-            Globals.cls.download = fp;
-
-            // give the server an offset to start the download
-            Com.Printf("Resuming " + Globals.cls.downloadname + "\n");
-            MSG.WriteByte(Globals.cls.netchan.message, Defines.clc_stringcmd);
-            MSG.WriteString(Globals.cls.netchan.message, "download "
-                    + Globals.cls.downloadname + " " + len);
-        } else {
-            Com.Printf("Downloading " + Globals.cls.downloadname + "\n");
-            MSG.WriteByte(Globals.cls.netchan.message, Defines.clc_stringcmd);
-            MSG.WriteString(Globals.cls.netchan.message, "download "
-                    + Globals.cls.downloadname);
-        }
-
-        Globals.cls.downloadnumber++;
-
-        return false;
-    }
-
+            "svc_deltapacketentities", "svc_frame"};
     /*
      * =============== CL_Download_f
-     * 
+     *
      * Request a download from the server ===============
      */
     public static xcommand_t Download_f = new xcommand_t() {
@@ -171,6 +93,76 @@ public class CL_parse {
         }
     };
 
+    public static String DownloadFileName(String fn) {
+        return FS.Gamedir() + "/" + fn;
+    }
+
+    /*
+     * =============== CL_CheckOrDownloadFile
+     *
+     * Returns true if the file exists, otherwise it attempts to start a
+     * download from the server. ===============
+     */
+    public static boolean CheckOrDownloadFile(String filename) {
+        RandomAccessFile fp;
+        String name;
+
+        if (filename.indexOf("..") != -1) {
+            Com.Printf("Refusing to download a path with ..\n");
+            return true;
+        }
+
+        if (FS.FileLength(filename) > 0) { // it exists, no need to download
+            return true;
+        }
+
+        Globals.cls.downloadname = filename;
+
+        // download to a temp name, and only rename
+        // to the real name when done, so if interrupted
+        // a runt file wont be left
+        Globals.cls.downloadtempname = Com
+                .StripExtension(Globals.cls.downloadname);
+        Globals.cls.downloadtempname += ".tmp";
+
+        //	  ZOID
+        // check to see if we already have a tmp for this file, if so, try to
+        // resume
+        // open the file if not opened yet
+        name = DownloadFileName(Globals.cls.downloadtempname);
+
+        fp = Lib.fopen(name, "r+b");
+
+        if (fp != null) {
+
+            // it exists
+            long len = 0;
+
+            try {
+                len = fp.length();
+            } catch (IOException e) {
+            }
+
+
+            Globals.cls.download = fp;
+
+            // give the server an offset to start the download
+            Com.Printf("Resuming " + Globals.cls.downloadname + "\n");
+            MSG.WriteByte(Globals.cls.netchan.message, Defines.clc_stringcmd);
+            MSG.WriteString(Globals.cls.netchan.message, "download "
+                    + Globals.cls.downloadname + " " + len);
+        } else {
+            Com.Printf("Downloading " + Globals.cls.downloadname + "\n");
+            MSG.WriteByte(Globals.cls.netchan.message, Defines.clc_stringcmd);
+            MSG.WriteString(Globals.cls.netchan.message, "download "
+                    + Globals.cls.downloadname);
+        }
+
+        Globals.cls.downloadnumber++;
+
+        return false;
+    }
+
     /*
      * ====================== CL_RegisterSounds ======================
      */
@@ -180,9 +172,9 @@ public class CL_parse {
         for (int i = 1; i < Defines.MAX_SOUNDS; i++) {
             if (Globals.cl.configstrings[Defines.CS_SOUNDS + i] == null
                     || Globals.cl.configstrings[Defines.CS_SOUNDS + i]
-                            .equals("")
+                    .equals("")
                     || Globals.cl.configstrings[Defines.CS_SOUNDS + i]
-                            .equals("\0"))
+                    .equals("\0"))
                 break;
             Globals.cl.sound_precache[i] = S
                     .RegisterSound(Globals.cl.configstrings[Defines.CS_SOUNDS
@@ -193,8 +185,16 @@ public class CL_parse {
     }
 
     /*
-     * ===================== CL_ParseDownload
+     * =====================================================================
      * 
+     * SERVER CONNECTING MESSAGES
+     * 
+     * =====================================================================
+     */
+
+    /*
+     * ===================== CL_ParseDownload
+     *
      * A download message has been received from the server
      * =====================
      */
@@ -277,14 +277,6 @@ public class CL_parse {
     }
 
     /*
-     * =====================================================================
-     * 
-     * SERVER CONNECTING MESSAGES
-     * 
-     * =====================================================================
-     */
-
-    /*
      * ================== CL_ParseServerData ==================
      */
     //checked once, was ok.
@@ -321,10 +313,10 @@ public class CL_parse {
         // set gamedir
         if (str.length() > 0
                 && (FS.fs_gamedirvar.string == null
-                        || FS.fs_gamedirvar.string.length() == 0 || FS.fs_gamedirvar.string
-                        .equals(str))
+                || FS.fs_gamedirvar.string.length() == 0 || FS.fs_gamedirvar.string
+                .equals(str))
                 || (str.length() == 0 && (FS.fs_gamedirvar.string != null || FS.fs_gamedirvar.string
-                        .length() == 0)))
+                .length() == 0)))
             Cvar.Set("game", str);
 
         // parse player entity number
@@ -357,7 +349,7 @@ public class CL_parse {
 
         entity_state_t nullstate = new entity_state_t(null);
         //memset(nullstate, 0, sizeof(nullstate));
-        int bits[] = { 0 };
+        int bits[] = {0};
         newnum = CL_ents.ParseEntityBits(bits);
         es = Globals.cl_entities[newnum].baseline;
         CL_ents.ParseDelta(nullstate, es, newnum, bits[0]);
@@ -365,7 +357,7 @@ public class CL_parse {
 
     /*
      * ================ CL_LoadClientinfo
-     * 
+     *
      * ================
      */
     public static void LoadClientinfo(clientinfo_t ci, String s) {
@@ -409,7 +401,7 @@ public class CL_parse {
             ci.weaponmodel[0] = Globals.re.RegisterModel(weapon_filename);
             ci.skin = Globals.re.RegisterSkin(skin_filename);
             ci.icon = Globals.re.RegisterPic(ci.iconname);
-            
+
         } else {
             // isolate the model name
 
@@ -498,7 +490,7 @@ public class CL_parse {
 
     /*
      * ================ CL_ParseClientinfo
-     * 
+     *
      * Load the skin, icon, and model for a client ================
      */
     public static void ParseClientinfo(int player) {
@@ -511,6 +503,14 @@ public class CL_parse {
 
         LoadClientinfo(ci, s);
     }
+
+    /*
+     * =====================================================================
+     * 
+     * ACTION MESSAGES
+     * 
+     * =====================================================================
+     */
 
     /*
      * ================ CL_ParseConfigString ================
@@ -529,16 +529,16 @@ public class CL_parse {
 
         olds = Globals.cl.configstrings[i];
         Globals.cl.configstrings[i] = s;
-        
+
         //Com.dprintln("ParseConfigString(): configstring[" + i + "]=<"+s+">");
 
         // do something apropriate
 
         if (i >= Defines.CS_LIGHTS
                 && i < Defines.CS_LIGHTS + Defines.MAX_LIGHTSTYLES) {
-            
+
             CL_fx.SetLightstyle(i - Defines.CS_LIGHTS);
-            
+
         } else if (i >= Defines.CS_MODELS && i < Defines.CS_MODELS + Defines.MAX_MODELS) {
             if (Globals.cl.refresh_prepped) {
                 Globals.cl.model_draw[i - Defines.CS_MODELS] = Globals.re
@@ -566,15 +566,6 @@ public class CL_parse {
         }
     }
 
-    /*
-     * =====================================================================
-     * 
-     * ACTION MESSAGES
-     * 
-     * =====================================================================
-     */
-
-    private static final float[] pos_v = { 0, 0, 0 };
     /*
      * ================== CL_ParseStartSoundPacket ==================
      */
@@ -681,105 +672,105 @@ public class CL_parse {
 
             // other commands
             switch (cmd) {
-            default:
-                Com.Error(Defines.ERR_DROP,
-                        "CL_ParseServerMessage: Illegible server message\n");
-                break;
+                default:
+                    Com.Error(Defines.ERR_DROP,
+                            "CL_ParseServerMessage: Illegible server message\n");
+                    break;
 
-            case Defines.svc_nop:
-                //				Com.Printf ("svc_nop\n");
-                break;
+                case Defines.svc_nop:
+                    //				Com.Printf ("svc_nop\n");
+                    break;
 
-            case Defines.svc_disconnect:
-                Com.Error(Defines.ERR_DISCONNECT, "Server disconnected\n");
-                break;
+                case Defines.svc_disconnect:
+                    Com.Error(Defines.ERR_DISCONNECT, "Server disconnected\n");
+                    break;
 
-            case Defines.svc_reconnect:
-                Com.Printf("Server disconnected, reconnecting\n");
-                if (Globals.cls.download != null) {
-                    //ZOID, close download
-                    try {
-                        Globals.cls.download.close();
-                    } catch (IOException e) {
+                case Defines.svc_reconnect:
+                    Com.Printf("Server disconnected, reconnecting\n");
+                    if (Globals.cls.download != null) {
+                        //ZOID, close download
+                        try {
+                            Globals.cls.download.close();
+                        } catch (IOException e) {
+                        }
+                        Globals.cls.download = null;
                     }
-                    Globals.cls.download = null;
-                }
-                Globals.cls.state = Defines.ca_connecting;
-                Globals.cls.connect_time = -99999; // CL_CheckForResend() will
-                // fire immediately
-                break;
+                    Globals.cls.state = Defines.ca_connecting;
+                    Globals.cls.connect_time = -99999; // CL_CheckForResend() will
+                    // fire immediately
+                    break;
 
-            case Defines.svc_print:
-                i = MSG.ReadByte(Globals.net_message);
-                if (i == Defines.PRINT_CHAT) {
-                    S.StartLocalSound("misc/talk.wav");
-                    Globals.con.ormask = 128;
-                }
-                Com.Printf(MSG.ReadString(Globals.net_message));
-                Globals.con.ormask = 0;
-                break;
+                case Defines.svc_print:
+                    i = MSG.ReadByte(Globals.net_message);
+                    if (i == Defines.PRINT_CHAT) {
+                        S.StartLocalSound("misc/talk.wav");
+                        Globals.con.ormask = 128;
+                    }
+                    Com.Printf(MSG.ReadString(Globals.net_message));
+                    Globals.con.ormask = 0;
+                    break;
 
-            case Defines.svc_centerprint:
-                SCR.CenterPrint(MSG.ReadString(Globals.net_message));
-                break;
+                case Defines.svc_centerprint:
+                    SCR.CenterPrint(MSG.ReadString(Globals.net_message));
+                    break;
 
-            case Defines.svc_stufftext:
-                s = MSG.ReadString(Globals.net_message);
-                Com.DPrintf("stufftext: " + s + "\n");
-                Cbuf.AddText(s);
-                break;
+                case Defines.svc_stufftext:
+                    s = MSG.ReadString(Globals.net_message);
+                    Com.DPrintf("stufftext: " + s + "\n");
+                    Cbuf.AddText(s);
+                    break;
 
-            case Defines.svc_serverdata:
-                Cbuf.Execute(); // make sure any stuffed commands are done
-                ParseServerData();
-                break;
+                case Defines.svc_serverdata:
+                    Cbuf.Execute(); // make sure any stuffed commands are done
+                    ParseServerData();
+                    break;
 
-            case Defines.svc_configstring:
-                ParseConfigString();
-                break;
+                case Defines.svc_configstring:
+                    ParseConfigString();
+                    break;
 
-            case Defines.svc_sound:
-                ParseStartSoundPacket();
-                break;
+                case Defines.svc_sound:
+                    ParseStartSoundPacket();
+                    break;
 
-            case Defines.svc_spawnbaseline:
-                ParseBaseline();
-                break;
+                case Defines.svc_spawnbaseline:
+                    ParseBaseline();
+                    break;
 
-            case Defines.svc_temp_entity:
-                CL_tent.ParseTEnt();
-                break;
+                case Defines.svc_temp_entity:
+                    CL_tent.ParseTEnt();
+                    break;
 
-            case Defines.svc_muzzleflash:
-                CL_fx.ParseMuzzleFlash();
-                break;
+                case Defines.svc_muzzleflash:
+                    CL_fx.ParseMuzzleFlash();
+                    break;
 
-            case Defines.svc_muzzleflash2:
-                CL_fx.ParseMuzzleFlash2();
-                break;
+                case Defines.svc_muzzleflash2:
+                    CL_fx.ParseMuzzleFlash2();
+                    break;
 
-            case Defines.svc_download:
-                ParseDownload();
-                break;
+                case Defines.svc_download:
+                    ParseDownload();
+                    break;
 
-            case Defines.svc_frame:
-                CL_ents.ParseFrame();
-                break;
+                case Defines.svc_frame:
+                    CL_ents.ParseFrame();
+                    break;
 
-            case Defines.svc_inventory:
-                CL_inv.ParseInventory();
-                break;
+                case Defines.svc_inventory:
+                    CL_inv.ParseInventory();
+                    break;
 
-            case Defines.svc_layout:
-                s = MSG.ReadString(Globals.net_message);
-                Globals.cl.layout = s;
-                break;
+                case Defines.svc_layout:
+                    s = MSG.ReadString(Globals.net_message);
+                    Globals.cl.layout = s;
+                    break;
 
-            case Defines.svc_playerinfo:
-            case Defines.svc_packetentities:
-            case Defines.svc_deltapacketentities:
-                Com.Error(Defines.ERR_DROP, "Out of place frame data");
-                break;
+                case Defines.svc_playerinfo:
+                case Defines.svc_packetentities:
+                case Defines.svc_deltapacketentities:
+                    Com.Error(Defines.ERR_DROP, "Out of place frame data");
+                    break;
             }
         }
 

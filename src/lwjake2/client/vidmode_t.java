@@ -20,18 +20,18 @@ package lwjake2.client;
 
 /**
  * vidmode_t
- * 
+ *
  * @author cwei
  */
 public class vidmode_t {
-	String description;
-	int width, height;
-	int mode;
-	
-	vidmode_t (String description, int width, int height, int mode) {
-		this.description = description;
-		this.width = width;
-		this.height = height;
-		this.mode = mode;
-	}
+    String description;
+    int width, height;
+    int mode;
+
+    vidmode_t(String description, int width, int height, int mode) {
+        this.description = description;
+        this.width = width;
+        this.height = height;
+        this.mode = mode;
+    }
 }

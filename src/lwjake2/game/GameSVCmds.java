@@ -29,57 +29,19 @@ import java.util.StringTokenizer;
 
 public class GameSVCmds {
 
-    /**
-     * 
-     * PACKET FILTERING
-     * 
-     * 
-     * You can add or remove addresses from the filter list with:
-     * 
-     * addip <ip> removeip <ip>
-     * 
-     * The ip address is specified in dot format, and any unspecified digits
-     * will match any value, so you can specify an entire class C network with
-     * "addip 192.246.40".
-     * 
-     * Removeip will only remove an address specified exactly the same way. You
-     * cannot addip a subnet, then removeip a single host.
-     * 
-     * listip Prints the current list of filters.
-     * 
-     * writeip Dumps "addip <ip>" commands to listip.cfg so it can be execed at
-     * a later date. The filter lists are not saved and restored by default,
-     * because I beleive it would cause too much confusion.
-     * 
-     * filterban <0 or 1>
-     * 
-     * If 1 (the default), then ip addresses matching the current list will be
-     * prohibited from entering the game. This is the default setting.
-     * 
-     * If 0, then only addresses matching the list will be allowed. This lets
-     * you easily set up a private game, or a game that only allows players from
-     * your local network.
-     * 
-     */
-
-    public static class ipfilter_t {
-        int mask;
-
-        int compare;
-    };
-
-    public static void Svcmd_Test_f() {
-        GameBase.gi.cprintf(null, Defines.PRINT_HIGH, "Svcmd_Test_f()\n");
-    }
-
     public static final int MAX_IPFILTERS = 1024;
 
+    ;
     static GameSVCmds.ipfilter_t ipfilters[] = new GameSVCmds.ipfilter_t[MAX_IPFILTERS];
-
     static int numipfilters;
+
     static {
         for (int n = 0; n < GameSVCmds.MAX_IPFILTERS; n++)
             GameSVCmds.ipfilters[n] = new ipfilter_t();
+    }
+
+    public static void Svcmd_Test_f() {
+        GameBase.gi.cprintf(null, Defines.PRINT_HIGH, "Svcmd_Test_f()\n");
     }
 
     /**
@@ -87,8 +49,8 @@ public class GameSVCmds {
      */
     static boolean StringToFilter(String s, GameSVCmds.ipfilter_t f) {
 
-    	byte b[] = { 0, 0, 0, 0 };
-        byte m[] = { 0, 0, 0, 0 };
+        byte b[] = {0, 0, 0, 0};
+        byte m[] = {0, 0, 0, 0};
 
         try {
             StringTokenizer tk = new StringTokenizer(s, ". ");
@@ -116,7 +78,7 @@ public class GameSVCmds {
     static boolean SV_FilterPacket(String from) {
         int i;
         int in;
-        int m[] = { 0, 0, 0, 0 };
+        int m[] = {0, 0, 0, 0};
 
         int p = 0;
         char c;
@@ -269,7 +231,7 @@ public class GameSVCmds {
 
     /**
      * ServerCommand
-     * 
+     * <p/>
      * ServerCommand will be called when an "sv" command is issued. The game can
      * issue gi.argc() / gi.argv() commands to get the rest of the parameters
      */
@@ -290,5 +252,42 @@ public class GameSVCmds {
         else
             GameBase.gi.cprintf(null, Defines.PRINT_HIGH,
                     "Unknown server command \"" + cmd + "\"\n");
+    }
+
+    /**
+     * PACKET FILTERING
+     * <p/>
+     * <p/>
+     * You can add or remove addresses from the filter list with:
+     * <p/>
+     * addip <ip> removeip <ip>
+     * <p/>
+     * The ip address is specified in dot format, and any unspecified digits
+     * will match any value, so you can specify an entire class C network with
+     * "addip 192.246.40".
+     * <p/>
+     * Removeip will only remove an address specified exactly the same way. You
+     * cannot addip a subnet, then removeip a single host.
+     * <p/>
+     * listip Prints the current list of filters.
+     * <p/>
+     * writeip Dumps "addip <ip>" commands to listip.cfg so it can be execed at
+     * a later date. The filter lists are not saved and restored by default,
+     * because I beleive it would cause too much confusion.
+     * <p/>
+     * filterban <0 or 1>
+     * <p/>
+     * If 1 (the default), then ip addresses matching the current list will be
+     * prohibited from entering the game. This is the default setting.
+     * <p/>
+     * If 0, then only addresses matching the list will be allowed. This lets
+     * you easily set up a private game, or a game that only allows players from
+     * your local network.
+     */
+
+    public static class ipfilter_t {
+        int mask;
+
+        int compare;
     }
 }

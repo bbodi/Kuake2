@@ -23,10 +23,10 @@ import lwjake2.game.player_state_t;
 
 public class client_frame_t {
 
-	int					areabytes;
-	byte				areabits[] = new byte[Defines.MAX_MAP_AREAS/8];		// portalarea visibility bits
-	player_state_t		ps = new player_state_t();
-	int					num_entities;
-	int					first_entity;		// into the circular sv_packet_entities[]
-	int					senttime;			// for ping calculations
+    int areabytes;
+    byte areabits[] = new byte[Defines.MAX_MAP_AREAS / 8];        // portalarea visibility bits
+    player_state_t ps = new player_state_t();
+    int num_entities;
+    int first_entity;        // into the circular sv_packet_entities[]
+    int senttime;            // for ping calculations
 }

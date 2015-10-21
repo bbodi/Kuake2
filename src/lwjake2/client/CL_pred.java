@@ -20,12 +20,7 @@ package lwjake2.client;
 
 import lwjake2.Defines;
 import lwjake2.Globals;
-import lwjake2.game.cmodel_t;
-import lwjake2.game.edict_t;
-import lwjake2.game.entity_state_t;
-import lwjake2.game.pmove_t;
-import lwjake2.game.trace_t;
-import lwjake2.game.usercmd_t;
+import lwjake2.game.*;
 import lwjake2.qcommon.CM;
 import lwjake2.qcommon.Com;
 import lwjake2.qcommon.PMove;
@@ -35,6 +30,8 @@ import lwjake2.util.Math3D;
  * CL_pred
  */
 public class CL_pred {
+
+    public static edict_t DUMMY_ENT = new edict_t(-1);
 
     /*
      * =================== CL_CheckPredictionError ===================
@@ -78,12 +75,16 @@ public class CL_pred {
     }
 
     /*
+     * ================ CL_PMTrace ================
+     */
+
+    /*
      * ==================== CL_ClipMoveToEntities
-     * 
+     *
      * ====================
      */
     static void ClipMoveToEntities(float[] start, float[] mins, float[] maxs,
-            float[] end, trace_t tr) {
+                                   float[] end, trace_t tr) {
         int i, x, zd, zu;
         trace_t trace;
         int headnode;
@@ -136,24 +137,18 @@ public class CL_pred {
                 trace.ent = ent.surrounding_ent;
                 if (tr.startsolid) {
                     tr.set(trace); // rst: solved the Z U P P E L - P R O B L E
-                                   // M
+                    // M
                     tr.startsolid = true;
                 } else
                     tr.set(trace); // rst: solved the Z U P P E L - P R O B L E
-                                   // M
+                // M
             } else if (trace.startsolid)
                 tr.startsolid = true;
         }
     }
 
-    /*
-     * ================ CL_PMTrace ================
-     */
-
-    public static edict_t DUMMY_ENT = new edict_t(-1);
-
     static trace_t PMTrace(float[] start, float[] mins, float[] maxs,
-            float[] end) {
+                           float[] end) {
         trace_t t;
 
         // check against world
@@ -220,7 +215,7 @@ public class CL_pred {
             for (int i = 0; i < 3; i++) {
                 Globals.cl.predicted_angles[i] = Globals.cl.viewangles[i]
                         + Math3D
-                                .SHORT2ANGLE(Globals.cl.frame.playerstate.pmove.delta_angles[i]);
+                        .SHORT2ANGLE(Globals.cl.frame.playerstate.pmove.delta_angles[i]);
             }
             return;
         }
@@ -241,7 +236,7 @@ public class CL_pred {
 
         pm.trace = new pmove_t.TraceAdapter() {
             public trace_t trace(float[] start, float[] mins, float[] maxs,
-                    float[] end) {
+                                 float[] end) {
                 return PMTrace(start, mins, maxs, end);
             }
         };

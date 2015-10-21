@@ -19,19 +19,7 @@
 package lwjake2.game.monsters;
 
 import lwjake2.Defines;
-import lwjake2.game.EntDieAdapter;
-import lwjake2.game.EntInteractAdapter;
-import lwjake2.game.EntPainAdapter;
-import lwjake2.game.EntThinkAdapter;
-import lwjake2.game.GameAI;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameMisc;
-import lwjake2.game.GameUtil;
-import lwjake2.game.Monster;
-import lwjake2.game.edict_t;
-import lwjake2.game.mframe_t;
-import lwjake2.game.mmove_t;
-import lwjake2.game.monsters.M_Flash;
+import lwjake2.game.*;
 import lwjake2.util.Lib;
 import lwjake2.util.Math3D;
 
@@ -464,28 +452,16 @@ public class M_Hover {
     static int sound_search1;
 
     static int sound_search2;
-
-    static EntThinkAdapter hover_reattack = new EntThinkAdapter() {
-    	public String getID() { return "hover_reattack"; }
-        public boolean think(edict_t self) {
-            if (self.enemy.health > 0)
-                if (GameUtil.visible(self, self.enemy))
-                    if (Lib.random() <= 0.6) {
-                        self.monsterinfo.currentmove = hover_move_attack1;
-                        return true;
-                    }
-            self.monsterinfo.currentmove = hover_move_end_attack;
-            return true;
-        }
-    };
-
     static EntThinkAdapter hover_fire_blaster = new EntThinkAdapter() {
-    	public String getID() { return "hover_fire_blaster"; }
+        public String getID() {
+            return "hover_fire_blaster";
+        }
+
         public boolean think(edict_t self) {
-            float[] start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-            float[] end = { 0, 0, 0 };
-            float[] dir = { 0, 0, 0 };
+            float[] start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+            float[] end = {0, 0, 0};
+            float[] dir = {0, 0, 0};
             int effect;
 
             if (self.s.frame == FRAME_attak104)
@@ -507,84 +483,11 @@ public class M_Hover {
             return true;
         }
     };
-
-    static EntThinkAdapter hover_stand = new EntThinkAdapter() {
-    	public String getID() { return "hover_stand"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = hover_move_stand;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter hover_run = new EntThinkAdapter() {
-    	public String getID() { return "hover_run"; }
-        public boolean think(edict_t self) {
-            if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
-                self.monsterinfo.currentmove = hover_move_stand;
-            else
-                self.monsterinfo.currentmove = hover_move_run;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter hover_walk = new EntThinkAdapter() {
-    	public String getID() { return "hover_walk"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = hover_move_walk;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter hover_start_attack = new EntThinkAdapter() {
-    	public String getID() { return "hover_start_attack"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = hover_move_start_attack;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter hover_attack = new EntThinkAdapter() {
-    	public String getID() { return "hover_attack"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = hover_move_attack1;
-            return true;
-        }
-    };
-
-    static EntPainAdapter hover_pain = new EntPainAdapter() {
-    	public String getID() { return "hover_pain"; }
-        public void pain(edict_t self, edict_t other, float kick, int damage) {
-            if (self.health < (self.max_health / 2))
-                self.s.skinnum = 1;
-
-            if (GameBase.level.time < self.pain_debounce_time)
-                return;
-
-            self.pain_debounce_time = GameBase.level.time + 3;
-
-            if (GameBase.skill.value == 3)
-                return; // no pain anims in nightmare
-
-            if (damage <= 25) {
-                if (Lib.random() < 0.5) {
-                    GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain1, 1,
-                            Defines.ATTN_NORM, 0);
-                    self.monsterinfo.currentmove = hover_move_pain3;
-                } else {
-                    GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain2, 1,
-                            Defines.ATTN_NORM, 0);
-                    self.monsterinfo.currentmove = hover_move_pain2;
-                }
-            } else {
-                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain1, 1,
-                        Defines.ATTN_NORM, 0);
-                self.monsterinfo.currentmove = hover_move_pain1;
-            }
-        }
-    };
-
     static EntThinkAdapter hover_deadthink = new EntThinkAdapter() {
-    	public String getID() { return "hover_deadthink"; }
+        public String getID() {
+            return "hover_deadthink";
+        }
+
         public boolean think(edict_t self) {
             if (null == self.groundentity
                     && GameBase.level.time < self.timestamp) {
@@ -595,9 +498,11 @@ public class M_Hover {
             return true;
         }
     };
-
     static EntThinkAdapter hover_dead = new EntThinkAdapter() {
-    	public String getID() { return "hover_dead"; }
+        public String getID() {
+            return "hover_dead";
+        }
+
         public boolean think(edict_t self) {
             Math3D.VectorSet(self.mins, -16, -16, -24);
             Math3D.VectorSet(self.maxs, 16, 16, -8);
@@ -609,59 +514,22 @@ public class M_Hover {
             return true;
         }
     };
-
-    static EntDieAdapter hover_die = new EntDieAdapter() {
-    	public String getID() { return "hover_die"; }
-        public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
-            int n;
-
-            //	check for gib
-            if (self.health <= self.gib_health) {
-                GameBase.gi
-                        .sound(self, Defines.CHAN_VOICE, GameBase.gi
-                                .soundindex("misc/udeath.wav"), 1,
-                                Defines.ATTN_NORM, 0);
-                for (n = 0; n < 2; n++)
-                    GameMisc.ThrowGib(self, "models/objects/gibs/bone/tris.md2",
-                            damage, Defines.GIB_ORGANIC);
-                for (n = 0; n < 2; n++)
-                    GameMisc.ThrowGib(self,
-                            "models/objects/gibs/sm_meat/tris.md2", damage,
-                            Defines.GIB_ORGANIC);
-                GameMisc.ThrowHead(self, "models/objects/gibs/sm_meat/tris.md2",
-                        damage, Defines.GIB_ORGANIC);
-                self.deadflag = Defines.DEAD_DEAD;
-                return;
-            }
-
-            if (self.deadflag == Defines.DEAD_DEAD)
-                return;
-
-            //	regular death
-            if (Lib.random() < 0.5)
-                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_death1, 1,
-                        Defines.ATTN_NORM, 0);
-            else
-                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_death2, 1,
-                        Defines.ATTN_NORM, 0);
-            self.deadflag = Defines.DEAD_DEAD;
-            self.takedamage = Defines.DAMAGE_YES;
-            self.monsterinfo.currentmove = hover_move_death1;
-        }
-    };
-
     static EntInteractAdapter hover_sight = new EntInteractAdapter() {
-    	public String getID() { return "hover_sight"; }
+        public String getID() {
+            return "hover_sight";
+        }
+
         public boolean interact(edict_t self, edict_t other) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_sight, 1,
                     Defines.ATTN_NORM, 0);
             return true;
         }
     };
-
     static EntThinkAdapter hover_search = new EntThinkAdapter() {
-    	public String getID() { return "hover_search"; }
+        public String getID() {
+            return "hover_search";
+        }
+
         public boolean think(edict_t self) {
             if (Lib.random() < 0.5)
                 GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_search1, 1,
@@ -672,8 +540,7 @@ public class M_Hover {
             return true;
         }
     };
-
-    static mframe_t hover_frames_stand[] = new mframe_t[] {
+    static mframe_t hover_frames_stand[] = new mframe_t[]{
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
@@ -703,12 +570,20 @@ public class M_Hover {
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null) };
-
+            new mframe_t(GameAI.ai_stand, 0, null)};
     static mmove_t hover_move_stand = new mmove_t(FRAME_stand01, FRAME_stand30,
             hover_frames_stand, null);
+    static EntThinkAdapter hover_stand = new EntThinkAdapter() {
+        public String getID() {
+            return "hover_stand";
+        }
 
-    static mframe_t hover_frames_stop1[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = hover_move_stand;
+            return true;
+        }
+    };
+    static mframe_t hover_frames_stop1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -717,12 +592,10 @@ public class M_Hover {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t hover_move_stop1 = new mmove_t(FRAME_stop101, FRAME_stop109,
             hover_frames_stop1, null);
-
-    static mframe_t hover_frames_stop2[] = new mframe_t[] {
+    static mframe_t hover_frames_stop2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -730,12 +603,10 @@ public class M_Hover {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t hover_move_stop2 = new mmove_t(FRAME_stop201, FRAME_stop208,
             hover_frames_stop2, null);
-
-    static mframe_t hover_frames_takeoff[] = new mframe_t[] {
+    static mframe_t hover_frames_takeoff[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, -2, null),
             new mframe_t(GameAI.ai_move, 5, null),
@@ -765,12 +636,10 @@ public class M_Hover {
             new mframe_t(GameAI.ai_move, 2, null),
             new mframe_t(GameAI.ai_move, 3, null),
             new mframe_t(GameAI.ai_move, 2, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t hover_move_takeoff = new mmove_t(FRAME_takeof01,
             FRAME_takeof30, hover_frames_takeoff, null);
-
-    static mframe_t hover_frames_pain3[] = new mframe_t[] {
+    static mframe_t hover_frames_pain3[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -779,12 +648,10 @@ public class M_Hover {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t hover_move_pain3 = new mmove_t(FRAME_pain301, FRAME_pain309,
             hover_frames_pain3, hover_run);
-
-    static mframe_t hover_frames_pain2[] = new mframe_t[] {
+    static mframe_t hover_frames_pain2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -796,12 +663,10 @@ public class M_Hover {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t hover_move_pain2 = new mmove_t(FRAME_pain201, FRAME_pain212,
             hover_frames_pain2, hover_run);
-
-    static mframe_t hover_frames_pain1[] = new mframe_t[] {
+    static mframe_t hover_frames_pain1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 2, null),
@@ -829,18 +694,48 @@ public class M_Hover {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 5, null),
             new mframe_t(GameAI.ai_move, 3, null),
-            new mframe_t(GameAI.ai_move, 4, null) };
-
+            new mframe_t(GameAI.ai_move, 4, null)};
     static mmove_t hover_move_pain1 = new mmove_t(FRAME_pain101, FRAME_pain128,
             hover_frames_pain1, hover_run);
+    static EntPainAdapter hover_pain = new EntPainAdapter() {
+        public String getID() {
+            return "hover_pain";
+        }
 
-    static mframe_t hover_frames_land[] = new mframe_t[] { new mframe_t(
-            GameAI.ai_move, 0, null) };
+        public void pain(edict_t self, edict_t other, float kick, int damage) {
+            if (self.health < (self.max_health / 2))
+                self.s.skinnum = 1;
 
+            if (GameBase.level.time < self.pain_debounce_time)
+                return;
+
+            self.pain_debounce_time = GameBase.level.time + 3;
+
+            if (GameBase.skill.value == 3)
+                return; // no pain anims in nightmare
+
+            if (damage <= 25) {
+                if (Lib.random() < 0.5) {
+                    GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain1, 1,
+                            Defines.ATTN_NORM, 0);
+                    self.monsterinfo.currentmove = hover_move_pain3;
+                } else {
+                    GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain2, 1,
+                            Defines.ATTN_NORM, 0);
+                    self.monsterinfo.currentmove = hover_move_pain2;
+                }
+            } else {
+                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_pain1, 1,
+                        Defines.ATTN_NORM, 0);
+                self.monsterinfo.currentmove = hover_move_pain1;
+            }
+        }
+    };
+    static mframe_t hover_frames_land[] = new mframe_t[]{new mframe_t(
+            GameAI.ai_move, 0, null)};
     static mmove_t hover_move_land = new mmove_t(FRAME_land01, FRAME_land01,
             hover_frames_land, null);
-
-    static mframe_t hover_frames_forward[] = new mframe_t[] {
+    static mframe_t hover_frames_forward[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -875,12 +770,10 @@ public class M_Hover {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t hover_move_forward = new mmove_t(FRAME_forwrd01,
             FRAME_forwrd35, hover_frames_forward, null);
-
-    static mframe_t hover_frames_walk[] = new mframe_t[] {
+    static mframe_t hover_frames_walk[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 4, null),
             new mframe_t(GameAI.ai_walk, 4, null),
             new mframe_t(GameAI.ai_walk, 4, null),
@@ -915,12 +808,20 @@ public class M_Hover {
             new mframe_t(GameAI.ai_walk, 4, null),
             new mframe_t(GameAI.ai_walk, 4, null),
             new mframe_t(GameAI.ai_walk, 4, null),
-            new mframe_t(GameAI.ai_walk, 4, null) };
-
+            new mframe_t(GameAI.ai_walk, 4, null)};
     static mmove_t hover_move_walk = new mmove_t(FRAME_forwrd01,
             FRAME_forwrd35, hover_frames_walk, null);
+    static EntThinkAdapter hover_walk = new EntThinkAdapter() {
+        public String getID() {
+            return "hover_walk";
+        }
 
-    static mframe_t hover_frames_run[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = hover_move_walk;
+            return true;
+        }
+    };
+    static mframe_t hover_frames_run[] = new mframe_t[]{
             new mframe_t(GameAI.ai_run, 10, null),
             new mframe_t(GameAI.ai_run, 10, null),
             new mframe_t(GameAI.ai_run, 10, null),
@@ -955,12 +856,23 @@ public class M_Hover {
             new mframe_t(GameAI.ai_run, 10, null),
             new mframe_t(GameAI.ai_run, 10, null),
             new mframe_t(GameAI.ai_run, 10, null),
-            new mframe_t(GameAI.ai_run, 10, null) };
-
+            new mframe_t(GameAI.ai_run, 10, null)};
     static mmove_t hover_move_run = new mmove_t(FRAME_forwrd01, FRAME_forwrd35,
             hover_frames_run, null);
+    static EntThinkAdapter hover_run = new EntThinkAdapter() {
+        public String getID() {
+            return "hover_run";
+        }
 
-    static mframe_t hover_frames_death1[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
+                self.monsterinfo.currentmove = hover_move_stand;
+            else
+                self.monsterinfo.currentmove = hover_move_run;
+            return true;
+        }
+    };
+    static mframe_t hover_frames_death1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -971,62 +883,132 @@ public class M_Hover {
             new mframe_t(GameAI.ai_move, 3, null),
             new mframe_t(GameAI.ai_move, 5, null),
             new mframe_t(GameAI.ai_move, 4, null),
-            new mframe_t(GameAI.ai_move, 7, null) };
-
+            new mframe_t(GameAI.ai_move, 7, null)};
     static mmove_t hover_move_death1 = new mmove_t(FRAME_death101,
             FRAME_death111, hover_frames_death1, hover_dead);
+    static EntDieAdapter hover_die = new EntDieAdapter() {
+        public String getID() {
+            return "hover_die";
+        }
 
-    static mframe_t hover_frames_backward[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+        public void die(edict_t self, edict_t inflictor, edict_t attacker,
+                        int damage, float[] point) {
+            int n;
 
+            //	check for gib
+            if (self.health <= self.gib_health) {
+                GameBase.gi
+                        .sound(self, Defines.CHAN_VOICE, GameBase.gi
+                                        .soundindex("misc/udeath.wav"), 1,
+                                Defines.ATTN_NORM, 0);
+                for (n = 0; n < 2; n++)
+                    GameMisc.ThrowGib(self, "models/objects/gibs/bone/tris.md2",
+                            damage, Defines.GIB_ORGANIC);
+                for (n = 0; n < 2; n++)
+                    GameMisc.ThrowGib(self,
+                            "models/objects/gibs/sm_meat/tris.md2", damage,
+                            Defines.GIB_ORGANIC);
+                GameMisc.ThrowHead(self, "models/objects/gibs/sm_meat/tris.md2",
+                        damage, Defines.GIB_ORGANIC);
+                self.deadflag = Defines.DEAD_DEAD;
+                return;
+            }
+
+            if (self.deadflag == Defines.DEAD_DEAD)
+                return;
+
+            //	regular death
+            if (Lib.random() < 0.5)
+                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_death1, 1,
+                        Defines.ATTN_NORM, 0);
+            else
+                GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_death2, 1,
+                        Defines.ATTN_NORM, 0);
+            self.deadflag = Defines.DEAD_DEAD;
+            self.takedamage = Defines.DAMAGE_YES;
+            self.monsterinfo.currentmove = hover_move_death1;
+        }
+    };
+    static mframe_t hover_frames_backward[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t hover_move_backward = new mmove_t(FRAME_backwd01,
             FRAME_backwd24, hover_frames_backward, null);
-
-    static mframe_t hover_frames_start_attack[] = new mframe_t[] {
+    static mframe_t hover_frames_start_attack[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 1, null),
             new mframe_t(GameAI.ai_charge, 1, null),
-            new mframe_t(GameAI.ai_charge, 1, null) };
-
+            new mframe_t(GameAI.ai_charge, 1, null)};
     static mmove_t hover_move_start_attack = new mmove_t(FRAME_attak101,
             FRAME_attak103, hover_frames_start_attack, hover_attack);
+    static EntThinkAdapter hover_start_attack = new EntThinkAdapter() {
+        public String getID() {
+            return "hover_start_attack";
+        }
 
-    static mframe_t hover_frames_attack1[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = hover_move_start_attack;
+            return true;
+        }
+    };
+    static mframe_t hover_frames_attack1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, -10, hover_fire_blaster),
             new mframe_t(GameAI.ai_charge, -10, hover_fire_blaster),
-            new mframe_t(GameAI.ai_charge, 0, hover_reattack), };
-
+            new mframe_t(GameAI.ai_charge, 0, hover_reattack),};
     static mmove_t hover_move_attack1 = new mmove_t(FRAME_attak104,
             FRAME_attak106, hover_frames_attack1, null);
+    static EntThinkAdapter hover_attack = new EntThinkAdapter() {
+        public String getID() {
+            return "hover_attack";
+        }
 
-    static mframe_t hover_frames_end_attack[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = hover_move_attack1;
+            return true;
+        }
+    };
+    static mframe_t hover_frames_end_attack[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 1, null),
-            new mframe_t(GameAI.ai_charge, 1, null) };
-
+            new mframe_t(GameAI.ai_charge, 1, null)};
     static mmove_t hover_move_end_attack = new mmove_t(FRAME_attak107,
             FRAME_attak108, hover_frames_end_attack, hover_run);
+    static EntThinkAdapter hover_reattack = new EntThinkAdapter() {
+        public String getID() {
+            return "hover_reattack";
+        }
+
+        public boolean think(edict_t self) {
+            if (self.enemy.health > 0)
+                if (GameUtil.visible(self, self.enemy))
+                    if (Lib.random() <= 0.6) {
+                        self.monsterinfo.currentmove = hover_move_attack1;
+                        return true;
+                    }
+            self.monsterinfo.currentmove = hover_move_end_attack;
+            return true;
+        }
+    };
 
     /*
      * QUAKED monster_hover (1 .5 0) (-16 -16 -24) (16 16 32) Ambush

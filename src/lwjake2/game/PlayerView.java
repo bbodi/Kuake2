@@ -30,11 +30,24 @@ public class PlayerView {
 
     public static gclient_t current_client;
 
-    public static float[] forward = { 0, 0, 0 };
+    public static float[] forward = {0, 0, 0};
 
-    public static float[] right = { 0, 0, 0 };
+    public static float[] right = {0, 0, 0};
 
-    public static float[] up = { 0, 0, 0 };
+    public static float[] up = {0, 0, 0};
+    public static float xyspeed;
+
+    /*
+     * =============== 
+     * P_DamageFeedback
+     * 
+     * Handles color blends and view kicks 
+     * ===============
+     */
+    public static float bobmove;
+    public static int bobcycle; // odd cycles are right foot going forward
+    public static float bobfracsin; // sin(bobfrac*M_PI)}
+    private static int xxxi = 0;
 
     /**
      * SV_CalcRoll.
@@ -58,23 +71,15 @@ public class PlayerView {
         return side * sign;
     }
 
-    /*
-     * =============== 
-     * P_DamageFeedback
-     * 
-     * Handles color blends and view kicks 
-     * ===============
-     */
-
     public static void P_DamageFeedback(edict_t player) {
         gclient_t client;
         float side;
         float realcount, count, kick;
-        float[] v = { 0, 0, 0 };
+        float[] v = {0, 0, 0};
         int r, l;
-        float[] power_color = { 0.0f, 1.0f, 0.0f };
-        float[] acolor = { 1.0f, 1.0f, 1.0f };
-        float[] bcolor = { 1.0f, 0.0f, 0.0f };
+        float[] power_color = {0.0f, 1.0f, 0.0f};
+        float[] acolor = {1.0f, 1.0f, 1.0f};
+        float[] bcolor = {1.0f, 0.0f, 0.0f};
 
         client = player.client;
 
@@ -104,18 +109,18 @@ public class PlayerView {
 
                 xxxi = (xxxi + 1) % 3;
                 switch (xxxi) {
-                case 0:
-                    player.s.frame = M_Player.FRAME_pain101 - 1;
-                    client.anim_end = M_Player.FRAME_pain104;
-                    break;
-                case 1:
-                    player.s.frame = M_Player.FRAME_pain201 - 1;
-                    client.anim_end = M_Player.FRAME_pain204;
-                    break;
-                case 2:
-                    player.s.frame = M_Player.FRAME_pain301 - 1;
-                    client.anim_end = M_Player.FRAME_pain304;
-                    break;
+                    case 0:
+                        player.s.frame = M_Player.FRAME_pain101 - 1;
+                        client.anim_end = M_Player.FRAME_pain104;
+                        break;
+                    case 1:
+                        player.s.frame = M_Player.FRAME_pain201 - 1;
+                        client.anim_end = M_Player.FRAME_pain204;
+                        break;
+                    case 2:
+                        player.s.frame = M_Player.FRAME_pain301 - 1;
+                        client.anim_end = M_Player.FRAME_pain304;
+                        break;
                 }
             }
         }
@@ -139,7 +144,7 @@ public class PlayerView {
             else
                 l = 100;
             GameBase.gi.sound(player, Defines.CHAN_VOICE, GameBase.gi
-                    .soundindex("*pain" + l + "_" + r + ".wav"), 1,
+                            .soundindex("*pain" + l + "_" + r + ".wav"), 1,
                     Defines.ATTN_NORM, 0);
         }
 
@@ -155,7 +160,7 @@ public class PlayerView {
         // the color of the blend will vary based on how much was absorbed
         // by different armors
         //
-        
+
         Math3D.VectorClear(v);
         if (client.damage_parmor != 0)
             Math3D.VectorMA(v, (float) client.damage_parmor / realcount,
@@ -175,7 +180,7 @@ public class PlayerView {
         //
         kick = Math.abs(client.damage_knockback);
         if (kick != 0 && player.health > 0) // kick of 0 means no view adjust at
-                                            // all
+        // all
         {
             kick = kick * 100 / player.health;
 
@@ -206,20 +211,19 @@ public class PlayerView {
     }
 
     /**
-     * 
-     * fall from 128: 400 = 160000 
-     * fall from 256: 580 = 336400 
-     * fall from 384: 720 = 518400 
-     * fall from 512: 800 = 640000 
-     * fall from 640: 960 =  
+     * fall from 128: 400 = 160000
+     * fall from 256: 580 = 336400
+     * fall from 384: 720 = 518400
+     * fall from 512: 800 = 640000
+     * fall from 640: 960 =
      * damage = deltavelocity*deltavelocity * 0.0001
      */
     public static void SV_CalcViewOffset(edict_t ent) {
-        float angles[] = { 0, 0, 0 };
+        float angles[] = {0, 0, 0};
         float bob;
         float ratio;
         float delta;
-        float[] v = { 0, 0, 0 };
+        float[] v = {0, 0, 0};
 
         // base angles
         angles = ent.client.ps.kick_angles;
@@ -232,7 +236,7 @@ public class PlayerView {
             ent.client.ps.viewangles[Defines.PITCH] = -15;
             ent.client.ps.viewangles[Defines.YAW] = ent.client.killer_yaw;
         } else {
-        	
+
             // add angles based on weapon kick
             Math3D.VectorCopy(ent.client.kick_angles, angles);
 
@@ -291,7 +295,7 @@ public class PlayerView {
         bob = bobfracsin * xyspeed * GameBase.bob_up.value;
         if (bob > 6)
             bob = 6;
-        
+
         //gi.DebugGraph (bob *2, 255);
         v[2] += bob;
 
@@ -367,7 +371,7 @@ public class PlayerView {
      * Adds a blending effect to the clients view.
      */
     public static void SV_AddBlend(float r, float g, float b, float a,
-            float v_blend[]) {
+                                   float v_blend[]) {
         float a2, a3;
 
         if (a <= 0)
@@ -386,7 +390,7 @@ public class PlayerView {
      */
     public static void SV_CalcBlend(edict_t ent) {
         int contents;
-        float[] vieworg = { 0, 0, 0 };
+        float[] vieworg = {0, 0, 0};
         int remaining;
 
         ent.client.ps.blend[0] = ent.client.ps.blend[1] = ent.client.ps.blend[2] = ent.client.ps.blend[3] = 0;
@@ -410,23 +414,23 @@ public class PlayerView {
         if (ent.client.quad_framenum > GameBase.level.framenum) {
             remaining = (int) (ent.client.quad_framenum - GameBase.level.framenum);
             if (remaining == 30) // beginning to fade
-                GameBase.gi.sound(ent, Defines.CHAN_ITEM, 
-                	GameBase.gi.soundindex("items/damage2.wav"), 1, Defines.ATTN_NORM, 0);
+                GameBase.gi.sound(ent, Defines.CHAN_ITEM,
+                        GameBase.gi.soundindex("items/damage2.wav"), 1, Defines.ATTN_NORM, 0);
             if (remaining > 30 || (remaining & 4) != 0)
                 SV_AddBlend(0, 0, 1, 0.08f, ent.client.ps.blend);
         } else if (ent.client.invincible_framenum > GameBase.level.framenum) {
             remaining = (int) ent.client.invincible_framenum - GameBase.level.framenum;
             if (remaining == 30) // beginning to fade
-                GameBase.gi.sound(ent, Defines.CHAN_ITEM, 
-                	GameBase.gi.soundindex("items/protect2.wav"), 1, Defines.ATTN_NORM, 0);
+                GameBase.gi.sound(ent, Defines.CHAN_ITEM,
+                        GameBase.gi.soundindex("items/protect2.wav"), 1, Defines.ATTN_NORM, 0);
             if (remaining > 30 || (remaining & 4) != 0)
                 SV_AddBlend(1, 1, 0, 0.08f, ent.client.ps.blend);
         } else if (ent.client.enviro_framenum > GameBase.level.framenum) {
             remaining = (int) ent.client.enviro_framenum
                     - GameBase.level.framenum;
             if (remaining == 30) // beginning to fade
-                GameBase.gi.sound(ent, Defines.CHAN_ITEM, 
-                		GameBase.gi.soundindex("items/airout.wav"), 1, Defines.ATTN_NORM, 0);
+                GameBase.gi.sound(ent, Defines.CHAN_ITEM,
+                        GameBase.gi.soundindex("items/airout.wav"), 1, Defines.ATTN_NORM, 0);
             if (remaining > 30 || (remaining & 4) != 0)
                 SV_AddBlend(0, 1, 0, 0.08f, ent.client.ps.blend);
         } else if (ent.client.breather_framenum > GameBase.level.framenum) {
@@ -434,7 +438,7 @@ public class PlayerView {
                     - GameBase.level.framenum;
             if (remaining == 30) // beginning to fade
                 GameBase.gi.sound(ent, Defines.CHAN_ITEM, GameBase.gi
-                        .soundindex("items/airout.wav"), 1, Defines.ATTN_NORM,
+                                .soundindex("items/airout.wav"), 1, Defines.ATTN_NORM,
                         0);
             if (remaining > 30 || (remaining & 4) != 0)
                 SV_AddBlend(0.4f, 1, 0.4f, 0.04f, ent.client.ps.blend);
@@ -467,7 +471,7 @@ public class PlayerView {
     public static void P_FallingDamage(edict_t ent) {
         float delta;
         int damage;
-        float[] dir = { 0, 0, 0 };
+        float[] dir = {0, 0, 0};
 
         if (ent.s.modelindex != 255)
             return; // not in the player model
@@ -515,7 +519,7 @@ public class PlayerView {
                     ent.s.event = Defines.EV_FALL;
             }
             ent.pain_debounce_time = GameBase.level.time; // no normal pain
-                                                          // sound
+            // sound
             damage = (int) ((delta - 30) / 2);
             if (damage < 1)
                 damage = 1;
@@ -542,7 +546,7 @@ public class PlayerView {
 
         if (current_player.movetype == Defines.MOVETYPE_NOCLIP) {
             current_player.air_finished = GameBase.level.time + 12; // don't
-                                                                    // need air
+            // need air
             return;
         }
 
@@ -585,7 +589,7 @@ public class PlayerView {
                     Defines.PNOISE_SELF);
             GameBase.gi
                     .sound(current_player, Defines.CHAN_BODY, GameBase.gi
-                            .soundindex("player/watr_out.wav"), 1,
+                                    .soundindex("player/watr_out.wav"), 1,
                             Defines.ATTN_NORM, 0);
             current_player.flags &= ~Defines.FL_INWATER;
         }
@@ -603,15 +607,15 @@ public class PlayerView {
         //
         if (old_waterlevel == 3 && waterlevel != 3) {
             if (current_player.air_finished < GameBase.level.time) { // gasp for
-                                                                     // air
+                // air
                 GameBase.gi.sound(current_player, Defines.CHAN_VOICE,
                         GameBase.gi.soundindex("player/gasp1.wav"), 1,
                         Defines.ATTN_NORM, 0);
                 PlayerWeapon.PlayerNoise(current_player, current_player.s.origin,
                         Defines.PNOISE_SELF);
             } else if (current_player.air_finished < GameBase.level.time + 11) { // just
-                                                                                 // break
-                                                                                 // surface
+                // break
+                // surface
                 GameBase.gi.sound(current_player, Defines.CHAN_VOICE,
                         GameBase.gi.soundindex("player/gasp2.wav"), 1,
                         Defines.ATTN_NORM, 0);
@@ -725,8 +729,8 @@ public class PlayerView {
     }
 
     /*
-     * =============== 
-     * G_SetClientEffects 
+     * ===============
+     * G_SetClientEffects
      * ===============
      */
     public static void G_SetClientEffects(edict_t ent) {
@@ -771,8 +775,8 @@ public class PlayerView {
     }
 
     /*
-     * =============== 
-     * G_SetClientEvent 
+     * ===============
+     * G_SetClientEvent
      * ===============
      */
     public static void G_SetClientEvent(edict_t ent) {
@@ -786,8 +790,8 @@ public class PlayerView {
     }
 
     /*
-     * =============== 
-     * G_SetClientSound 
+     * ===============
+     * G_SetClientSound
      * ===============
      */
     public static void G_SetClientSound(edict_t ent) {
@@ -826,8 +830,8 @@ public class PlayerView {
     }
 
     /*
-     * =============== 
-     * G_SetClientFrame 
+     * ===============
+     * G_SetClientFrame
      * ===============
      */
     public static void G_SetClientFrame(edict_t ent) {
@@ -914,7 +918,6 @@ public class PlayerView {
         }
     }
 
-    
     /**
      * Called for each player at the end of the server frame and right after
      * spawning.
@@ -930,7 +933,7 @@ public class PlayerView {
         // If the origin or velocity have changed since ClientThink(),
         // update the pmove values. This will happen when the client
         // is pushed by a bmodel or kicked by an explosion.
-        // 
+        //
         // If it wasn't updated here, the view position would lag a frame
         // behind the body position when pushed -- "sinking into plats"
         //
@@ -979,7 +982,7 @@ public class PlayerView {
             bobmove = 0;
             current_client.bobtime = 0; // start at beginning of cycle again
         } else if (ent.groundentity != null) { // so bobbing only cycles when on
-                                               // ground
+            // ground
             if (xyspeed > 210)
                 bobmove = 0.25f;
             else if (xyspeed > 100)
@@ -1043,14 +1046,4 @@ public class PlayerView {
             GameBase.gi.unicast(ent, false);
         }
     }
-
-    public static float xyspeed;
-
-    public static float bobmove;
-
-    public static int bobcycle; // odd cycles are right foot going forward
-
-    public static float bobfracsin; // sin(bobfrac*M_PI)}
-
-    private static int xxxi = 0;
 }

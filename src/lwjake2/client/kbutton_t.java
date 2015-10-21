@@ -22,8 +22,8 @@ package lwjake2.client;
  * kbutton_t
  */
 public class kbutton_t {
-	int[] down = new int[2];	// key nums holding it down
-	long downtime;				// msec timestamp
-	long msec;					// msec down this frame
-	public int state;
+    public int state;
+    int[] down = new int[2];    // key nums holding it down
+    long downtime;                // msec timestamp
+    long msec;                    // msec down this frame
 }

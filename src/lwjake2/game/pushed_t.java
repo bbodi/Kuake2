@@ -19,8 +19,8 @@
 package lwjake2.game;
 
 public class pushed_t {
-	public edict_t ent;
-	public float[] origin= { 0.0f, 0.0f, 0.0f };
-	public float[] angles= { 0.0f, 0.0f, 0.0f };
-	public float deltayaw;
+    public edict_t ent;
+    public float[] origin = {0.0f, 0.0f, 0.0f};
+    public float[] angles = {0.0f, 0.0f, 0.0f};
+    public float deltayaw;
 }

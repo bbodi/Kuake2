@@ -20,12 +20,7 @@ package lwjake2.client;
 
 import lwjake2.Defines;
 import lwjake2.Globals;
-import lwjake2.game.EntThinkAdapter;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameCombat;
-import lwjake2.game.edict_t;
-import lwjake2.game.mmove_t;
-import lwjake2.game.trace_t;
+import lwjake2.game.*;
 import lwjake2.server.SV;
 import lwjake2.util.Lib;
 import lwjake2.util.Math3D;
@@ -35,8 +30,91 @@ import lwjake2.util.Math3D;
  */
 public final class M {
 
+    public static EntThinkAdapter M_droptofloor = new EntThinkAdapter() {
+        public String getID() {
+            return "m_drop_to_floor";
+        }
+
+        public boolean think(edict_t ent) {
+            float[] end = {0, 0, 0};
+            trace_t trace;
+
+            ent.s.origin[2] += 1;
+            Math3D.VectorCopy(ent.s.origin, end);
+            end[2] -= 256;
+
+            trace = GameBase.gi.trace(ent.s.origin, ent.mins, ent.maxs, end,
+                    ent, Defines.MASK_MONSTERSOLID);
+
+            if (trace.fraction == 1 || trace.allsolid)
+                return true;
+
+            Math3D.VectorCopy(trace.endpos, ent.s.origin);
+
+            GameBase.gi.linkentity(ent);
+            M.M_CheckGround(ent);
+            M_CatagorizePosition(ent);
+            return true;
+        }
+    };
+    /**
+     * Stops the Flies.
+     */
+    public static EntThinkAdapter M_FliesOff = new EntThinkAdapter() {
+        public String getID() {
+            return "m_fliesoff";
+        }
+
+        public boolean think(edict_t self) {
+            self.s.effects &= ~Defines.EF_FLIES;
+            self.s.sound = 0;
+            return true;
+        }
+    };
+    /**
+     * Starts the Flies as setting the animation flag in the entity.
+     */
+    public static EntThinkAdapter M_FliesOn = new EntThinkAdapter() {
+        public String getID() {
+            return "m_flies_on";
+        }
+
+        public boolean think(edict_t self) {
+            if (self.waterlevel != 0)
+                return true;
+
+            self.s.effects |= Defines.EF_FLIES;
+            self.s.sound = GameBase.gi.soundindex("infantry/inflies1.wav");
+            self.think = M_FliesOff;
+            self.nextthink = GameBase.level.time + 60;
+            return true;
+        }
+    };
+    /**
+     * Adds some flies after a random time
+     */
+    public static EntThinkAdapter M_FlyCheck = new EntThinkAdapter() {
+        public String getID() {
+            return "m_fly_check";
+        }
+
+        public boolean think(edict_t self) {
+
+            if (self.waterlevel != 0)
+                return true;
+
+            if (Globals.rnd.nextFloat() > 0.5)
+                return true;
+
+            self.think = M_FliesOn;
+            self.nextthink = GameBase.level.time + 5 + 10
+                    * Globals.rnd.nextFloat();
+            return true;
+        }
+    };
+
     public static void M_CheckGround(edict_t ent) {
-        float[] point = { 0, 0, 0 };
+        float[] point = {0, 0, 0};
         trace_t trace;
 
         if ((ent.flags & (Defines.FL_SWIM | Defines.FL_FLY)) != 0)
@@ -73,17 +151,17 @@ public final class M {
             ent.velocity[2] = 0;
         }
     }
-    
+
     /**
      * Returns false if any part of the bottom of the entity is off an edge that
      * is not a staircase.
      */
 
     public static boolean M_CheckBottom(edict_t ent) {
-        float[] mins = { 0, 0, 0 };
-        float[] maxs = { 0, 0, 0 };
-        float[] start = { 0, 0, 0 };
-        float[] stop = { 0, 0, 0 };
+        float[] mins = {0, 0, 0};
+        float[] maxs = {0, 0, 0};
+        float[] start = {0, 0, 0};
+        float[] stop = {0, 0, 0};
 
         trace_t trace;
         int x, y;
@@ -146,7 +224,7 @@ public final class M {
         return true; // we got out easy
     }
 
-    /** 
+    /**
      * M_ChangeYaw.
      */
     public static void M_ChangeYaw(edict_t ent) {
@@ -203,11 +281,11 @@ public final class M {
         }
     }
 
-    /** 
+    /**
      * M_walkmove.
      */
     public static boolean M_walkmove(edict_t ent, float yaw, float dist) {
-        float[] move = { 0, 0, 0 };
+        float[] move = {0, 0, 0};
 
         if ((ent.groundentity == null)
                 && (ent.flags & (Defines.FL_FLY | Defines.FL_SWIM)) == 0)
@@ -222,8 +300,10 @@ public final class M {
         return SV.SV_movestep(ent, move, true);
     }
 
+    ;
+
     public static void M_CatagorizePosition(edict_t ent) {
-        float[] point = { 0, 0, 0 };
+        float[] point = {0, 0, 0};
         int cont;
 
         //
@@ -298,7 +378,7 @@ public final class M {
         if (ent.waterlevel == 0) {
             if ((ent.flags & Defines.FL_INWATER) != 0) {
                 GameBase.gi.sound(ent, Defines.CHAN_BODY, GameBase.gi
-                        .soundindex("player/watr_out.wav"), 1,
+                                .soundindex("player/watr_out.wav"), 1,
                         Defines.ATTN_NORM, 0);
                 ent.flags &= ~Defines.FL_INWATER;
             }
@@ -331,19 +411,19 @@ public final class M {
                 if ((ent.watertype & Defines.CONTENTS_LAVA) != 0)
                     if (Globals.rnd.nextFloat() <= 0.5)
                         GameBase.gi.sound(ent, Defines.CHAN_BODY, GameBase.gi
-                                .soundindex("player/lava1.wav"), 1,
+                                        .soundindex("player/lava1.wav"), 1,
                                 Defines.ATTN_NORM, 0);
                     else
                         GameBase.gi.sound(ent, Defines.CHAN_BODY, GameBase.gi
-                                .soundindex("player/lava2.wav"), 1,
+                                        .soundindex("player/lava2.wav"), 1,
                                 Defines.ATTN_NORM, 0);
                 else if ((ent.watertype & Defines.CONTENTS_SLIME) != 0)
                     GameBase.gi.sound(ent, Defines.CHAN_BODY, GameBase.gi
-                            .soundindex("player/watr_in.wav"), 1,
+                                    .soundindex("player/watr_in.wav"), 1,
                             Defines.ATTN_NORM, 0);
                 else if ((ent.watertype & Defines.CONTENTS_WATER) != 0)
                     GameBase.gi.sound(ent, Defines.CHAN_BODY, GameBase.gi
-                            .soundindex("player/watr_in.wav"), 1,
+                                    .soundindex("player/watr_in.wav"), 1,
                             Defines.ATTN_NORM, 0);
             }
 
@@ -351,31 +431,6 @@ public final class M {
             ent.damage_debounce_time = 0;
         }
     }
-
-    public static EntThinkAdapter M_droptofloor = new EntThinkAdapter() {
-        public String getID() { return "m_drop_to_floor";}
-        public boolean think(edict_t ent) {
-            float[] end = { 0, 0, 0 };
-            trace_t trace;
-
-            ent.s.origin[2] += 1;
-            Math3D.VectorCopy(ent.s.origin, end);
-            end[2] -= 256;
-
-            trace = GameBase.gi.trace(ent.s.origin, ent.mins, ent.maxs, end,
-                    ent, Defines.MASK_MONSTERSOLID);
-
-            if (trace.fraction == 1 || trace.allsolid)
-                return true;
-
-            Math3D.VectorCopy(trace.endpos, ent.s.origin);
-
-            GameBase.gi.linkentity(ent);
-            M.M_CheckGround(ent);
-            M_CatagorizePosition(ent);
-            return true;
-        }
-    };
 
     public static void M_SetEffects(edict_t ent) {
         ent.s.effects &= ~(Defines.EF_COLOR_SHELL | Defines.EF_POWERSCREEN);
@@ -397,7 +452,7 @@ public final class M {
                 ent.s.renderfx |= Defines.RF_SHELL_GREEN;
             }
         }
-    };
+    }
 
     //ok
     public static void M_MoveFrame(edict_t self) {
@@ -449,47 +504,4 @@ public final class M {
         if (move.frame[index].think != null)
             move.frame[index].think.think(self);
     }
-
-    /** Stops the Flies. */
-    public static EntThinkAdapter M_FliesOff = new EntThinkAdapter() {
-        public String getID() { return "m_fliesoff";}
-        public boolean think(edict_t self) {
-            self.s.effects &= ~Defines.EF_FLIES;
-            self.s.sound = 0;
-            return true;
-        }
-    };
-
-    /** Starts the Flies as setting the animation flag in the entity. */
-    public static EntThinkAdapter M_FliesOn = new EntThinkAdapter() {
-        public String getID() { return "m_flies_on";}
-        public boolean think(edict_t self) {
-            if (self.waterlevel != 0)
-                return true;
-
-            self.s.effects |= Defines.EF_FLIES;
-            self.s.sound = GameBase.gi.soundindex("infantry/inflies1.wav");
-            self.think = M_FliesOff;
-            self.nextthink = GameBase.level.time + 60;
-            return true;
-        }
-    };
-
-    /** Adds some flies after a random time */
-    public static EntThinkAdapter M_FlyCheck = new EntThinkAdapter() {
-        public String getID() { return "m_fly_check";}
-        public boolean think(edict_t self) {
-
-            if (self.waterlevel != 0)
-                return true;
-
-            if (Globals.rnd.nextFloat() > 0.5)
-                return true;
-
-            self.think = M_FliesOn;
-            self.nextthink = GameBase.level.time + 5 + 10
-                    * Globals.rnd.nextFloat();
-            return true;
-        }
-    };
 }

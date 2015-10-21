@@ -18,9 +18,8 @@
 
 package lwjake2.game;
 
-public final class cmdalias_t
-{
-	public cmdalias_t next;
-	public String name = "";
-	public String value;
+public final class cmdalias_t {
+    public cmdalias_t next;
+    public String name = "";
+    public String value;
 }

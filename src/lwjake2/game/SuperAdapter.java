@@ -24,31 +24,41 @@ import java.util.Hashtable;
 
 public abstract class SuperAdapter {
 
-	/** Constructor, does the adapter registration. */
-	public SuperAdapter() {
-		register(this, getID());
-	}
+    /**
+     * Adapter repository.
+     */
+    private static Hashtable<String, SuperAdapter> adapters = new Hashtable<String, SuperAdapter>();
 
-	/** Adapter registration. */
-	private static void register(SuperAdapter sa, String id) {
-		adapters.put(id, sa);
-	}
+    /**
+     * Constructor, does the adapter registration.
+     */
+    public SuperAdapter() {
+        register(this, getID());
+    }
 
-	/** Adapter repository. */
-	private static Hashtable<String, SuperAdapter> adapters= new Hashtable<String, SuperAdapter>();
+    /**
+     * Adapter registration.
+     */
+    private static void register(SuperAdapter sa, String id) {
+        adapters.put(id, sa);
+    }
 
-	/** Returns the adapter from the repository given by its ID. */
-	public static SuperAdapter getFromID(String key) {
-		SuperAdapter sa= (SuperAdapter) adapters.get(key);
+    /**
+     * Returns the adapter from the repository given by its ID.
+     */
+    public static SuperAdapter getFromID(String key) {
+        SuperAdapter sa = (SuperAdapter) adapters.get(key);
 
-		// try to create the adapter
-		if (sa == null) {
-			Com.DPrintf("SuperAdapter.getFromID():adapter not found->" + key + "\n");
-		}
+        // try to create the adapter
+        if (sa == null) {
+            Com.DPrintf("SuperAdapter.getFromID():adapter not found->" + key + "\n");
+        }
 
-		return sa;
-	}
+        return sa;
+    }
 
-	/** Returns the Adapter-ID. */
-	public abstract String getID();
+    /**
+     * Returns the Adapter-ID.
+     */
+    public abstract String getID();
 }

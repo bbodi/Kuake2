@@ -84,20 +84,18 @@ public final class Netchan extends SV_MAIN {
      * unacknowledged reliable
      */
 
+    private static final byte send_buf[] = new byte[Defines.MAX_MSGLEN];
+    private static final sizebuf_t send = new sizebuf_t();
     public static cvar_t showpackets;
-
     public static cvar_t showdrop;
-
     public static cvar_t qport;
-
     //public static netadr_t net_from = new netadr_t();
     public static sizebuf_t net_message = new sizebuf_t();
-
     public static byte net_message_buffer[] = new byte[Defines.MAX_MSGLEN];
 
     /*
      * =============== Netchan_Init
-     * 
+     *
      * ===============
      */
     //ok.
@@ -112,8 +110,6 @@ public final class Netchan extends SV_MAIN {
         qport = Cvar.Get("qport", "" + port, Defines.CVAR_NOSET);
     }
 
-    private static final byte send_buf[] = new byte[Defines.MAX_MSGLEN];
-    private static final sizebuf_t send = new sizebuf_t();
     /*
      * =============== Netchan_OutOfBand
      * 
@@ -121,7 +117,7 @@ public final class Netchan extends SV_MAIN {
      */
     //ok.
     public static void Netchan_OutOfBand(int net_socket, netadr_t adr,
-            int length, byte data[]) {
+                                         int length, byte data[]) {
 
         // write the packet header
         SZ.Init(send, send_buf, Defines.MAX_MSGLEN);
@@ -256,7 +252,7 @@ public final class Netchan extends SV_MAIN {
         if (showpackets.value != 0) {
             if (send_reliable != 0)
                 Com.Printf(
-                //"send %4i : s=%i reliable=%i ack=%i rack=%i\n"
+                        //"send %4i : s=%i reliable=%i ack=%i rack=%i\n"
                         "send " + send.cursize + " : s="
                                 + (chan.outgoing_sequence - 1) + " reliable="
                                 + chan.reliable_sequence + " ack="
@@ -264,7 +260,7 @@ public final class Netchan extends SV_MAIN {
                                 + chan.incoming_reliable_sequence + "\n");
             else
                 Com.Printf(
-                //"send %4i : s=%i ack=%i rack=%i\n"
+                        //"send %4i : s=%i ack=%i rack=%i\n"
                         "send " + send.cursize + " : s="
                                 + (chan.outgoing_sequence - 1) + " ack="
                                 + chan.incoming_sequence + " rack="
@@ -301,7 +297,7 @@ public final class Netchan extends SV_MAIN {
         if (showpackets.value != 0) {
             if (reliable_message != 0)
                 Com.Printf(
-                //"recv %4i : s=%i reliable=%i ack=%i rack=%i\n"
+                        //"recv %4i : s=%i reliable=%i ack=%i rack=%i\n"
                         "recv " + msg.cursize + " : s=" + sequence
                                 + " reliable="
                                 + (chan.incoming_reliable_sequence ^ 1)
@@ -310,9 +306,9 @@ public final class Netchan extends SV_MAIN {
             else
                 Com
                         .Printf(
-                        //"recv %4i : s=%i ack=%i rack=%i\n"
-                        "recv " + msg.cursize + " : s=" + sequence + " ack="
-                                + sequence_ack + " rack=" + reliable_ack + "\n");
+                                //"recv %4i : s=%i ack=%i rack=%i\n"
+                                "recv " + msg.cursize + " : s=" + sequence + " ack="
+                                        + sequence_ack + " rack=" + reliable_ack + "\n");
         }
 
         //

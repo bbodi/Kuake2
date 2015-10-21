@@ -21,8 +21,8 @@ package lwjake2.server;
 import lwjake2.qcommon.netadr_t;
 
 public class challenge_t {
-	//mem
-	netadr_t		adr = new netadr_t();
-	int			challenge;
-	int			time;
+    //mem
+    netadr_t adr = new netadr_t();
+    int challenge;
+    int time;
 }

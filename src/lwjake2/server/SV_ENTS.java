@@ -19,16 +19,8 @@
 package lwjake2.server;
 
 import lwjake2.Defines;
-import lwjake2.game.EndianHandler;
-import lwjake2.game.GameBase;
-import lwjake2.game.edict_t;
-import lwjake2.game.entity_state_t;
-import lwjake2.game.player_state_t;
-import lwjake2.qcommon.CM;
-import lwjake2.qcommon.Com;
-import lwjake2.qcommon.MSG;
-import lwjake2.qcommon.SZ;
-import lwjake2.qcommon.sizebuf_t;
+import lwjake2.game.*;
+import lwjake2.qcommon.*;
 import lwjake2.util.Math3D;
 
 import java.io.IOException;
@@ -37,9 +29,9 @@ public class SV_ENTS {
 
     /**
      * =============================================================================
-     * 
+     * <p/>
      * Build a client frame structure
-     * 
+     * <p/>
      * =============================================================================
      */
 
@@ -57,7 +49,7 @@ public class SV_ENTS {
      * Writes a delta update of an entity_state_t list to the message.
      */
     static void SV_EmitPacketEntities(client_frame_t from, client_frame_t to,
-            sizebuf_t msg) {
+                                      sizebuf_t msg) {
         entity_state_t oldent = null, newent = null;
         int oldindex, newindex;
         int oldnum, newnum;
@@ -90,8 +82,8 @@ public class SV_ENTS {
                 oldnum = oldent.number;
             }
 
-            if (newnum == oldnum) { 
-            	// delta update from old position
+            if (newnum == oldnum) {
+                // delta update from old position
                 // because the force parm is false, this will not result
                 // in any bytes being emited if the entity has not changed at
                 // all note that players are always 'newentities', this updates
@@ -104,16 +96,16 @@ public class SV_ENTS {
                 continue;
             }
 
-            if (newnum < oldnum) { 
-            	// this is a new entity, send it from the baseline
+            if (newnum < oldnum) {
+                // this is a new entity, send it from the baseline
                 MSG.WriteDeltaEntity(SV_INIT.sv.baselines[newnum], newent, msg,
                         true, true);
                 newindex++;
                 continue;
             }
 
-            if (newnum > oldnum) { 
-            	// the old entity isn't present in the new message
+            if (newnum > oldnum) {
+                // the old entity isn't present in the new message
                 bits = Defines.U_REMOVE;
                 if (oldnum >= 256)
                     bits |= Defines.U_NUMBER16 | Defines.U_MOREBITS1;
@@ -136,11 +128,11 @@ public class SV_ENTS {
 
     }
 
-    /** 
+    /**
      * Writes the status of a player to a client system.
      */
     static void SV_WritePlayerstateToClient(client_frame_t from,
-            client_frame_t to, sizebuf_t msg) {
+                                            client_frame_t to, sizebuf_t msg) {
         int i;
         int pflags;
         // ptr
@@ -350,16 +342,16 @@ public class SV_ENTS {
         SV_EmitPacketEntities(oldframe, frame, msg);
     }
 
-    /** 
+    /**
      * The client will interpolate the view position, so we can't use a single
-     * PVS point. 
+     * PVS point.
      */
     public static void SV_FatPVS(float[] org) {
         int leafs[] = new int[64];
         int i, j, count;
         int longs;
         byte src[];
-        float[] mins = { 0, 0, 0 }, maxs = { 0, 0, 0 };
+        float[] mins = {0, 0, 0}, maxs = {0, 0, 0};
 
         for (i = 0; i < 3; i++) {
             mins[i] = org[i] - 8;
@@ -407,7 +399,7 @@ public class SV_ENTS {
      */
     public static void SV_BuildClientFrame(client_t client) {
         int e, i;
-        float[] org = { 0, 0, 0 };
+        float[] org = {0, 0, 0};
         edict_t ent;
         edict_t clent;
         client_frame_t frame;
@@ -465,7 +457,7 @@ public class SV_ENTS {
             // check area
             if (ent != clent) {
                 if (!CM.CM_AreasConnected(clientarea, ent.areanum)) {
-                	// doors can legally straddle two areas, so we may need to check another one
+                    // doors can legally straddle two areas, so we may need to check another one
                     if (0 == ent.areanum2 || !CM.CM_AreasConnected(clientarea, ent.areanum2))
                         continue; // blocked by a door
                 }
@@ -484,8 +476,8 @@ public class SV_ENTS {
                         bitvector = SV_ENTS.fatpvs;
 
                     if (ent.num_clusters == -1) { // too many leafs for
-                                                  // individual check, go by
-                                                  // headnode
+                        // individual check, go by
+                        // headnode
                         if (!CM.CM_HeadnodeVisible(ent.headnode, bitvector))
                             continue;
                     } else { // check individual leafs
@@ -499,8 +491,8 @@ public class SV_ENTS {
                     }
 
                     if (ent.s.modelindex == 0) { // don't send sounds if they
-                                                 // will be attenuated away
-                        float[] delta = { 0, 0, 0 };
+                        // will be attenuated away
+                        float[] delta = {0, 0, 0};
                         float len;
 
                         Math3D.VectorSubtract(org, ent.s.origin, delta);
@@ -564,7 +556,7 @@ public class SV_ENTS {
             if (ent.inuse
                     && ent.s.number != 0
                     && (ent.s.modelindex != 0 || ent.s.effects != 0
-                            || ent.s.sound != 0 || ent.s.event != 0)
+                    || ent.s.sound != 0 || ent.s.event != 0)
                     && 0 == (ent.svflags & Defines.SVF_NOCLIENT))
                 MSG.WriteDeltaEntity(nostate, ent.s, buf, false, true);
 

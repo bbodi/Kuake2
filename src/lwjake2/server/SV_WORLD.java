@@ -20,16 +20,13 @@ package lwjake2.server;
 
 import lwjake2.Defines;
 import lwjake2.Globals;
-import lwjake2.game.GameBase;
-import lwjake2.game.cmodel_t;
-import lwjake2.game.edict_t;
-import lwjake2.game.link_t;
-import lwjake2.game.trace_t;
+import lwjake2.game.*;
 import lwjake2.qcommon.CM;
 import lwjake2.qcommon.Com;
 import lwjake2.util.Math3D;
 
 public class SV_WORLD {
+    public static final int MAX_TOTAL_ENT_LEAFS = 128;
     // world.c -- world query functions
     //
     //
@@ -40,10 +37,6 @@ public class SV_WORLD {
     //FIXME: this use of "area" is different from the bsp file use
     //===============================================================================
     public static areanode_t sv_areanodes[] = new areanode_t[Defines.AREA_NODES];
-    static {
-        SV_WORLD.initNodes();
-    }
-
     public static int sv_numareanodes;
 
     public static float area_mins[], area_maxs[];
@@ -53,18 +46,16 @@ public class SV_WORLD {
     public static int area_count, area_maxcount;
 
     public static int area_type;
-
-    public static final int MAX_TOTAL_ENT_LEAFS = 128;
-
     static int leafs[] = new int[MAX_TOTAL_ENT_LEAFS];
-
     static int clusters[] = new int[MAX_TOTAL_ENT_LEAFS];
-
     //===========================================================================
     static edict_t touch[] = new edict_t[Defines.MAX_EDICTS];
-
     //===========================================================================
     static edict_t touchlist[] = new edict_t[Defines.MAX_EDICTS];
+
+    static {
+        SV_WORLD.initNodes();
+    }
 
     public static void initNodes() {
         for (int n = 0; n < Defines.AREA_NODES; n++)
@@ -95,11 +86,11 @@ public class SV_WORLD {
      * ===============
      */
     public static areanode_t SV_CreateAreaNode(int depth, float[] mins,
-            float[] maxs) {
+                                               float[] maxs) {
         areanode_t anode;
-        float[] size = { 0, 0, 0 };
-        float[] mins1 = { 0, 0, 0 }, maxs1 = { 0, 0, 0 }, mins2 = { 0, 0, 0 }, maxs2 = {
-                0, 0, 0 };
+        float[] size = {0, 0, 0};
+        float[] mins1 = {0, 0, 0}, maxs1 = {0, 0, 0}, mins2 = {0, 0, 0}, maxs2 = {
+                0, 0, 0};
         anode = SV_WORLD.sv_areanodes[SV_WORLD.sv_numareanodes];
         // just for debugging (rst)
         Math3D.VectorCopy(mins, anode.mins_rst);
@@ -235,7 +226,7 @@ public class SV_WORLD {
         ent.areanum = 0;
         ent.areanum2 = 0;
         // get all leafs, including solids
-        int iw[] = { topnode };
+        int iw[] = {topnode};
         num_leafs = CM.CM_BoxLeafnums(ent.absmin, ent.absmax, SV_WORLD.leafs,
                 SV_WORLD.MAX_TOTAL_ENT_LEAFS, iw);
         topnode = iw[0];
@@ -351,7 +342,7 @@ public class SV_WORLD {
      * ================ SV_AreaEdicts ================
      */
     public static int SV_AreaEdicts(float[] mins, float[] maxs, edict_t list[],
-            int maxcount, int areatype) {
+                                    int maxcount, int areatype) {
         SV_WORLD.area_mins = mins;
         SV_WORLD.area_maxs = maxs;
         SV_WORLD.area_list = list;
@@ -466,7 +457,7 @@ public class SV_WORLD {
      * ================== SV_TraceBounds ==================
      */
     public static void SV_TraceBounds(float[] start, float[] mins,
-            float[] maxs, float[] end, float[] boxmins, float[] boxmaxs) {
+                                      float[] maxs, float[] end, float[] boxmins, float[] boxmaxs) {
         int i;
         for (i = 0; i < 3; i++) {
             if (end[i] > start[i]) {
@@ -489,7 +480,7 @@ public class SV_WORLD {
      * ==================
      */
     public static trace_t SV_Trace(float[] start, float[] mins, float[] maxs,
-            float[] end, edict_t passedict, int contentmask) {
+                                   float[] end, edict_t passedict, int contentmask) {
         moveclip_t clip = new moveclip_t();
         if (mins == null)
             mins = Globals.vec3_origin;

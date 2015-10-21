@@ -22,19 +22,8 @@ import lwjake2.Defines;
 import lwjake2.Globals;
 import lwjake2.client.CL;
 import lwjake2.client.SCR;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameSpawn;
-import lwjake2.game.edict_t;
-import lwjake2.game.entity_state_t;
-import lwjake2.game.usercmd_t;
-import lwjake2.qcommon.CM;
-import lwjake2.qcommon.Cbuf;
-import lwjake2.qcommon.Com;
-import lwjake2.qcommon.Cvar;
-import lwjake2.qcommon.FS;
-import lwjake2.qcommon.MSG;
-import lwjake2.qcommon.PMove;
-import lwjake2.qcommon.SZ;
+import lwjake2.game.*;
+import lwjake2.qcommon.*;
 import lwjake2.sys.NET;
 import lwjake2.util.Lib;
 import lwjake2.util.Math3D;
@@ -44,11 +33,15 @@ import java.io.RandomAccessFile;
 
 public class SV_INIT {
 
+    public static server_static_t svs = new server_static_t(); // persistant
+    public static server_t sv = new server_t(); // local server
+    private static String firstmap = "";
+
     /**
      * SV_FindIndex.
      */
     public static int SV_FindIndex(String name, int start, int max,
-            boolean create) {
+                                   boolean create) {
         int i;
 
         if (name == null || name.length() == 0)
@@ -66,7 +59,7 @@ public class SV_INIT {
 
         sv.configstrings[start + i] = name;
 
-        if (sv.state != Defines.ss_loading) { 
+        if (sv.state != Defines.ss_loading) {
             // send the update to everyone
             SZ.Clear(sv.multicast);
             MSG.WriteChar(sv.multicast, Defines.svc_configstring);
@@ -92,7 +85,7 @@ public class SV_INIT {
 
     /**
      * SV_CreateBaseline
-     * 
+     * <p/>
      * Entity baselines are used to compress the update messages to the clients --
      * only the fields that differ from the baseline will be transmitted.
      */
@@ -108,7 +101,7 @@ public class SV_INIT {
             if (0 == svent.s.modelindex && 0 == svent.s.sound
                     && 0 == svent.s.effects)
                 continue;
-            
+
             svent.s.number = entnum;
 
             // take current state as baseline
@@ -117,7 +110,7 @@ public class SV_INIT {
         }
     }
 
-    /** 
+    /**
      * SV_CheckForSavegame.
      */
     public static void SV_CheckForSavegame() {
@@ -136,9 +129,7 @@ public class SV_INIT {
         name = FS.Gamedir() + "/save/current/" + sv.name + ".sav";
         try {
             f = new RandomAccessFile(name, "r");
-        }
-
-        catch (Exception e) {
+        } catch (Exception e) {
             return;
         }
 
@@ -153,7 +144,7 @@ public class SV_INIT {
         // get configstrings and areaportals
         SV_CCMDS.SV_ReadLevelFile();
 
-        if (!sv.loadgame) { 
+        if (!sv.loadgame) {
             // coming back to a level after being in a different
             // level, so run it for ten seconds
 
@@ -173,12 +164,12 @@ public class SV_INIT {
 
     /**
      * SV_SpawnServer.
-     * 
+     * <p/>
      * Change the server to a new map, taking all connected clients along with
      * it.
      */
     public static void SV_SpawnServer(String server, String spawnpoint,
-            int serverstate, boolean attractloop, boolean loadgame) {
+                                      int serverstate, boolean attractloop, boolean loadgame) {
         int i;
         int checksum = 0;
 
@@ -191,12 +182,11 @@ public class SV_INIT {
         if (sv.demofile != null)
             try {
                 sv.demofile.close();
-            } 
-        	catch (Exception e) {
+            } catch (Exception e) {
             }
 
         // any partially connected client will be restarted
-        svs.spawncount++;        
+        svs.spawncount++;
 
         sv.state = Defines.ss_dead;
 
@@ -238,7 +228,7 @@ public class SV_INIT {
         sv.name = server;
         sv.configstrings[Defines.CS_NAME] = server;
 
-        int iw[] = { checksum };
+        int iw[] = {checksum};
 
         if (serverstate != Defines.ss_game) {
             sv.models[1] = CM.CM_LoadMap("", false, iw); // no real map
@@ -252,17 +242,17 @@ public class SV_INIT {
 
 
         // clear physics interaction links
-        
+
         SV_WORLD.SV_ClearWorld();
 
         for (i = 1; i < CM.CM_NumInlineModels(); i++) {
             sv.configstrings[Defines.CS_MODELS + 1 + i] = "*" + i;
-            
+
             // copy references
             sv.models[i + 1] = CM.InlineModel(sv.configstrings[Defines.CS_MODELS + 1 + i]);
         }
 
-     
+
         // spawn the rest of the entities on the map
 
         // precache and static commands can be issued during
@@ -295,7 +285,7 @@ public class SV_INIT {
 
     /**
      * SV_InitGame.
-     * 
+     * <p/>
      * A brand new game has been started.
      */
     public static void SV_InitGame() {
@@ -352,7 +342,7 @@ public class SV_INIT {
                     | Defines.CVAR_LATCH);
         }
 
-        svs.spawncount = Lib.rand();        
+        svs.spawncount = Lib.rand();
         svs.clients = new client_t[(int) SV_MAIN.maxclients.value];
         for (int n = 0; n < svs.clients.length; n++) {
             svs.clients[n] = new client_t();
@@ -382,21 +372,20 @@ public class SV_INIT {
             svs.clients[i].lastcmd = new usercmd_t();
         }
     }
+    // server info
 
-    private static String firstmap = "";
-    
     /**
      * SV_Map
-     * 
+     * <p/>
      * the full syntax is:
-     * 
+     * <p/>
      * map [*] <map>$ <startspot>+ <nextserver>
-     * 
+     * <p/>
      * command from the console or progs. Map can also be a.cin, .pcx, or .dm2 file.
-     * 
+     * <p/>
      * Nextserver is used to allow a cinematic to play, then proceed to
      * another level:
-     * 
+     * <p/>
      * map tram.cin+jail_e3
      */
     public static void SV_Map(boolean attractloop, String levelstring, boolean loadgame) {
@@ -421,15 +410,13 @@ public class SV_INIT {
         } else {
             Cvar.Set("nextserver", "");
         }
-        
+
         // rst: base1 works for full, damo1 works for demo, so we need to store first map.
-        if (firstmap.length() == 0)
-        {        
-        	if (!levelstring.endsWith(".cin") && !levelstring.endsWith(".pcx") && !levelstring.endsWith(".dm2"))
-        	{
-        		int pos = levelstring.indexOf('+');
-        		firstmap = levelstring.substring(pos + 1);
-        	}
+        if (firstmap.length() == 0) {
+            if (!levelstring.endsWith(".cin") && !levelstring.endsWith(".pcx") && !levelstring.endsWith(".dm2")) {
+                int pos = levelstring.indexOf('+');
+                firstmap = levelstring.substring(pos + 1);
+            }
         }
 
         // ZOID: special hack for end game screen in coop mode
@@ -476,9 +463,4 @@ public class SV_INIT {
 
         SV_SEND.SV_BroadcastCommand("reconnect\n");
     }
-
-    public static server_static_t svs = new server_static_t(); // persistant
-                                                               // server info
-
-    public static server_t sv = new server_t(); // local server
 }

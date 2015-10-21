@@ -21,14 +21,14 @@ package lwjake2.client;
 import lwjake2.game.entity_state_t;
 
 public class centity_t {
-	entity_state_t baseline= new entity_state_t(null); // delta from this if not from a previous frame
-	public entity_state_t current= new entity_state_t(null);
-	entity_state_t prev= new entity_state_t(null); // will always be valid, but might just be a copy of current
+    public entity_state_t current = new entity_state_t(null);
+    entity_state_t baseline = new entity_state_t(null); // delta from this if not from a previous frame
+    entity_state_t prev = new entity_state_t(null); // will always be valid, but might just be a copy of current
 
-	int serverframe; // if not current, this ent isn't in the frame
+    int serverframe; // if not current, this ent isn't in the frame
 
-	int trailcount; // for diminishing grenade trails
-	float[] lerp_origin = { 0, 0, 0 }; // for trails (variable hz)
+    int trailcount; // for diminishing grenade trails
+    float[] lerp_origin = {0, 0, 0}; // for trails (variable hz)
 
-	int fly_stoptime;
+    int fly_stoptime;
 }

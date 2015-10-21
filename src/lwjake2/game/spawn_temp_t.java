@@ -21,104 +21,104 @@ package lwjake2.game;
 import lwjake2.util.Lib;
 
 public class spawn_temp_t {
-	// world vars
-	public String sky="";
-	public float skyrotate;
-	public float[] skyaxis = { 0, 0, 0 };
-	
-	public String nextmap="";
+    // world vars
+    public String sky = "";
+    public float skyrotate;
+    public float[] skyaxis = {0, 0, 0};
 
-	public int lip;
-	public int distance;
-	public int height;
-	
-	public String noise="";
-	public float pausetime;
+    public String nextmap = "";
 
-	public String item="";
-	public String gravity="";
+    public int lip;
+    public int distance;
+    public int height;
 
-	public float minyaw;
-	public float maxyaw;
-	public float minpitch;
-	public float maxpitch;
+    public String noise = "";
+    public float pausetime;
 
-	public boolean set(String key, String value) {
-		if (key.equals("lip")) {
-			lip=Lib.atoi(value);
-			return true;
-		} // F_INT, FFL_SPAWNTEMP),
-		
-		if (key.equals("distance")) {
-			distance=Lib.atoi(value);
-			return true;
-		} // F_INT, FFL_SPAWNTEMP),
-		
-		if (key.equals("height")) {
-			height=Lib.atoi(value);
-			return true;
-		} // F_INT, FFL_SPAWNTEMP),
-		
-		if (key.equals("noise")) {
-			noise = GameSpawn.ED_NewString(value);
-			return true;
-		} // F_LSTRING, FFL_SPAWNTEMP),
-		
-		if (key.equals("pausetime")) {
-			pausetime = Lib.atof(value);
-			return true;
-		} // F_FLOAT, FFL_SPAWNTEMP),
-		
-		if (key.equals("item")) {
-			item = GameSpawn.ED_NewString(value);
-			return true;
-		} // F_LSTRING, FFL_SPAWNTEMP),
-		
-		if (key.equals("gravity")) {
-			 gravity = GameSpawn.ED_NewString(value);
-			return true;
-		} // F_LSTRING, FFL_SPAWNTEMP),
-		
-		if (key.equals("sky")) {
-			sky = GameSpawn.ED_NewString(value);
-			return true;
-		} // F_LSTRING, FFL_SPAWNTEMP),
-		
-		if (key.equals("skyrotate")) {
-			skyrotate=Lib.atof(value);
-			return true;
-		} // F_FLOAT, FFL_SPAWNTEMP),
-		
-		if (key.equals("skyaxis")) {
-			skyaxis=Lib.atov(value);
-			return true;
-		} // F_VECTOR, FFL_SPAWNTEMP),
-		
-		if (key.equals("minyaw")) {
-			minyaw=Lib.atof(value);
-			return true;
-		} // F_FLOAT, FFL_SPAWNTEMP),
-		
-		if (key.equals("maxyaw")) {
-			maxyaw=Lib.atof(value);
-			return true;
-		} // F_FLOAT, FFL_SPAWNTEMP),
-		
-		if (key.equals("minpitch")) {
-			minpitch = Lib.atof(value);
-			return true;
-		} // F_FLOAT, FFL_SPAWNTEMP),
-		
-		if (key.equals("maxpitch")) {
-			maxpitch = Lib.atof(value);
-			return true;
-		} // F_FLOAT, FFL_SPAWNTEMP),
-		
-		if (key.equals("nextmap")) {
-			nextmap  = GameSpawn.ED_NewString(value);
-			return true;
-		} // F_LSTRING, FFL_SPAWNTEMP),
+    public String item = "";
+    public String gravity = "";
 
-		return false;
-	}
+    public float minyaw;
+    public float maxyaw;
+    public float minpitch;
+    public float maxpitch;
+
+    public boolean set(String key, String value) {
+        if (key.equals("lip")) {
+            lip = Lib.atoi(value);
+            return true;
+        } // F_INT, FFL_SPAWNTEMP),
+
+        if (key.equals("distance")) {
+            distance = Lib.atoi(value);
+            return true;
+        } // F_INT, FFL_SPAWNTEMP),
+
+        if (key.equals("height")) {
+            height = Lib.atoi(value);
+            return true;
+        } // F_INT, FFL_SPAWNTEMP),
+
+        if (key.equals("noise")) {
+            noise = GameSpawn.ED_NewString(value);
+            return true;
+        } // F_LSTRING, FFL_SPAWNTEMP),
+
+        if (key.equals("pausetime")) {
+            pausetime = Lib.atof(value);
+            return true;
+        } // F_FLOAT, FFL_SPAWNTEMP),
+
+        if (key.equals("item")) {
+            item = GameSpawn.ED_NewString(value);
+            return true;
+        } // F_LSTRING, FFL_SPAWNTEMP),
+
+        if (key.equals("gravity")) {
+            gravity = GameSpawn.ED_NewString(value);
+            return true;
+        } // F_LSTRING, FFL_SPAWNTEMP),
+
+        if (key.equals("sky")) {
+            sky = GameSpawn.ED_NewString(value);
+            return true;
+        } // F_LSTRING, FFL_SPAWNTEMP),
+
+        if (key.equals("skyrotate")) {
+            skyrotate = Lib.atof(value);
+            return true;
+        } // F_FLOAT, FFL_SPAWNTEMP),
+
+        if (key.equals("skyaxis")) {
+            skyaxis = Lib.atov(value);
+            return true;
+        } // F_VECTOR, FFL_SPAWNTEMP),
+
+        if (key.equals("minyaw")) {
+            minyaw = Lib.atof(value);
+            return true;
+        } // F_FLOAT, FFL_SPAWNTEMP),
+
+        if (key.equals("maxyaw")) {
+            maxyaw = Lib.atof(value);
+            return true;
+        } // F_FLOAT, FFL_SPAWNTEMP),
+
+        if (key.equals("minpitch")) {
+            minpitch = Lib.atof(value);
+            return true;
+        } // F_FLOAT, FFL_SPAWNTEMP),
+
+        if (key.equals("maxpitch")) {
+            maxpitch = Lib.atof(value);
+            return true;
+        } // F_FLOAT, FFL_SPAWNTEMP),
+
+        if (key.equals("nextmap")) {
+            nextmap = GameSpawn.ED_NewString(value);
+            return true;
+        } // F_LSTRING, FFL_SPAWNTEMP),
+
+        return false;
+    }
 }

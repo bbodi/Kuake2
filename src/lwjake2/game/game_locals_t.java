@@ -59,7 +59,9 @@ public class game_locals_t {
 
     public boolean autosaved;
 
-    /** Reads the game locals from a file. */
+    /**
+     * Reads the game locals from a file.
+     */
     public void load(QuakeFile f) throws IOException {
         f.readString(); // Reads date?
 
@@ -82,7 +84,9 @@ public class game_locals_t {
 
     }
 
-    /** Writes the game locals to a file. */
+    /**
+     * Writes the game locals to a file.
+     */
     public void write(QuakeFile f) throws IOException {
         f.writeString(new Date().toString());
 

@@ -21,13 +21,13 @@ package lwjake2.server;
 import lwjake2.game.link_t;
 
 public class areanode_t {
-	int axis; // -1 = leaf node
-	float dist;
-	areanode_t children[] = new areanode_t[2];
-	link_t trigger_edicts = new link_t(this);
-	link_t solid_edicts = new link_t(this);
-	
-	// used for debugging
-	float mins_rst[] = {0,0,0};
-	float maxs_rst[] = {0,0,0};
+    int axis; // -1 = leaf node
+    float dist;
+    areanode_t children[] = new areanode_t[2];
+    link_t trigger_edicts = new link_t(this);
+    link_t solid_edicts = new link_t(this);
+
+    // used for debugging
+    float mins_rst[] = {0, 0, 0};
+    float maxs_rst[] = {0, 0, 0};
 }

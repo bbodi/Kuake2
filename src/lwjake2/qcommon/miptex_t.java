@@ -21,18 +21,18 @@ package lwjake2.qcommon;
 import lwjake2.Defines;
 
 public class miptex_t {
-	//char		name[32];
-	String		name="";
-	
-	int		width, height;
-	
-	//unsigned	offsets[MIPLEVELS];		// four mip maps stored
-	int		offsets[] = new int[Defines.MIPLEVELS];		// four mip maps stored
-	
-	//char		animname[32];			// next frame in animation chain
-	String 		animframe="";
-	
-	int			flags;
-	int			contents;
-	int			value;
+    //char		name[32];
+    String name = "";
+
+    int width, height;
+
+    //unsigned	offsets[MIPLEVELS];		// four mip maps stored
+    int offsets[] = new int[Defines.MIPLEVELS];        // four mip maps stored
+
+    //char		animname[32];			// next frame in animation chain
+    String animframe = "";
+
+    int flags;
+    int contents;
+    int value;
 }

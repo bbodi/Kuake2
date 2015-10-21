@@ -22,37 +22,37 @@ import lwjake2.util.Math3D;
 
 //a trace is returned when a box is swept through the world
 public class trace_t {
-	public boolean allsolid; // if true, plane is not valid
-	public boolean startsolid; // if true, the initial point was in a solid area
-	public float fraction; // time completed, 1.0 = didn't hit anything
-	public float[] endpos = { 0, 0, 0 }; // final position
-	// memory
-	public cplane_t plane = new cplane_t(); // surface normal at impact
-	// pointer
-	public csurface_t surface; // surface hit
-	public int contents; // contents on other side of surface hit
-	// pointer
-	public edict_t ent; // not set by CM_*() functions
-	
-	public void set(trace_t from) {
-		allsolid = from.allsolid;
-		startsolid = from.allsolid;
-		fraction = from.fraction;
-		Math3D.VectorCopy(from.endpos, endpos);
-		plane.set(from.plane);
-		surface = from.surface;
-		contents = from.contents;
-		ent = from.ent;
-	}
+    public boolean allsolid; // if true, plane is not valid
+    public boolean startsolid; // if true, the initial point was in a solid area
+    public float fraction; // time completed, 1.0 = didn't hit anything
+    public float[] endpos = {0, 0, 0}; // final position
+    // memory
+    public cplane_t plane = new cplane_t(); // surface normal at impact
+    // pointer
+    public csurface_t surface; // surface hit
+    public int contents; // contents on other side of surface hit
+    // pointer
+    public edict_t ent; // not set by CM_*() functions
 
-	public void clear() {
-		allsolid = false;
-		startsolid = false;
-		fraction = 0;
-		Math3D.VectorClear(endpos);
-		plane.clear();
-		surface = null;
-		contents = 0;
-		ent = null;
-	}
+    public void set(trace_t from) {
+        allsolid = from.allsolid;
+        startsolid = from.allsolid;
+        fraction = from.fraction;
+        Math3D.VectorCopy(from.endpos, endpos);
+        plane.set(from.plane);
+        surface = from.surface;
+        contents = from.contents;
+        ent = from.ent;
+    }
+
+    public void clear() {
+        allsolid = false;
+        startsolid = false;
+        fraction = 0;
+        Math3D.VectorClear(endpos);
+        plane.clear();
+        surface = null;
+        contents = 0;
+        ent = null;
+    }
 }

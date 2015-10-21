@@ -18,12 +18,11 @@
 
 package lwjake2.render;
 
-public class mmodel_t
-{
-	public float[] mins = { 0, 0, 0 }, maxs = { 0, 0, 0 };
-	public float[] origin = { 0, 0, 0 }; // for sounds or lights
-	public float radius;
-	public int headnode;
-	public int visleafs; // not including the solid leaf 0
-	public int firstface, numfaces;
+public class mmodel_t {
+    public float[] mins = {0, 0, 0}, maxs = {0, 0, 0};
+    public float[] origin = {0, 0, 0}; // for sounds or lights
+    public float radius;
+    public int headnode;
+    public int visleafs; // not including the solid leaf 0
+    public int firstface, numfaces;
 }

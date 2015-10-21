@@ -36,29 +36,57 @@ import java.nio.FloatBuffer;
  */
 public final class V extends Globals {
 
+    // stack variable
+    private static final float[] origin = {0, 0, 0};
     static cvar_t cl_testblend;
-
     static cvar_t cl_testparticles;
-
     static cvar_t cl_testentities;
-
     static cvar_t cl_testlights;
-
     static cvar_t cl_stats;
-
     static int r_numdlights;
-
     static dlight_t[] r_dlights = new dlight_t[MAX_DLIGHTS];
-
     static int r_numentities;
-
     static entity_t[] r_entities = new entity_t[MAX_ENTITIES];
 
-    static int r_numparticles;
-
     //static particle_t[] r_particles = new particle_t[MAX_PARTICLES];
-
+    static int r_numparticles;
     static lightstyle_t[] r_lightstyles = new lightstyle_t[MAX_LIGHTSTYLES];
+    static xcommand_t Gun_Next_f = new xcommand_t() {
+        public void execute() {
+            gun_frame++;
+            Com.Printf("frame " + gun_frame + "\n");
+        }
+    };
+    static xcommand_t Gun_Prev_f = new xcommand_t() {
+        public void execute() {
+            gun_frame--;
+            if (gun_frame < 0)
+                gun_frame = 0;
+            Com.Printf("frame " + gun_frame + "\n");
+        }
+    };
+    static xcommand_t Gun_Model_f = new xcommand_t() {
+        public void execute() {
+            if (Cmd.Argc() != 2) {
+                gun_model = null;
+                return;
+            }
+            String name = "models/" + Cmd.Argv(1) + "/tris.md2";
+            gun_model = re.RegisterModel(name);
+        }
+    };
+    /*
+     * ============= V_Viewpos_f =============
+     */
+    static xcommand_t Viewpos_f = new xcommand_t() {
+        public void execute() {
+            Com.Printf("(%i %i %i) : %i\n", new Vargs(4).add(
+                    (int) cl.refdef.vieworg[0]).add((int) cl.refdef.vieworg[1])
+                    .add((int) cl.refdef.vieworg[2]).add(
+                            (int) cl.refdef.viewangles[YAW]));
+        }
+    };
+
     static {
         for (int i = 0; i < r_dlights.length; i++)
             r_dlights[i] = new dlight_t();
@@ -70,7 +98,7 @@ public final class V extends Globals {
 
     /*
      * ==================== V_ClearScene
-     * 
+     *
      * Specifies the model that will be used as the world ====================
      */
     static void ClearScene() {
@@ -81,7 +109,7 @@ public final class V extends Globals {
 
     /*
      * ===================== V_AddEntity
-     * 
+     *
      * =====================
      */
     static void AddEntity(entity_t ent) {
@@ -92,7 +120,7 @@ public final class V extends Globals {
 
     /*
      * ===================== V_AddParticle
-     * 
+     *
      * =====================
      */
     static void AddParticle(float[] org, int color, float alpha) {
@@ -114,7 +142,7 @@ public final class V extends Globals {
 
     /*
      * ===================== V_AddLight
-     * 
+     *
      * =====================
      */
     static void AddLight(float[] org, float intensity, float r, float g, float b) {
@@ -132,7 +160,7 @@ public final class V extends Globals {
 
     /*
      * ===================== V_AddLightStyle
-     * 
+     *
      * =====================
      */
     static void AddLightStyle(int style, float r, float g, float b) {
@@ -148,11 +176,9 @@ public final class V extends Globals {
         ls.rgb[2] = b;
     }
 
-    // stack variable
-    private static final float[] origin = { 0, 0, 0 };
     /*
      * ================ V_TestParticles
-     * 
+     *
      * If cl_testparticles is set, create 4096 particles in the view
      * ================
      */
@@ -176,7 +202,7 @@ public final class V extends Globals {
 
     /*
      * ================ V_TestEntities
-     * 
+     *
      * If cl_testentities is set, create 32 player models ================
      */
     static void TestEntities() {
@@ -187,7 +213,7 @@ public final class V extends Globals {
         r_numentities = 32;
         //memset (r_entities, 0, sizeof(r_entities));
         for (i = 0; i < r_entities.length; i++)
-        	r_entities[i].clear();
+            r_entities[i].clear();
 
         for (i = 0; i < r_numentities; i++) {
             ent = r_entities[i];
@@ -206,7 +232,7 @@ public final class V extends Globals {
 
     /*
      * ================ V_TestLights
-     * 
+     *
      * If cl_testlights is set, create 32 lights models ================
      */
     static void TestLights() {
@@ -235,36 +261,9 @@ public final class V extends Globals {
         }
     }
 
-    static xcommand_t Gun_Next_f = new xcommand_t() {
-        public void execute() {
-            gun_frame++;
-            Com.Printf("frame " + gun_frame + "\n");
-        }
-    };
-
-    static xcommand_t Gun_Prev_f = new xcommand_t() {
-        public void execute() {
-            gun_frame--;
-            if (gun_frame < 0)
-                gun_frame = 0;
-            Com.Printf("frame " + gun_frame + "\n");
-        }
-    };
-
-    static xcommand_t Gun_Model_f = new xcommand_t() {
-        public void execute() {
-            if (Cmd.Argc() != 2) {
-                gun_model = null;
-                return;
-            }
-            String name = "models/" + Cmd.Argv(1) + "/tris.md2";
-            gun_model = re.RegisterModel(name);
-        }
-    };
-
     /*
      * ================== V_RenderView
-     * 
+     *
      * ==================
      */
     static void RenderView(float stereo_separation) {
@@ -375,18 +374,6 @@ public final class V extends Globals {
 
         SCR.DrawCrosshair();
     }
-
-    /*
-     * ============= V_Viewpos_f =============
-     */
-    static xcommand_t Viewpos_f = new xcommand_t() {
-        public void execute() {
-            Com.Printf("(%i %i %i) : %i\n", new Vargs(4).add(
-                    (int) cl.refdef.vieworg[0]).add((int) cl.refdef.vieworg[1])
-                    .add((int) cl.refdef.vieworg[2]).add(
-                            (int) cl.refdef.viewangles[YAW]));
-        }
-    };
 
     public static void Init() {
         Cmd.AddCommand("gun_next", Gun_Next_f);

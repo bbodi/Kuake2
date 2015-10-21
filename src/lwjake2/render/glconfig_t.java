@@ -19,22 +19,22 @@
 package lwjake2.render;
 
 public class glconfig_t {
-    
-	public int renderer;
-	public String renderer_string;
-	public String vendor_string;
-	public String version_string;
-	public String extensions_string;
 
-	public boolean allow_cds;
-	
-	private float version = 1.1f;
+    public int renderer;
+    public String renderer_string;
+    public String vendor_string;
+    public String version_string;
+    public String extensions_string;
 
-	public void parseOpenGLVersion() {
-	    version = Float.parseFloat(version_string.substring(0, 3));
-	}
-	
-	public float getOpenGLVersion() {
-	    return version;
-	}
+    public boolean allow_cds;
+
+    private float version = 1.1f;
+
+    public void parseOpenGLVersion() {
+        version = Float.parseFloat(version_string.substring(0, 3));
+    }
+
+    public float getOpenGLVersion() {
+        return version;
+    }
 }

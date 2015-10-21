@@ -20,11 +20,7 @@ package lwjake2.server;
 
 import lwjake2.Defines;
 import lwjake2.Globals;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameSave;
-import lwjake2.game.cmodel_t;
-import lwjake2.game.edict_t;
-import lwjake2.game.game_import_t;
+import lwjake2.game.*;
 import lwjake2.qcommon.CM;
 import lwjake2.qcommon.Com;
 import lwjake2.qcommon.MSG;
@@ -35,7 +31,7 @@ public class SV_GAME {
 
     /**
      * PF_Unicast
-     * 
+     * <p/>
      * Sends the contents of the mutlicast buffer to a single client.
      */
     public static void PF_Unicast(edict_t ent, boolean reliable) {
@@ -63,7 +59,7 @@ public class SV_GAME {
 
     /**
      * PF_dprintf
-     * 
+     * <p/>
      * Debug print to server console.
      */
     public static void PF_dprintf(String fmt) {
@@ -75,12 +71,12 @@ public class SV_GAME {
      * Centerprintf for critical messages.
      */
     public static void PF_cprintfhigh(edict_t ent, String fmt) {
-    	PF_cprintf(ent, Defines.PRINT_HIGH, fmt);
+        PF_cprintf(ent, Defines.PRINT_HIGH, fmt);
     }
-    
+
     /**
      * PF_cprintf
-     * 
+     * <p/>
      * Print to a single client.
      */
     public static void PF_cprintf(edict_t ent, int level, String fmt) {
@@ -101,7 +97,7 @@ public class SV_GAME {
 
     /**
      * PF_centerprintf
-     * 
+     * <p/>
      * centerprint to a single client.
      */
     public static void PF_centerprintf(edict_t ent, String fmt) {
@@ -117,9 +113,9 @@ public class SV_GAME {
     }
 
     /**
-     *  PF_error
-     * 
-     *  Abort the server with a game error. 
+     * PF_error
+     * <p/>
+     * Abort the server with a game error.
      */
     public static void PF_error(String fmt) {
         Com.Error(Defines.ERR_DROP, "Game Error: " + fmt);
@@ -131,7 +127,7 @@ public class SV_GAME {
 
     /**
      * PF_setmodel
-     * 
+     * <p/>
      * Also sets mins and maxs for inline bmodels.
      */
     public static void PF_setmodel(edict_t ent, String name) {
@@ -155,7 +151,7 @@ public class SV_GAME {
     }
 
     /**
-     *  PF_Configstring
+     * PF_Configstring
      */
     public static void PF_Configstring(int index, String val) {
         if (index < 0 || index >= Defines.MAX_CONFIGSTRINGS)
@@ -169,7 +165,7 @@ public class SV_GAME {
         SV_INIT.sv.configstrings[index] = val;
 
         if (SV_INIT.sv.state != Defines.ss_loading) { // send the update to
-                                                      // everyone
+            // everyone
             SZ.Clear(SV_INIT.sv.multicast);
             MSG.WriteChar(SV_INIT.sv.multicast, Defines.svc_configstring);
             MSG.WriteShort(SV_INIT.sv.multicast, index);
@@ -217,7 +213,7 @@ public class SV_GAME {
 
     /**
      * PF_inPVS
-     * 
+     * <p/>
      * Also checks portalareas so that doors block sight.
      */
     public static boolean PF_inPVS(float[] p1, float[] p2) {
@@ -249,7 +245,7 @@ public class SV_GAME {
 
     /**
      * PF_inPHS.
-     * 
+     * <p/>
      * Also checks portalareas so that doors block sound.
      */
     public static boolean PF_inPHS(float[] p1, float[] p2) {
@@ -279,7 +275,7 @@ public class SV_GAME {
     }
 
     public static void PF_StartSound(edict_t entity, int channel,
-            int sound_num, float volume, float attenuation, float timeofs) {
+                                     int sound_num, float volume, float attenuation, float timeofs) {
 
         if (null == entity)
             return;
@@ -290,10 +286,10 @@ public class SV_GAME {
 
 
     /**
-     *  SV_ShutdownGameProgs
-     * 
+     * SV_ShutdownGameProgs
+     * <p/>
      * Called when either the entire server is being killed, or it is changing
-     * to a different game directory. 
+     * to a different game directory.
      */
     public static void SV_ShutdownGameProgs() {
         GameBase.ShutdownGame();
@@ -301,8 +297,8 @@ public class SV_GAME {
 
     /**
      * SV_InitGameProgs
-     * 
-     * Init the game subsystem for a new map. 
+     * <p/>
+     * Init the game subsystem for a new map.
      */
 
     public static void SV_InitGameProgs() {

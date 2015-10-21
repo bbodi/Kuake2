@@ -26,6 +26,74 @@ import lwjake2.util.QuakeFile;
 
 public class GameSave {
 
+    private static String preloadclasslist[] =
+            {
+                    "jake2.game.PlayerWeapon",
+                    "jake2.game.AIAdapter",
+                    "jake2.game.Cmd",
+                    "jake2.game.EdictFindFilter",
+                    "jake2.game.EdictIterator",
+                    "jake2.game.EndianHandler",
+                    "jake2.game.EntBlockedAdapter",
+                    "jake2.game.EntDieAdapter",
+                    "jake2.game.EntDodgeAdapter",
+                    "jake2.game.EntInteractAdapter",
+                    "jake2.game.EntPainAdapter",
+                    "jake2.game.EntThinkAdapter",
+                    "jake2.game.EntTouchAdapter",
+                    "jake2.game.EntUseAdapter",
+                    "jake2.game.GameAI",
+                    "jake2.game.GameBase",
+                    "jake2.game.GameChase",
+                    "jake2.game.GameCombat",
+                    "jake2.game.GameFunc",
+                    "jake2.game.GameMisc",
+                    "jake2.game.GameSVCmds",
+                    "jake2.game.GameSave",
+                    "jake2.game.GameSpawn",
+                    "jake2.game.GameTarget",
+                    "jake2.game.GameTrigger",
+                    "jake2.game.GameTurret",
+                    "jake2.game.GameUtil",
+                    "jake2.game.GameWeapon",
+                    "jake2.game.Info",
+                    "jake2.game.ItemDropAdapter",
+                    "jake2.game.ItemUseAdapter",
+                    "jake2.game.Monster",
+                    "jake2.game.PlayerClient",
+                    "jake2.game.PlayerHud",
+                    "jake2.game.PlayerTrail",
+                    "jake2.game.PlayerView",
+                    "jake2.game.SuperAdapter",
+                    "jake2.game.monsters.M_Actor",
+                    "jake2.game.monsters.M_Berserk",
+                    "jake2.game.monsters.M_Boss2",
+                    "jake2.game.monsters.M_Boss3",
+                    "jake2.game.monsters.M_Boss31",
+                    "jake2.game.monsters.M_Boss32",
+                    "jake2.game.monsters.M_Brain",
+                    "jake2.game.monsters.M_Chick",
+                    "jake2.game.monsters.M_Flash",
+                    "jake2.game.monsters.M_Flipper",
+                    "jake2.game.monsters.M_Float",
+                    "jake2.game.monsters.M_Flyer",
+                    "jake2.game.monsters.M_Gladiator",
+                    "jake2.game.monsters.M_Gunner",
+                    "jake2.game.monsters.M_Hover",
+                    "jake2.game.monsters.M_Infantry",
+                    "jake2.game.monsters.M_Insane",
+                    "jake2.game.monsters.M_Medic",
+                    "jake2.game.monsters.M_Mutant",
+                    "jake2.game.monsters.M_Parasite",
+                    "jake2.game.monsters.M_Player",
+                    "jake2.game.monsters.M_Soldier",
+                    "jake2.game.monsters.M_Supertank",
+                    "jake2.game.monsters.M_Tank",
+                    "jake2.game.GameItems",
+                    // DANGER! init as last, when all adatpers are != null
+                    "jake2.game.GameItemList"
+            };
+
     public static void CreateEdicts() {
         GameBase.g_edicts = new edict_t[GameBase.game.maxentities];
         for (int i = 0; i < GameBase.game.maxentities; i++)
@@ -39,97 +107,25 @@ public class GameSave {
 
     }
 
-    private static String preloadclasslist [] = 
-    {		
-    	"jake2.game.PlayerWeapon",
-    	"jake2.game.AIAdapter",
-		"jake2.game.Cmd",
-		"jake2.game.EdictFindFilter",
-		"jake2.game.EdictIterator",
-		"jake2.game.EndianHandler",
-		"jake2.game.EntBlockedAdapter",
-		"jake2.game.EntDieAdapter",
-		"jake2.game.EntDodgeAdapter",
-		"jake2.game.EntInteractAdapter",
-		"jake2.game.EntPainAdapter",
-		"jake2.game.EntThinkAdapter",
-		"jake2.game.EntTouchAdapter",
-		"jake2.game.EntUseAdapter",
-		"jake2.game.GameAI",
-		"jake2.game.GameBase",
-		"jake2.game.GameChase",
-		"jake2.game.GameCombat",
-		"jake2.game.GameFunc",
-		"jake2.game.GameMisc",
-		"jake2.game.GameSVCmds",
-		"jake2.game.GameSave",
-		"jake2.game.GameSpawn",
-		"jake2.game.GameTarget",
-		"jake2.game.GameTrigger",
-		"jake2.game.GameTurret",
-		"jake2.game.GameUtil",
-		"jake2.game.GameWeapon",
-		"jake2.game.Info",
-		"jake2.game.ItemDropAdapter",
-		"jake2.game.ItemUseAdapter",
-		"jake2.game.Monster",
-		"jake2.game.PlayerClient",
-		"jake2.game.PlayerHud",
-		"jake2.game.PlayerTrail",
-		"jake2.game.PlayerView",
-		"jake2.game.SuperAdapter",
-		"jake2.game.monsters.M_Actor",
-		"jake2.game.monsters.M_Berserk",
-		"jake2.game.monsters.M_Boss2",
-		"jake2.game.monsters.M_Boss3",
-		"jake2.game.monsters.M_Boss31",
-		"jake2.game.monsters.M_Boss32",
-		"jake2.game.monsters.M_Brain",
-		"jake2.game.monsters.M_Chick",
-		"jake2.game.monsters.M_Flash",
-		"jake2.game.monsters.M_Flipper",
-		"jake2.game.monsters.M_Float",
-		"jake2.game.monsters.M_Flyer",
-		"jake2.game.monsters.M_Gladiator",
-		"jake2.game.monsters.M_Gunner",
-		"jake2.game.monsters.M_Hover",
-		"jake2.game.monsters.M_Infantry",
-		"jake2.game.monsters.M_Insane",
-		"jake2.game.monsters.M_Medic",
-		"jake2.game.monsters.M_Mutant",
-		"jake2.game.monsters.M_Parasite",
-		"jake2.game.monsters.M_Player",
-		"jake2.game.monsters.M_Soldier",
-		"jake2.game.monsters.M_Supertank",
-		"jake2.game.monsters.M_Tank",
-		"jake2.game.GameItems",
-		// DANGER! init as last, when all adatpers are != null
-		"jake2.game.GameItemList"
-    };
-    
     /**
      * InitGame
-     * 
+     * <p/>
      * This will be called when the dll is first loaded, which only happens when
-     * a new game is started or a save game is loaded. 
+     * a new game is started or a save game is loaded.
      */
     public static void InitGame() {
         GameBase.gi.dprintf("==== InitGame ====\n");
 
         // preload all classes to register the adapters
-        for ( int n=0; n < preloadclasslist.length; n++)
-        {
-        	try
-			{
-        		Class.forName(preloadclasslist[n]);
-			}
-        	catch(Exception e)
-			{
-        		Com.DPrintf("error loading class: " + e.getMessage());
-			}
+        for (int n = 0; n < preloadclasslist.length; n++) {
+            try {
+                Class.forName(preloadclasslist[n]);
+            } catch (Exception e) {
+                Com.DPrintf("error loading class: " + e.getMessage());
+            }
         }
-        
-        
+
+
         GameBase.gun_x = GameBase.gi.cvar("gun_x", "0", 0);
         GameBase.gun_y = GameBase.gi.cvar("gun_y", "0", 0);
         GameBase.gun_z = GameBase.gi.cvar("gun_z", "0", 0);
@@ -215,13 +211,13 @@ public class GameSave {
 
     /**
      * WriteGame
-     * 
+     * <p/>
      * This will be called whenever the game goes to a new level, and when the
      * user explicitly saves the game.
-     * 
+     * <p/>
      * Game information include cross level data, like multi level triggers,
      * help computer info, and all client states.
-     * 
+     * <p/>
      * A single player death will automatically restore from the last save
      * position.
      */
@@ -232,7 +228,7 @@ public class GameSave {
             if (!autosave)
                 PlayerClient.SaveClientData();
 
-            f = new QuakeFile(filename, "rw");  
+            f = new QuakeFile(filename, "rw");
 
             GameBase.game.autosaved = autosave;
             GameBase.game.write(f);
@@ -265,9 +261,7 @@ public class GameSave {
             }
 
             f.close();
-        }
-
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -282,7 +276,7 @@ public class GameSave {
             QuakeFile f;
 
             f = new QuakeFile(filename, "rw");
-            
+
             // write out level_locals_t
             GameBase.level.write(f);
 
@@ -307,15 +301,15 @@ public class GameSave {
 
     /**
      * ReadLevel
-     * 
+     * <p/>
      * SpawnEntities will allready have been called on the level the same way it
      * was when the level was saved.
-     * 
+     * <p/>
      * That is necessary to get the baselines set up identically.
-     * 
+     * <p/>
      * The server will have cleared all of the world links before calling
      * ReadLevel.
-     * 
+     * <p/>
      * No clients are connected yet.
      */
     public static void ReadLevel(String filename) {

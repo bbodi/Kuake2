@@ -20,13 +20,13 @@ package lwjake2.client;
 
 /**
  * vrect_t
- *  
+ *
  * @author cwei
  */
 public class vrect_t {
-	public int x;
-	public int y;
-	public int width;
-	public int height;
-	vrect_t pnext;
+    public int x;
+    public int y;
+    public int width;
+    public int height;
+    vrect_t pnext;
 }

@@ -18,7 +18,7 @@
 
 package lwjake2.game;
 
-public abstract class ItemUseAdapter  extends SuperAdapter {
-	public void use(edict_t ent, gitem_t item) {
-	}
+public abstract class ItemUseAdapter extends SuperAdapter {
+    public void use(edict_t ent, gitem_t item) {
+    }
 }

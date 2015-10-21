@@ -23,83 +23,95 @@ import lwjake2.render.image_t;
 import lwjake2.render.model_t;
 import lwjake2.sys.KBD;
 
-import java.awt.Dimension;
-import java.awt.DisplayMode;
+import java.awt.*;
 
 /**
  * refexport_t
- * 
+ *
  * @author cwei
  */
 public interface refexport_t {
-	// ============================================================================
-	// public interface for Renderer implementations
-	//
-	// ref.h, refexport_t
-	// ============================================================================
-	//
-	// these are the functions exported by the refresh module
-	//
-	// called when the library is loaded
-	boolean Init(int vid_xpos, int vid_ypos);
+    // ============================================================================
+    // public interface for Renderer implementations
+    //
+    // ref.h, refexport_t
+    // ============================================================================
+    //
+    // these are the functions exported by the refresh module
+    //
+    // called when the library is loaded
+    boolean Init(int vid_xpos, int vid_ypos);
 
-	// called before the library is unloaded
-	void Shutdown();
+    // called before the library is unloaded
+    void Shutdown();
 
-	// All data that will be used in a level should be
-	// registered before rendering any frames to prevent disk hits,
-	// but they can still be registered at a later time
-	// if necessary.
-	//
-	// EndRegistration will free any remaining data that wasn't registered.
-	// Any model_s or skin_s pointers from before the BeginRegistration
-	// are no longer valid after EndRegistration.
-	//
-	// Skins and images need to be differentiated, because skins
-	// are flood filled to eliminate mip map edge errors, and pics have
-	// an implicit "pics/" prepended to the name. (a pic name that starts with a
-	// slash will not use the "pics/" prefix or the ".pcx" postfix)
-	void BeginRegistration(String map);
-	model_t RegisterModel(String name);
-	image_t RegisterSkin(String name);
-	image_t RegisterPic(String name);
-	void SetSky(String name, float rotate, /* vec3_t */
-	float[] axis);
-	void EndRegistration();
+    // All data that will be used in a level should be
+    // registered before rendering any frames to prevent disk hits,
+    // but they can still be registered at a later time
+    // if necessary.
+    //
+    // EndRegistration will free any remaining data that wasn't registered.
+    // Any model_s or skin_s pointers from before the BeginRegistration
+    // are no longer valid after EndRegistration.
+    //
+    // Skins and images need to be differentiated, because skins
+    // are flood filled to eliminate mip map edge errors, and pics have
+    // an implicit "pics/" prepended to the name. (a pic name that starts with a
+    // slash will not use the "pics/" prefix or the ".pcx" postfix)
+    void BeginRegistration(String map);
 
-	void RenderFrame(refdef_t fd);
+    model_t RegisterModel(String name);
 
-	void DrawGetPicSize(Dimension dim /* int *w, *h */, String name);
-	// will return 0 0 if not found
-	void DrawPic(int x, int y, String name);
-	void DrawStretchPic(int x, int y, int w, int h, String name);
-	void DrawChar(int x, int y, int num); // num is 8 bit ASCII 
-	void DrawTileClear(int x, int y, int w, int h, String name);
-	void DrawFill(int x, int y, int w, int h, int c);
-	void DrawFadeScreen();
+    image_t RegisterSkin(String name);
 
-	// Draw images for cinematic rendering (which can have a different palette). Note that calls
-	void DrawStretchRaw(int x,	int y, int w, int h, int cols, int rows, byte[] data);
+    image_t RegisterPic(String name);
 
-	/*
-	** video mode and refresh state management entry points
-	*/
-	/* 256 r,g,b values;	null = game palette, size = 768 bytes */
-	void CinematicSetPalette(final byte[] palette);
-	void BeginFrame(float camera_separation);
-	void EndFrame();
+    void SetSky(String name, float rotate, /* vec3_t */
+                float[] axis);
 
-	void AppActivate(boolean activate);
-	
-	/**
-	 * 
-	 *
-	 */
-	void updateScreen(xcommand_t callback);
-	
-	int apiVersion();
-	
-	DisplayMode[] getModeList();
-	
-	KBD getKeyboardHandler();
+    void EndRegistration();
+
+    void RenderFrame(refdef_t fd);
+
+    void DrawGetPicSize(Dimension dim /* int *w, *h */, String name);
+
+    // will return 0 0 if not found
+    void DrawPic(int x, int y, String name);
+
+    void DrawStretchPic(int x, int y, int w, int h, String name);
+
+    void DrawChar(int x, int y, int num); // num is 8 bit ASCII
+
+    void DrawTileClear(int x, int y, int w, int h, String name);
+
+    void DrawFill(int x, int y, int w, int h, int c);
+
+    void DrawFadeScreen();
+
+    // Draw images for cinematic rendering (which can have a different palette). Note that calls
+    void DrawStretchRaw(int x, int y, int w, int h, int cols, int rows, byte[] data);
+
+    /*
+    ** video mode and refresh state management entry points
+    */
+    /* 256 r,g,b values;	null = game palette, size = 768 bytes */
+    void CinematicSetPalette(final byte[] palette);
+
+    void BeginFrame(float camera_separation);
+
+    void EndFrame();
+
+    void AppActivate(boolean activate);
+
+    /**
+     *
+     *
+     */
+    void updateScreen(xcommand_t callback);
+
+    int apiVersion();
+
+    DisplayMode[] getModeList();
+
+    KBD getKeyboardHandler();
 }

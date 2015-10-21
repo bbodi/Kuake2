@@ -25,578 +25,70 @@ import lwjake2.util.Math3D;
 
 public class GameFunc {
 
-    static void Move_Calc(edict_t ent, float[] dest, EntThinkAdapter func) {
-        Math3D.VectorClear(ent.velocity);
-        Math3D.VectorSubtract(dest, ent.s.origin, ent.moveinfo.dir);
-        ent.moveinfo.remaining_distance = Math3D
-                .VectorNormalize(ent.moveinfo.dir);
-
-        ent.moveinfo.endfunc = func;
-
-        if (ent.moveinfo.speed == ent.moveinfo.accel
-                && ent.moveinfo.speed == ent.moveinfo.decel) {
-            if (GameBase.level.current_entity == ((ent.flags & Defines.FL_TEAMSLAVE) != 0 ? ent.teammaster
-                    : ent)) {
-                Move_Begin.think(ent);
-            } else {
-                ent.nextthink = GameBase.level.time + Defines.FRAMETIME;
-                ent.think = Move_Begin;
-            }
-        } else {
-            // accelerative
-            ent.moveinfo.current_speed = 0;
-            ent.think = Think_AccelMove;
-            ent.nextthink = GameBase.level.time + Defines.FRAMETIME;
-        }
-    }
-
-    static void AngleMove_Calc(edict_t ent, EntThinkAdapter func) {
-        Math3D.VectorClear(ent.avelocity);
-        ent.moveinfo.endfunc = func;
-        if (GameBase.level.current_entity == ((ent.flags & Defines.FL_TEAMSLAVE) != 0 ? ent.teammaster
-                : ent)) {
-            AngleMove_Begin.think(ent);
-        } else {
-            ent.nextthink = GameBase.level.time + Defines.FRAMETIME;
-            ent.think = AngleMove_Begin;
-        }
-    }
-
-    /**
-     * Think_AccelMove
-     * 
-     * The team has completed a frame of movement, so change the speed for the
-     * next frame.
-     */
-    static float AccelerationDistance(float target, float rate) {
-        return target * ((target / rate) + 1) / 2;
-    };
-
-    static void plat_CalcAcceleratedMove(moveinfo_t moveinfo) {
-        float accel_dist;
-        float decel_dist;
-
-        moveinfo.move_speed = moveinfo.speed;
-
-        if (moveinfo.remaining_distance < moveinfo.accel) {
-            moveinfo.current_speed = moveinfo.remaining_distance;
-            return;
-        }
-
-        accel_dist = AccelerationDistance(moveinfo.speed, moveinfo.accel);
-        decel_dist = AccelerationDistance(moveinfo.speed, moveinfo.decel);
-
-        if ((moveinfo.remaining_distance - accel_dist - decel_dist) < 0) {
-            float f;
-
-            f = (moveinfo.accel + moveinfo.decel)
-                    / (moveinfo.accel * moveinfo.decel);
-            moveinfo.move_speed = (float) ((-2 + Math.sqrt(4 - 4 * f
-                    * (-2 * moveinfo.remaining_distance))) / (2 * f));
-            decel_dist = AccelerationDistance(moveinfo.move_speed,
-                    moveinfo.decel);
-        }
-
-        moveinfo.decel_distance = decel_dist;
-    };
-
-    static void plat_Accelerate(moveinfo_t moveinfo) {
-        // are we decelerating?
-        if (moveinfo.remaining_distance <= moveinfo.decel_distance) {
-            if (moveinfo.remaining_distance < moveinfo.decel_distance) {
-                if (moveinfo.next_speed != 0) {
-                    moveinfo.current_speed = moveinfo.next_speed;
-                    moveinfo.next_speed = 0;
-                    return;
-                }
-                if (moveinfo.current_speed > moveinfo.decel)
-                    moveinfo.current_speed -= moveinfo.decel;
-            }
-            return;
-        }
-
-        // are we at full speed and need to start decelerating during this move?
-        if (moveinfo.current_speed == moveinfo.move_speed)
-            if ((moveinfo.remaining_distance - moveinfo.current_speed) < moveinfo.decel_distance) {
-                float p1_distance;
-                float p2_distance;
-                float distance;
-
-                p1_distance = moveinfo.remaining_distance
-                        - moveinfo.decel_distance;
-                p2_distance = moveinfo.move_speed
-                        * (1.0f - (p1_distance / moveinfo.move_speed));
-                distance = p1_distance + p2_distance;
-                moveinfo.current_speed = moveinfo.move_speed;
-                moveinfo.next_speed = moveinfo.move_speed - moveinfo.decel
-                        * (p2_distance / distance);
-                return;
-            }
-
-        // are we accelerating?
-        if (moveinfo.current_speed < moveinfo.speed) {
-            float old_speed;
-            float p1_distance;
-            float p1_speed;
-            float p2_distance;
-            float distance;
-
-            old_speed = moveinfo.current_speed;
-
-            // figure simple acceleration up to move_speed
-            moveinfo.current_speed += moveinfo.accel;
-            if (moveinfo.current_speed > moveinfo.speed)
-                moveinfo.current_speed = moveinfo.speed;
-
-            // are we accelerating throughout this entire move?
-            if ((moveinfo.remaining_distance - moveinfo.current_speed) >= moveinfo.decel_distance)
-                return;
-
-            // during this move we will accelrate from current_speed to
-            // move_speed
-            // and cross over the decel_distance; figure the average speed for
-            // the
-            // entire move
-            p1_distance = moveinfo.remaining_distance - moveinfo.decel_distance;
-            p1_speed = (old_speed + moveinfo.move_speed) / 2.0f;
-            p2_distance = moveinfo.move_speed
-                    * (1.0f - (p1_distance / p1_speed));
-            distance = p1_distance + p2_distance;
-            moveinfo.current_speed = (p1_speed * (p1_distance / distance))
-                    + (moveinfo.move_speed * (p2_distance / distance));
-            moveinfo.next_speed = moveinfo.move_speed - moveinfo.decel
-                    * (p2_distance / distance);
-            return;
-        }
-
-        // we are at constant velocity (move_speed)
-        return;
-    };
-
-    static void plat_go_up(edict_t ent) {
-        if (0 == (ent.flags & Defines.FL_TEAMSLAVE)) {
-            if (ent.moveinfo.sound_start != 0)
-                GameBase.gi.sound(ent, Defines.CHAN_NO_PHS_ADD
-                        + Defines.CHAN_VOICE, ent.moveinfo.sound_start, 1,
-                        Defines.ATTN_STATIC, 0);
-            ent.s.sound = ent.moveinfo.sound_middle;
-        }
-        ent.moveinfo.state = STATE_UP;
-        Move_Calc(ent, ent.moveinfo.start_origin, plat_hit_top);
-    }
-
-    static void plat_spawn_inside_trigger(edict_t ent) {
-        edict_t trigger;
-        float[] tmin = { 0, 0, 0 }, tmax = { 0, 0, 0 };
-
-        //
-        //	   middle trigger
-        //	
-        trigger = GameUtil.G_Spawn();
-        trigger.touch = Touch_Plat_Center;
-        trigger.movetype = Defines.MOVETYPE_NONE;
-        trigger.solid = Defines.SOLID_TRIGGER;
-        trigger.enemy = ent;
-
-        tmin[0] = ent.mins[0] + 25;
-        tmin[1] = ent.mins[1] + 25;
-        tmin[2] = ent.mins[2];
-
-        tmax[0] = ent.maxs[0] - 25;
-        tmax[1] = ent.maxs[1] - 25;
-        tmax[2] = ent.maxs[2] + 8;
-
-        tmin[2] = tmax[2] - (ent.pos1[2] - ent.pos2[2] + GameBase.st.lip);
-
-        if ((ent.spawnflags & PLAT_LOW_TRIGGER) != 0)
-            tmax[2] = tmin[2] + 8;
-
-        if (tmax[0] - tmin[0] <= 0) {
-            tmin[0] = (ent.mins[0] + ent.maxs[0]) * 0.5f;
-            tmax[0] = tmin[0] + 1;
-        }
-        if (tmax[1] - tmin[1] <= 0) {
-            tmin[1] = (ent.mins[1] + ent.maxs[1]) * 0.5f;
-            tmax[1] = tmin[1] + 1;
-        }
-
-        Math3D.VectorCopy(tmin, trigger.mins);
-        Math3D.VectorCopy(tmax, trigger.maxs);
-
-        GameBase.gi.linkentity(trigger);
-    }
-
-    /**
-     * QUAKED func_plat (0 .5 .8) ? PLAT_LOW_TRIGGER speed default 150
-     * 
-     * Plats are always drawn in the extended position, so they will light
-     * correctly.
-     * 
-     * If the plat is the target of another trigger or button, it will start out
-     * disabled in the extended position until it is trigger, when it will lower
-     * and become a normal plat.
-     * 
-     * "speed" overrides default 200. "accel" overrides default 500 "lip"
-     * overrides default 8 pixel lip
-     * 
-     * If the "height" key is set, that will determine the amount the plat
-     * moves, instead of being implicitly determoveinfoned by the model's
-     * height.
-     * 
-     * Set "sounds" to one of the following: 1) base fast 2) chain slow
-     */
-    static void SP_func_plat(edict_t ent) {
-        Math3D.VectorClear(ent.s.angles);
-        ent.solid = Defines.SOLID_BSP;
-        ent.movetype = Defines.MOVETYPE_PUSH;
-
-        GameBase.gi.setmodel(ent, ent.model);
-
-        ent.blocked = plat_blocked;
-
-        if (0 == ent.speed)
-            ent.speed = 20;
-        else
-            ent.speed *= 0.1;
-
-        if (ent.accel == 0)
-            ent.accel = 5;
-        else
-            ent.accel *= 0.1;
-
-        if (ent.decel == 0)
-            ent.decel = 5;
-        else
-            ent.decel *= 0.1;
-
-        if (ent.dmg == 0)
-            ent.dmg = 2;
-
-        if (GameBase.st.lip == 0)
-            GameBase.st.lip = 8;
-
-        // pos1 is the top position, pos2 is the bottom
-        Math3D.VectorCopy(ent.s.origin, ent.pos1);
-        Math3D.VectorCopy(ent.s.origin, ent.pos2);
-        if (GameBase.st.height != 0)
-            ent.pos2[2] -= GameBase.st.height;
-        else
-            ent.pos2[2] -= (ent.maxs[2] - ent.mins[2]) - GameBase.st.lip;
-
-        ent.use = Use_Plat;
-
-        plat_spawn_inside_trigger(ent); // the "start moving" trigger
-
-        if (ent.targetname != null) {
-            ent.moveinfo.state = STATE_UP;
-        } else {
-            Math3D.VectorCopy(ent.pos2, ent.s.origin);
-            GameBase.gi.linkentity(ent);
-            ent.moveinfo.state = STATE_BOTTOM;
-        }
-
-        ent.moveinfo.speed = ent.speed;
-        ent.moveinfo.accel = ent.accel;
-        ent.moveinfo.decel = ent.decel;
-        ent.moveinfo.wait = ent.wait;
-        Math3D.VectorCopy(ent.pos1, ent.moveinfo.start_origin);
-        Math3D.VectorCopy(ent.s.angles, ent.moveinfo.start_angles);
-        Math3D.VectorCopy(ent.pos2, ent.moveinfo.end_origin);
-        Math3D.VectorCopy(ent.s.angles, ent.moveinfo.end_angles);
-
-        ent.moveinfo.sound_start = GameBase.gi.soundindex("plats/pt1_strt.wav");
-        ent.moveinfo.sound_middle = GameBase.gi.soundindex("plats/pt1_mid.wav");
-        ent.moveinfo.sound_end = GameBase.gi.soundindex("plats/pt1_end.wav");
-    }
-
-    /**
-     * DOORS
-     * 
-     * spawn a trigger surrounding the entire team unless it is already targeted
-     * by another.
-     * 
-     */
-
-    /**
-     * QUAKED func_door (0 .5 .8) ? START_OPEN x CRUSHER NOMONSTER ANIMATED
-     * TOGGLE ANIMATED_FAST TOGGLE wait in both the start and end states for a
-     * trigger event. START_OPEN the door to moves to its destination when
-     * spawned, and operate in reverse. It is used to temporarily or permanently
-     * close off an area when triggered (not useful for touch or takedamage
-     * doors). NOMONSTER monsters will not trigger this door
-     * 
-     * "message" is printed when the door is touched if it is a trigger door and
-     * it hasn't been fired yet "angle" determines the opening direction
-     * "targetname" if set, no touch field will be spawned and a remote button
-     * or trigger field activates the door. "health" if set, door must be shot
-     * open "speed" movement speed (100 default) "wait" wait before returning (3
-     * default, -1 = never return) "lip" lip remaining at end of move (8
-     * default) "dmg" damage to inflict when blocked (2 default) "sounds" 1)
-     * silent 2) light 3) medium 4) heavy
-     */
-
-    static void door_use_areaportals(edict_t self, boolean open) {
-        edict_t t = null;
-
-        if (self.target == null)
-            return;
-
-        EdictIterator edit = null;
-
-        while ((edit = GameBase
-                .G_Find(edit, GameBase.findByTarget, self.target)) != null) {
-            t = edit.o;
-            if (Lib.Q_stricmp(t.classname, "func_areaportal") == 0) {
-                GameBase.gi.SetAreaPortalState(t.style, open);
-            }
-        }
-    }
-
-    static void door_go_up(edict_t self, edict_t activator) {
-        if (self.moveinfo.state == STATE_UP)
-            return; // already going up
-
-        if (self.moveinfo.state == STATE_TOP) {
-            // reset top wait time
-            if (self.moveinfo.wait >= 0)
-                self.nextthink = GameBase.level.time + self.moveinfo.wait;
-            return;
-        }
-
-        if (0 == (self.flags & Defines.FL_TEAMSLAVE)) {
-            if (self.moveinfo.sound_start != 0)
-                GameBase.gi.sound(self, Defines.CHAN_NO_PHS_ADD
-                        + Defines.CHAN_VOICE, self.moveinfo.sound_start, 1,
-                        Defines.ATTN_STATIC, 0);
-            self.s.sound = self.moveinfo.sound_middle;
-        }
-        self.moveinfo.state = STATE_UP;
-        if (Lib.strcmp(self.classname, "func_door") == 0)
-            Move_Calc(self, self.moveinfo.end_origin, door_hit_top);
-        else if (Lib.strcmp(self.classname, "func_door_rotating") == 0)
-            AngleMove_Calc(self, door_hit_top);
-
-        GameUtil.G_UseTargets(self, activator);
-        door_use_areaportals(self, true);
-    }
-
-    /**
-     * QUAKED func_water (0 .5 .8) ? START_OPEN func_water is a moveable water
-     * brush. It must be targeted to operate. Use a non-water texture at your
-     * own risk.
-     * 
-     * START_OPEN causes the water to move to its destination when spawned and
-     * operate in reverse.
-     * 
-     * "angle" determines the opening direction (up or down only) "speed"
-     * movement speed (25 default) "wait" wait before returning (-1 default, -1 =
-     * TOGGLE) "lip" lip remaining at end of move (0 default) "sounds" (yes,
-     * these need to be changed) 0) no sound 1) water 2) lava
-     */
-
-    static void SP_func_water(edict_t self) {
-        float[] abs_movedir = { 0, 0, 0 };
-
-        GameBase.G_SetMovedir(self.s.angles, self.movedir);
-        self.movetype = Defines.MOVETYPE_PUSH;
-        self.solid = Defines.SOLID_BSP;
-        GameBase.gi.setmodel(self, self.model);
-
-        switch (self.sounds) {
-        default:
-            break;
-
-        case 1: // water
-            self.moveinfo.sound_start = GameBase.gi
-                    .soundindex("world/mov_watr.wav");
-            self.moveinfo.sound_end = GameBase.gi
-                    .soundindex("world/stp_watr.wav");
-            break;
-
-        case 2: // lava
-            self.moveinfo.sound_start = GameBase.gi
-                    .soundindex("world/mov_watr.wav");
-            self.moveinfo.sound_end = GameBase.gi
-                    .soundindex("world/stp_watr.wav");
-            break;
-        }
-
-        // calculate second position
-        Math3D.VectorCopy(self.s.origin, self.pos1);
-        abs_movedir[0] = Math.abs(self.movedir[0]);
-        abs_movedir[1] = Math.abs(self.movedir[1]);
-        abs_movedir[2] = Math.abs(self.movedir[2]);
-        self.moveinfo.distance = abs_movedir[0] * self.size[0] + abs_movedir[1]
-                * self.size[1] + abs_movedir[2] * self.size[2]
-                - GameBase.st.lip;
-        Math3D.VectorMA(self.pos1, self.moveinfo.distance, self.movedir,
-                self.pos2);
-
-        // if it starts open, switch the positions
-        if ((self.spawnflags & DOOR_START_OPEN) != 0) {
-            Math3D.VectorCopy(self.pos2, self.s.origin);
-            Math3D.VectorCopy(self.pos1, self.pos2);
-            Math3D.VectorCopy(self.s.origin, self.pos1);
-        }
-
-        Math3D.VectorCopy(self.pos1, self.moveinfo.start_origin);
-        Math3D.VectorCopy(self.s.angles, self.moveinfo.start_angles);
-        Math3D.VectorCopy(self.pos2, self.moveinfo.end_origin);
-        Math3D.VectorCopy(self.s.angles, self.moveinfo.end_angles);
-
-        self.moveinfo.state = STATE_BOTTOM;
-
-        if (0 == self.speed)
-            self.speed = 25;
-        self.moveinfo.accel = self.moveinfo.decel = self.moveinfo.speed = self.speed;
-
-        if (0 == self.wait)
-            self.wait = -1;
-        self.moveinfo.wait = self.wait;
-
-        self.use = door_use;
-
-        if (self.wait == -1)
-            self.spawnflags |= DOOR_TOGGLE;
-
-        self.classname = "func_door";
-
-        GameBase.gi.linkentity(self);
-    }
-
-    static void train_resume(edict_t self) {
-        edict_t ent;
-        float[] dest = { 0, 0, 0 };
-
-        ent = self.target_ent;
-
-        Math3D.VectorSubtract(ent.s.origin, self.mins, dest);
-        self.moveinfo.state = STATE_TOP;
-        Math3D.VectorCopy(self.s.origin, self.moveinfo.start_origin);
-        Math3D.VectorCopy(dest, self.moveinfo.end_origin);
-        Move_Calc(self, dest, train_wait);
-        self.spawnflags |= TRAIN_START_ON;
-
-    }
-
-    static void SP_func_train(edict_t self) {
-        self.movetype = Defines.MOVETYPE_PUSH;
-
-        Math3D.VectorClear(self.s.angles);
-        self.blocked = train_blocked;
-        if ((self.spawnflags & TRAIN_BLOCK_STOPS) != 0)
-            self.dmg = 0;
-        else {
-            if (0 == self.dmg)
-                self.dmg = 100;
-        }
-        self.solid = Defines.SOLID_BSP;
-        GameBase.gi.setmodel(self, self.model);
-
-        if (GameBase.st.noise != null)
-            self.moveinfo.sound_middle = GameBase.gi
-                    .soundindex(GameBase.st.noise);
-
-        if (0 == self.speed)
-            self.speed = 100;
-
-        self.moveinfo.speed = self.speed;
-        self.moveinfo.accel = self.moveinfo.decel = self.moveinfo.speed;
-
-        self.use = train_use;
-
-        GameBase.gi.linkentity(self);
-
-        if (self.target != null) {
-            // start trains on the second frame, to make sure their targets have
-            // had
-            // a chance to spawn
-            self.nextthink = GameBase.level.time + Defines.FRAMETIME;
-            self.think = func_train_find;
-        } else {
-            GameBase.gi.dprintf("func_train without a target at "
-                    + Lib.vtos(self.absmin) + "\n");
-        }
-    }
-
-    static void SP_func_timer(edict_t self) {
-        if (0 == self.wait)
-            self.wait = 1.0f;
-
-        self.use = func_timer_use;
-        self.think = func_timer_think;
-
-        if (self.random >= self.wait) {
-            self.random = self.wait - Defines.FRAMETIME;
-            GameBase.gi.dprintf("func_timer at " + Lib.vtos(self.s.origin)
-                    + " has random >= wait\n");
-        }
-
-        if ((self.spawnflags & 1) != 0) {
-            self.nextthink = GameBase.level.time + 1.0f + GameBase.st.pausetime
-                    + self.delay + self.wait + Lib.crandom() * self.random;
-            self.activator = self;
-        }
-
-        self.svflags = Defines.SVF_NOCLIENT;
-    }
-
     /**
      * PLATS
-     * 
+     * <p/>
      * movement options:
-     * 
+     * <p/>
      * linear smooth start, hard stop smooth start, smooth stop
-     * 
+     * <p/>
      * start end acceleration speed deceleration begin sound end sound target
      * fired when reaching end wait at end
-     * 
+     * <p/>
      * object characteristics that use move segments
      * --------------------------------------------- movetype_push, or
      * movetype_stop action when touched action when blocked action when used
      * disabled? auto trigger spawning
-     * 
      */
 
     public final static int PLAT_LOW_TRIGGER = 1;
-
     public final static int STATE_TOP = 0;
-
     public final static int STATE_BOTTOM = 1;
 
+    ;
     public final static int STATE_UP = 2;
 
+    ;
     public final static int STATE_DOWN = 3;
 
+    ;
     public final static int DOOR_START_OPEN = 1;
-
     public final static int DOOR_REVERSE = 2;
-
     public final static int DOOR_CRUSHER = 4;
 
+    /**
+     * DOORS
+     *
+     * spawn a trigger surrounding the entire team unless it is already targeted
+     * by another.
+     *
+     */
     public final static int DOOR_NOMONSTER = 8;
-
     public final static int DOOR_TOGGLE = 32;
-
     public final static int DOOR_X_AXIS = 64;
-
     public final static int DOOR_Y_AXIS = 128;
-
-    //
-    //	   Support routines for movement (changes in origin using velocity)
-    //
-
+    public final static int TRAIN_START_ON = 1;
+    public final static int TRAIN_TOGGLE = 2;
+    public final static int TRAIN_BLOCK_STOPS = 4;
+    public final static int SECRET_ALWAYS_SHOOT = 1;
+    public final static int SECRET_1ST_LEFT = 2;
+    public final static int SECRET_1ST_DOWN = 4;
     static EntThinkAdapter Move_Done = new EntThinkAdapter() {
-        public String getID() { return "move_done";}
+        public String getID() {
+            return "move_done";
+        }
+
         public boolean think(edict_t ent) {
             Math3D.VectorClear(ent.velocity);
             ent.moveinfo.endfunc.think(ent);
             return true;
         }
     };
-
     static EntThinkAdapter Move_Final = new EntThinkAdapter() {
-        public String getID() { return "move_final";}
+        public String getID() {
+            return "move_final";
+        }
+
         public boolean think(edict_t ent) {
 
             if (ent.moveinfo.remaining_distance == 0) {
@@ -613,9 +105,11 @@ public class GameFunc {
             return true;
         }
     };
-
     static EntThinkAdapter Move_Begin = new EntThinkAdapter() {
-        public String getID() { return "move_begin";}
+        public String getID() {
+            return "move_begin";
+        }
+
         public boolean think(edict_t ent) {
 
             float frames;
@@ -636,24 +130,24 @@ public class GameFunc {
             return true;
         }
     };
-
-    //
-    //	   Support routines for angular movement (changes in angle using avelocity)
-    //
-
     static EntThinkAdapter AngleMove_Done = new EntThinkAdapter() {
-        public String getID() { return "agnle_move_done";}
+        public String getID() {
+            return "agnle_move_done";
+        }
+
         public boolean think(edict_t ent) {
             Math3D.VectorClear(ent.avelocity);
             ent.moveinfo.endfunc.think(ent);
             return true;
         }
     };
-
     static EntThinkAdapter AngleMove_Final = new EntThinkAdapter() {
-        public String getID() { return "angle_move_final";}
+        public String getID() {
+            return "angle_move_final";
+        }
+
         public boolean think(edict_t ent) {
-            float[] move = { 0, 0, 0 };
+            float[] move = {0, 0, 0};
 
             if (ent.moveinfo.state == STATE_UP)
                 Math3D.VectorSubtract(ent.moveinfo.end_angles, ent.s.angles,
@@ -674,11 +168,13 @@ public class GameFunc {
             return true;
         }
     };
-
     static EntThinkAdapter AngleMove_Begin = new EntThinkAdapter() {
-        public String getID() { return "angle_move_begin";}
+        public String getID() {
+            return "angle_move_begin";
+        }
+
         public boolean think(edict_t ent) {
-            float[] destdelta = { 0, 0, 0 };
+            float[] destdelta = {0, 0, 0};
             float len;
             float traveltime;
             float frames;
@@ -714,9 +210,11 @@ public class GameFunc {
             return true;
         }
     };
-
     static EntThinkAdapter Think_AccelMove = new EntThinkAdapter() {
-        public String getID() { return "thinc_accelmove";}
+        public String getID() {
+            return "thinc_accelmove";
+        }
+
         public boolean think(edict_t ent) {
             ent.moveinfo.remaining_distance -= ent.moveinfo.current_speed;
 
@@ -738,14 +236,56 @@ public class GameFunc {
             return true;
         }
     };
+    static EntThinkAdapter plat_hit_bottom = new EntThinkAdapter() {
+        public String getID() {
+            return "plat_hit_bottom";
+        }
 
+        public boolean think(edict_t ent) {
+
+            if (0 == (ent.flags & Defines.FL_TEAMSLAVE)) {
+                if (ent.moveinfo.sound_end != 0)
+                    GameBase.gi.sound(ent, Defines.CHAN_NO_PHS_ADD
+                                    + Defines.CHAN_VOICE, ent.moveinfo.sound_end, 1,
+                            Defines.ATTN_STATIC, 0);
+                ent.s.sound = 0;
+            }
+            ent.moveinfo.state = STATE_BOTTOM;
+            return true;
+        }
+    };
+
+    //
+    //	   Support routines for movement (changes in origin using velocity)
+    //
+    static EntThinkAdapter plat_go_down = new EntThinkAdapter() {
+        public String getID() {
+            return "plat_go_down";
+        }
+
+        public boolean think(edict_t ent) {
+            if (0 == (ent.flags & Defines.FL_TEAMSLAVE)) {
+                if (ent.moveinfo.sound_start != 0)
+                    GameBase.gi.sound(ent, Defines.CHAN_NO_PHS_ADD
+                                    + Defines.CHAN_VOICE, ent.moveinfo.sound_start, 1,
+                            Defines.ATTN_STATIC, 0);
+                ent.s.sound = ent.moveinfo.sound_middle;
+            }
+            ent.moveinfo.state = STATE_DOWN;
+            Move_Calc(ent, ent.moveinfo.end_origin, plat_hit_bottom);
+            return true;
+        }
+    };
     static EntThinkAdapter plat_hit_top = new EntThinkAdapter() {
-        public String getID() { return "plat_hit_top";}
+        public String getID() {
+            return "plat_hit_top";
+        }
+
         public boolean think(edict_t ent) {
             if (0 == (ent.flags & Defines.FL_TEAMSLAVE)) {
                 if (ent.moveinfo.sound_end != 0)
                     GameBase.gi.sound(ent, Defines.CHAN_NO_PHS_ADD
-                            + Defines.CHAN_VOICE, ent.moveinfo.sound_end, 1,
+                                    + Defines.CHAN_VOICE, ent.moveinfo.sound_end, 1,
                             Defines.ATTN_STATIC, 0);
                 ent.s.sound = 0;
             }
@@ -756,41 +296,11 @@ public class GameFunc {
             return true;
         }
     };
-
-    static EntThinkAdapter plat_hit_bottom = new EntThinkAdapter() {
-        public String getID() { return "plat_hit_bottom";}
-        public boolean think(edict_t ent) {
-
-            if (0 == (ent.flags & Defines.FL_TEAMSLAVE)) {
-                if (ent.moveinfo.sound_end != 0)
-                    GameBase.gi.sound(ent, Defines.CHAN_NO_PHS_ADD
-                            + Defines.CHAN_VOICE, ent.moveinfo.sound_end, 1,
-                            Defines.ATTN_STATIC, 0);
-                ent.s.sound = 0;
-            }
-            ent.moveinfo.state = STATE_BOTTOM;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter plat_go_down = new EntThinkAdapter() {
-        public String getID() { return "plat_go_down";}
-        public boolean think(edict_t ent) {
-            if (0 == (ent.flags & Defines.FL_TEAMSLAVE)) {
-                if (ent.moveinfo.sound_start != 0)
-                    GameBase.gi.sound(ent, Defines.CHAN_NO_PHS_ADD
-                            + Defines.CHAN_VOICE, ent.moveinfo.sound_start, 1,
-                            Defines.ATTN_STATIC, 0);
-                ent.s.sound = ent.moveinfo.sound_middle;
-            }
-            ent.moveinfo.state = STATE_DOWN;
-            Move_Calc(ent, ent.moveinfo.end_origin, plat_hit_bottom);
-            return true;
-        }
-    };
-
     static EntBlockedAdapter plat_blocked = new EntBlockedAdapter() {
-        public String getID() { return "plat_blocked";}
+        public String getID() {
+            return "plat_blocked";
+        }
+
         public void blocked(edict_t self, edict_t other) {
             if (0 == (other.svflags & Defines.SVF_MONSTER)
                     && (null == other.client)) {
@@ -816,19 +326,27 @@ public class GameFunc {
         }
     };
 
+    //
+    //	   Support routines for angular movement (changes in angle using avelocity)
+    //
     static EntUseAdapter Use_Plat = new EntUseAdapter() {
-        public String getID() { return "use_plat";}
+        public String getID() {
+            return "use_plat";
+        }
+
         public void use(edict_t ent, edict_t other, edict_t activator) {
             if (ent.think != null)
                 return; // already down
             plat_go_down.think(ent);
         }
     };
-
     static EntTouchAdapter Touch_Plat_Center = new EntTouchAdapter() {
-        public String getID() { return "touch_plat_center";}
+        public String getID() {
+            return "touch_plat_center";
+        }
+
         public void touch(edict_t ent, edict_t other, cplane_t plane,
-                csurface_t surf) {
+                          csurface_t surf) {
             if (other.client == null)
                 return;
 
@@ -840,39 +358,43 @@ public class GameFunc {
                 plat_go_up(ent);
             else if (ent.moveinfo.state == STATE_TOP) {
                 ent.nextthink = GameBase.level.time + 1; // the player is still
-                                                         // on the plat, so
-                                                         // delay going down
+                // on the plat, so
+                // delay going down
             }
         }
     };
-
     /**
      * QUAKED func_rotating (0 .5 .8) ? START_ON REVERSE X_AXIS Y_AXIS
      * TOUCH_PAIN STOP ANIMATED ANIMATED_FAST You need to have an origin brush
      * as part of this entity. The center of that brush will be the point around
      * which it is rotated. It will rotate around the Z axis by default. You can
      * check either the X_AXIS or Y_AXIS box to change that.
-     * 
+     * <p/>
      * "speed" determines how fast it moves; default value is 100. "dmg" damage
      * to inflict when blocked (2 default)
-     * 
+     * <p/>
      * REVERSE will cause the it to rotate in the opposite direction. STOP mean
      * it will stop moving instead of pushing entities
      */
 
     static EntBlockedAdapter rotating_blocked = new EntBlockedAdapter() {
-        public String getID() { return "rotating_blocked";}
+        public String getID() {
+            return "rotating_blocked";
+        }
+
         public void blocked(edict_t self, edict_t other) {
             GameCombat.T_Damage(other, self, self, Globals.vec3_origin,
                     other.s.origin, Globals.vec3_origin, self.dmg, 1, 0,
                     Defines.MOD_CRUSH);
         }
     };
-
     static EntTouchAdapter rotating_touch = new EntTouchAdapter() {
-        public String getID() { return "rotating_touch";}
+        public String getID() {
+            return "rotating_touch";
+        }
+
         public void touch(edict_t self, edict_t other, cplane_t plane,
-                csurface_t surf) {
+                          csurface_t surf) {
             if (self.avelocity[0] != 0 || self.avelocity[1] != 0
                     || self.avelocity[2] != 0)
                 GameCombat.T_Damage(other, self, self, Globals.vec3_origin,
@@ -880,9 +402,11 @@ public class GameFunc {
                         Defines.MOD_CRUSH);
         }
     };
-
     static EntUseAdapter rotating_use = new EntUseAdapter() {
-        public String getID() { return "rotating_use";}
+        public String getID() {
+            return "rotating_use";
+        }
+
         public void use(edict_t self, edict_t other, edict_t activator) {
             if (!Math3D.VectorEquals(self.avelocity, Globals.vec3_origin)) {
                 self.s.sound = 0;
@@ -896,9 +420,11 @@ public class GameFunc {
             }
         }
     };
-
     static EntThinkAdapter SP_func_rotating = new EntThinkAdapter() {
-        public String getID() { return "sp_func_rotating";}
+        public String getID() {
+            return "sp_func_rotating";
+        }
+
         public boolean think(edict_t ent) {
             ent.solid = Defines.SOLID_BSP;
             if ((ent.spawnflags & 32) != 0)
@@ -944,31 +470,11 @@ public class GameFunc {
             return true;
         }
     };
-
-    /*
-     * ======================================================================
-     * 
-     * BUTTONS
-     * 
-     * ======================================================================
-     */
-
-    /*
-     * QUAKED func_button (0 .5 .8) ? When a button is touched, it moves some
-     * distance in the direction of it's angle, triggers all of it's targets,
-     * waits some time, then returns to it's original position where it can be
-     * triggered again.
-     * 
-     * "angle" determines the opening direction "target" all entities with a
-     * matching targetname will be used "speed" override the default 40 speed
-     * "wait" override the default 1 second wait (-1 = never return) "lip"
-     * override the default 4 pixel lip remaining at end of move "health" if
-     * set, the button must be killed instead of touched "sounds" 1) silent 2)
-     * steam metal 3) wooden clunk 4) metallic click 5) in-out
-     */
-
     static EntThinkAdapter button_done = new EntThinkAdapter() {
-        public String getID() { return "button_done";}
+        public String getID() {
+            return "button_done";
+        }
+
         public boolean think(edict_t self) {
 
             self.moveinfo.state = STATE_BOTTOM;
@@ -977,9 +483,11 @@ public class GameFunc {
             return true;
         }
     };
-
     static EntThinkAdapter button_return = new EntThinkAdapter() {
-        public String getID() { return "button_return";}
+        public String getID() {
+            return "button_return";
+        }
+
         public boolean think(edict_t self) {
             self.moveinfo.state = STATE_DOWN;
 
@@ -992,9 +500,11 @@ public class GameFunc {
             return true;
         }
     };
-
     static EntThinkAdapter button_wait = new EntThinkAdapter() {
-        public String getID() { return "button_wait";}
+        public String getID() {
+            return "button_wait";
+        }
+
         public boolean think(edict_t self) {
             self.moveinfo.state = STATE_TOP;
             self.s.effects &= ~Defines.EF_ANIM01;
@@ -1009,9 +519,11 @@ public class GameFunc {
             return true;
         }
     };
-
     static EntThinkAdapter button_fire = new EntThinkAdapter() {
-        public String getID() { return "button_fire";}
+        public String getID() {
+            return "button_fire";
+        }
+
         public boolean think(edict_t self) {
             if (self.moveinfo.state == STATE_UP
                     || self.moveinfo.state == STATE_TOP)
@@ -1021,26 +533,30 @@ public class GameFunc {
             if (self.moveinfo.sound_start != 0
                     && 0 == (self.flags & Defines.FL_TEAMSLAVE))
                 GameBase.gi.sound(self, Defines.CHAN_NO_PHS_ADD
-                        + Defines.CHAN_VOICE, self.moveinfo.sound_start, 1,
+                                + Defines.CHAN_VOICE, self.moveinfo.sound_start, 1,
                         Defines.ATTN_STATIC, 0);
             Move_Calc(self, self.moveinfo.end_origin, button_wait);
             return true;
         }
     };
-
     static EntUseAdapter button_use = new EntUseAdapter() {
-        public String getID() { return "button_use";}
+        public String getID() {
+            return "button_use";
+        }
+
         public void use(edict_t self, edict_t other, edict_t activator) {
             self.activator = activator;
             button_fire.think(self);
             return;
         }
     };
-
     static EntTouchAdapter button_touch = new EntTouchAdapter() {
-        public String getID() { return "button_touch";}
+        public String getID() {
+            return "button_touch";
+        }
+
         public void touch(edict_t self, edict_t other, cplane_t plane,
-                csurface_t surf) {
+                          csurface_t surf) {
             if (null == other.client)
                 return;
 
@@ -1052,11 +568,13 @@ public class GameFunc {
 
         }
     };
-
     static EntDieAdapter button_killed = new EntDieAdapter() {
-        public String getID() { return "button_killed";}
+        public String getID() {
+            return "button_killed";
+        }
+
         public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
+                        int damage, float[] point) {
             self.activator = attacker;
             self.health = self.max_health;
             self.takedamage = Defines.DAMAGE_NO;
@@ -1064,11 +582,13 @@ public class GameFunc {
 
         }
     };
-
     static EntThinkAdapter SP_func_button = new EntThinkAdapter() {
-        public String getID() { return "sp_func_button";}
+        public String getID() {
+            return "sp_func_button";
+        }
+
         public boolean think(edict_t ent) {
-            float[] abs_movedir = { 0, 0, 0 };
+            float[] abs_movedir = {0, 0, 0};
             float dist;
 
             GameBase.G_SetMovedir(ent.s.angles, ent.movedir);
@@ -1126,34 +646,37 @@ public class GameFunc {
         }
     };
 
-    static EntThinkAdapter door_hit_top = new EntThinkAdapter() {
-        public String getID() { return "door_hit_top";}
-        public boolean think(edict_t self) {
-            if (0 == (self.flags & Defines.FL_TEAMSLAVE)) {
-                if (self.moveinfo.sound_end != 0)
-                    GameBase.gi.sound(self, Defines.CHAN_NO_PHS_ADD
-                            + Defines.CHAN_VOICE, self.moveinfo.sound_end, 1,
-                            Defines.ATTN_STATIC, 0);
-                self.s.sound = 0;
-            }
-            self.moveinfo.state = STATE_TOP;
-            if ((self.spawnflags & DOOR_TOGGLE) != 0)
-                return true;
-            if (self.moveinfo.wait >= 0) {
-                self.think = door_go_down;
-                self.nextthink = GameBase.level.time + self.moveinfo.wait;
-            }
-            return true;
-        }
-    };
+    /*
+     * ======================================================================
+     * 
+     * BUTTONS
+     * 
+     * ======================================================================
+     */
 
+    /*
+     * QUAKED func_button (0 .5 .8) ? When a button is touched, it moves some
+     * distance in the direction of it's angle, triggers all of it's targets,
+     * waits some time, then returns to it's original position where it can be
+     * triggered again.
+     * 
+     * "angle" determines the opening direction "target" all entities with a
+     * matching targetname will be used "speed" override the default 40 speed
+     * "wait" override the default 1 second wait (-1 = never return) "lip"
+     * override the default 4 pixel lip remaining at end of move "health" if
+     * set, the button must be killed instead of touched "sounds" 1) silent 2)
+     * steam metal 3) wooden clunk 4) metallic click 5) in-out
+     */
     static EntThinkAdapter door_hit_bottom = new EntThinkAdapter() {
-        public String getID() { return "door_hit_bottom";}
+        public String getID() {
+            return "door_hit_bottom";
+        }
+
         public boolean think(edict_t self) {
             if (0 == (self.flags & Defines.FL_TEAMSLAVE)) {
                 if (self.moveinfo.sound_end != 0)
                     GameBase.gi.sound(self, Defines.CHAN_NO_PHS_ADD
-                            + Defines.CHAN_VOICE, self.moveinfo.sound_end, 1,
+                                    + Defines.CHAN_VOICE, self.moveinfo.sound_end, 1,
                             Defines.ATTN_STATIC, 0);
                 self.s.sound = 0;
             }
@@ -1162,14 +685,16 @@ public class GameFunc {
             return true;
         }
     };
-
     static EntThinkAdapter door_go_down = new EntThinkAdapter() {
-        public String getID() { return "door_go_down";}
+        public String getID() {
+            return "door_go_down";
+        }
+
         public boolean think(edict_t self) {
             if (0 == (self.flags & Defines.FL_TEAMSLAVE)) {
                 if (self.moveinfo.sound_start != 0)
                     GameBase.gi.sound(self, Defines.CHAN_NO_PHS_ADD
-                            + Defines.CHAN_VOICE, self.moveinfo.sound_start, 1,
+                                    + Defines.CHAN_VOICE, self.moveinfo.sound_start, 1,
                             Defines.ATTN_STATIC, 0);
                 self.s.sound = self.moveinfo.sound_middle;
             }
@@ -1187,9 +712,34 @@ public class GameFunc {
             return true;
         }
     };
+    static EntThinkAdapter door_hit_top = new EntThinkAdapter() {
+        public String getID() {
+            return "door_hit_top";
+        }
 
+        public boolean think(edict_t self) {
+            if (0 == (self.flags & Defines.FL_TEAMSLAVE)) {
+                if (self.moveinfo.sound_end != 0)
+                    GameBase.gi.sound(self, Defines.CHAN_NO_PHS_ADD
+                                    + Defines.CHAN_VOICE, self.moveinfo.sound_end, 1,
+                            Defines.ATTN_STATIC, 0);
+                self.s.sound = 0;
+            }
+            self.moveinfo.state = STATE_TOP;
+            if ((self.spawnflags & DOOR_TOGGLE) != 0)
+                return true;
+            if (self.moveinfo.wait >= 0) {
+                self.think = door_go_down;
+                self.nextthink = GameBase.level.time + self.moveinfo.wait;
+            }
+            return true;
+        }
+    };
     static EntUseAdapter door_use = new EntUseAdapter() {
-        public String getID() { return "door_use";}
+        public String getID() {
+            return "door_use";
+        }
+
         public void use(edict_t self, edict_t other, edict_t activator) {
             edict_t ent;
 
@@ -1217,11 +767,13 @@ public class GameFunc {
             }
         }
     };
-
     static EntTouchAdapter Touch_DoorTrigger = new EntTouchAdapter() {
-        public String getID() { return "touch_door_trigger";}
+        public String getID() {
+            return "touch_door_trigger";
+        }
+
         public void touch(edict_t self, edict_t other, cplane_t plane,
-                csurface_t surf) {
+                          csurface_t surf) {
             if (other.health <= 0)
                 return;
 
@@ -1240,9 +792,11 @@ public class GameFunc {
             door_use.use(self.owner, other, other);
         }
     };
-
     static EntThinkAdapter Think_CalcMoveSpeed = new EntThinkAdapter() {
-        public String getID() { return "think_calc_movespeed";}
+        public String getID() {
+            return "think_calc_movespeed";
+        }
+
         public boolean think(edict_t self) {
             edict_t ent;
             float min;
@@ -1281,12 +835,14 @@ public class GameFunc {
             return true;
         }
     };
-
     static EntThinkAdapter Think_SpawnDoorTrigger = new EntThinkAdapter() {
-        public String getID() { return "think_spawn_door_trigger";}
+        public String getID() {
+            return "think_spawn_door_trigger";
+        }
+
         public boolean think(edict_t ent) {
             edict_t other;
-            float[] mins = { 0, 0, 0 }, maxs = { 0, 0, 0 };
+            float[] mins = {0, 0, 0}, maxs = {0, 0, 0};
 
             if ((ent.flags & Defines.FL_TEAMSLAVE) != 0)
                 return true; // only the team leader spawns a trigger
@@ -1321,9 +877,11 @@ public class GameFunc {
             return true;
         }
     };
-
     static EntBlockedAdapter door_blocked = new EntBlockedAdapter() {
-        public String getID() { return "door_blocked";}
+        public String getID() {
+            return "door_blocked";
+        }
+
         public void blocked(edict_t self, edict_t other) {
             edict_t ent;
 
@@ -1360,11 +918,13 @@ public class GameFunc {
             }
         }
     };
-
     static EntDieAdapter door_killed = new EntDieAdapter() {
-        public String getID() { return "door_killed";}
+        public String getID() {
+            return "door_killed";
+        }
+
         public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
+                        int damage, float[] point) {
             edict_t ent;
 
             for (ent = self.teammaster; ent != null; ent = ent.teamchain) {
@@ -1374,11 +934,13 @@ public class GameFunc {
             door_use.use(self.teammaster, attacker, attacker);
         }
     };
-
     static EntTouchAdapter door_touch = new EntTouchAdapter() {
-        public String getID() { return "door_touch";}
+        public String getID() {
+            return "door_touch";
+        }
+
         public void touch(edict_t self, edict_t other, cplane_t plane,
-                csurface_t surf) {
+                          csurface_t surf) {
             if (null == other.client)
                 return;
 
@@ -1391,11 +953,13 @@ public class GameFunc {
                     .soundindex("misc/talk1.wav"), 1, Defines.ATTN_NORM, 0);
         }
     };
-
     static EntThinkAdapter SP_func_door = new EntThinkAdapter() {
-        public String getID() { return "sp_func_door";}
+        public String getID() {
+            return "sp_func_door";
+        }
+
         public boolean think(edict_t ent) {
-            float[] abs_movedir = { 0, 0, 0 };
+            float[] abs_movedir = {0, 0, 0};
 
             if (ent.sounds != 1) {
                 ent.moveinfo.sound_start = GameBase.gi
@@ -1490,38 +1054,11 @@ public class GameFunc {
             return true;
         }
     };
-
-    /*
-     * QUAKED func_door_rotating (0 .5 .8) ? START_OPEN REVERSE CRUSHER
-     * NOMONSTER ANIMATED TOGGLE X_AXIS Y_AXIS TOGGLE causes the door to wait in
-     * both the start and end states for a trigger event.
-     * 
-     * START_OPEN the door to moves to its destination when spawned, and operate
-     * in reverse. It is used to temporarily or permanently close off an area
-     * when triggered (not useful for touch or takedamage doors). NOMONSTER
-     * monsters will not trigger this door
-     * 
-     * You need to have an origin brush as part of this entity. The center of
-     * that brush will be the point around which it is rotated. It will rotate
-     * around the Z axis by default. You can check either the X_AXIS or Y_AXIS
-     * box to change that.
-     * 
-     * "distance" is how many degrees the door will be rotated. "speed"
-     * determines how fast the door moves; default value is 100.
-     * 
-     * REVERSE will cause the door to rotate in the opposite direction.
-     * 
-     * "message" is printed when the door is touched if it is a trigger door and
-     * it hasn't been fired yet "angle" determines the opening direction
-     * "targetname" if set, no touch field will be spawned and a remote button
-     * or trigger field activates the door. "health" if set, door must be shot
-     * open "speed" movement speed (100 default) "wait" wait before returning (3
-     * default, -1 = never return) "dmg" damage to inflict when blocked (2
-     * default) "sounds" 1) silent 2) light 3) medium 4) heavy
-     */
-
     static EntThinkAdapter SP_func_door_rotating = new EntThinkAdapter() {
-        public String getID() { return "sp_func_door_rotating";}
+        public String getID() {
+            return "sp_func_door_rotating";
+        }
+
         public boolean think(edict_t ent) {
             Math3D.VectorClear(ent.s.angles);
 
@@ -1625,25 +1162,11 @@ public class GameFunc {
             return true;
         }
     };
-
-    public final static int TRAIN_START_ON = 1;
-
-    public final static int TRAIN_TOGGLE = 2;
-
-    public final static int TRAIN_BLOCK_STOPS = 4;
-
-    /*
-     * QUAKED func_train (0 .5 .8) ? START_ON TOGGLE BLOCK_STOPS Trains are
-     * moving platforms that players can ride. The targets origin specifies the
-     * min point of the train at each corner. The train spawns at the first
-     * target it is pointing at. If the train is the target of a button or
-     * trigger, it will not begin moving until activated. speed default 100 dmg
-     * default 2 noise looping sound to play when the train is in motion
-     *  
-     */
-
     static EntBlockedAdapter train_blocked = new EntBlockedAdapter() {
-        public String getID() { return "train_blocked";}
+        public String getID() {
+            return "train_blocked";
+        }
+
         public void blocked(edict_t self, edict_t other) {
             if (0 == (other.svflags & Defines.SVF_MONSTER)
                     && (null == other.client)) {
@@ -1668,56 +1191,14 @@ public class GameFunc {
                     Defines.MOD_CRUSH);
         }
     };
-
-    static EntThinkAdapter train_wait = new EntThinkAdapter() {
-        public String getID() { return "train_wait";}
-        public boolean think(edict_t self) {
-            if (self.target_ent.pathtarget != null) {
-                String savetarget;
-                edict_t ent;
-
-                ent = self.target_ent;
-                savetarget = ent.target;
-                ent.target = ent.pathtarget;
-                GameUtil.G_UseTargets(ent, self.activator);
-                ent.target = savetarget;
-
-                // make sure we didn't get killed by a killtarget
-                if (!self.inuse)
-                    return true;
-            }
-
-            if (self.moveinfo.wait != 0) {
-                if (self.moveinfo.wait > 0) {
-                    self.nextthink = GameBase.level.time + self.moveinfo.wait;
-                    self.think = train_next;
-                } else if (0 != (self.spawnflags & TRAIN_TOGGLE)) // && wait < 0
-                {
-                    train_next.think(self);
-                    self.spawnflags &= ~TRAIN_START_ON;
-                    Math3D.VectorClear(self.velocity);
-                    self.nextthink = 0;
-                }
-
-                if (0 == (self.flags & Defines.FL_TEAMSLAVE)) {
-                    if (self.moveinfo.sound_end != 0)
-                        GameBase.gi.sound(self, Defines.CHAN_NO_PHS_ADD
-                                + Defines.CHAN_VOICE, self.moveinfo.sound_end,
-                                1, Defines.ATTN_STATIC, 0);
-                    self.s.sound = 0;
-                }
-            } else {
-                train_next.think(self);
-            }
-            return true;
-        }
-    };
-
     static EntThinkAdapter train_next = new EntThinkAdapter() {
-        public String getID() { return "train_next";}
+        public String getID() {
+            return "train_next";
+        }
+
         public boolean think(edict_t self) {
             edict_t ent = null;
-            float[] dest = { 0, 0, 0 };
+            float[] dest = {0, 0, 0};
             boolean first;
 
             first = true;
@@ -1763,7 +1244,7 @@ public class GameFunc {
             if (0 == (self.flags & Defines.FL_TEAMSLAVE)) {
                 if (self.moveinfo.sound_start != 0)
                     GameBase.gi.sound(self, Defines.CHAN_NO_PHS_ADD
-                            + Defines.CHAN_VOICE, self.moveinfo.sound_start, 1,
+                                    + Defines.CHAN_VOICE, self.moveinfo.sound_start, 1,
                             Defines.ATTN_STATIC, 0);
                 self.s.sound = self.moveinfo.sound_middle;
             }
@@ -1777,9 +1258,79 @@ public class GameFunc {
             return true;
         }
     };
+    static EntThinkAdapter train_wait = new EntThinkAdapter() {
+        public String getID() {
+            return "train_wait";
+        }
 
+        public boolean think(edict_t self) {
+            if (self.target_ent.pathtarget != null) {
+                String savetarget;
+                edict_t ent;
+
+                ent = self.target_ent;
+                savetarget = ent.target;
+                ent.target = ent.pathtarget;
+                GameUtil.G_UseTargets(ent, self.activator);
+                ent.target = savetarget;
+
+                // make sure we didn't get killed by a killtarget
+                if (!self.inuse)
+                    return true;
+            }
+
+            if (self.moveinfo.wait != 0) {
+                if (self.moveinfo.wait > 0) {
+                    self.nextthink = GameBase.level.time + self.moveinfo.wait;
+                    self.think = train_next;
+                } else if (0 != (self.spawnflags & TRAIN_TOGGLE)) // && wait < 0
+                {
+                    train_next.think(self);
+                    self.spawnflags &= ~TRAIN_START_ON;
+                    Math3D.VectorClear(self.velocity);
+                    self.nextthink = 0;
+                }
+
+                if (0 == (self.flags & Defines.FL_TEAMSLAVE)) {
+                    if (self.moveinfo.sound_end != 0)
+                        GameBase.gi.sound(self, Defines.CHAN_NO_PHS_ADD
+                                        + Defines.CHAN_VOICE, self.moveinfo.sound_end,
+                                1, Defines.ATTN_STATIC, 0);
+                    self.s.sound = 0;
+                }
+            } else {
+                train_next.think(self);
+            }
+            return true;
+        }
+    };
+    public static EntUseAdapter train_use = new EntUseAdapter() {
+        public String getID() {
+            return "train_use";
+        }
+
+        public void use(edict_t self, edict_t other, edict_t activator) {
+            self.activator = activator;
+
+            if ((self.spawnflags & TRAIN_START_ON) != 0) {
+                if (0 == (self.spawnflags & TRAIN_TOGGLE))
+                    return;
+                self.spawnflags &= ~TRAIN_START_ON;
+                Math3D.VectorClear(self.velocity);
+                self.nextthink = 0;
+            } else {
+                if (self.target_ent != null)
+                    train_resume(self);
+                else
+                    train_next.think(self);
+            }
+        }
+    };
     public static EntThinkAdapter func_train_find = new EntThinkAdapter() {
-        public String getID() { return "func_train_find";}
+        public String getID() {
+            return "func_train_find";
+        }
+
         public boolean think(edict_t self) {
             edict_t ent;
 
@@ -1810,32 +1361,13 @@ public class GameFunc {
             return true;
         }
     };
-
-    public static EntUseAdapter train_use = new EntUseAdapter() {
-        public String getID() { return "train_use";}
-        public void use(edict_t self, edict_t other, edict_t activator) {
-            self.activator = activator;
-
-            if ((self.spawnflags & TRAIN_START_ON) != 0) {
-                if (0 == (self.spawnflags & TRAIN_TOGGLE))
-                    return;
-                self.spawnflags &= ~TRAIN_START_ON;
-                Math3D.VectorClear(self.velocity);
-                self.nextthink = 0;
-            } else {
-                if (self.target_ent != null)
-                    train_resume(self);
-                else
-                    train_next.think(self);
-            }
-        }
-    };
-
     /*
      * QUAKED trigger_elevator (0.3 0.1 0.6) (-8 -8 -8) (8 8 8)
      */
     static EntUseAdapter trigger_elevator_use = new EntUseAdapter() {
-        public String getID() { return "trigger_elevator_use";}
+        public String getID() {
+            return "trigger_elevator_use";
+        }
 
         public void use(edict_t self, edict_t other, edict_t activator) {
             edict_t target;
@@ -1861,9 +1393,11 @@ public class GameFunc {
             train_resume(self.movetarget);
         }
     };
-
     static EntThinkAdapter trigger_elevator_init = new EntThinkAdapter() {
-        public String getID() { return "trigger_elevator_init";}
+        public String getID() {
+            return "trigger_elevator_init";
+        }
+
         public boolean think(edict_t self) {
             if (null == self.target) {
                 GameBase.gi.dprintf("trigger_elevator has no target\n");
@@ -1887,11 +1421,206 @@ public class GameFunc {
         }
     };
 
+    /*
+     * QUAKED func_door_rotating (0 .5 .8) ? START_OPEN REVERSE CRUSHER
+     * NOMONSTER ANIMATED TOGGLE X_AXIS Y_AXIS TOGGLE causes the door to wait in
+     * both the start and end states for a trigger event.
+     * 
+     * START_OPEN the door to moves to its destination when spawned, and operate
+     * in reverse. It is used to temporarily or permanently close off an area
+     * when triggered (not useful for touch or takedamage doors). NOMONSTER
+     * monsters will not trigger this door
+     * 
+     * You need to have an origin brush as part of this entity. The center of
+     * that brush will be the point around which it is rotated. It will rotate
+     * around the Z axis by default. You can check either the X_AXIS or Y_AXIS
+     * box to change that.
+     * 
+     * "distance" is how many degrees the door will be rotated. "speed"
+     * determines how fast the door moves; default value is 100.
+     * 
+     * REVERSE will cause the door to rotate in the opposite direction.
+     * 
+     * "message" is printed when the door is touched if it is a trigger door and
+     * it hasn't been fired yet "angle" determines the opening direction
+     * "targetname" if set, no touch field will be spawned and a remote button
+     * or trigger field activates the door. "health" if set, door must be shot
+     * open "speed" movement speed (100 default) "wait" wait before returning (3
+     * default, -1 = never return) "dmg" damage to inflict when blocked (2
+     * default) "sounds" 1) silent 2) light 3) medium 4) heavy
+     */
     static EntThinkAdapter SP_trigger_elevator = new EntThinkAdapter() {
-        public String getID() { return "sp_trigger_elevator";}
+        public String getID() {
+            return "sp_trigger_elevator";
+        }
+
         public boolean think(edict_t self) {
             self.think = trigger_elevator_init;
             self.nextthink = GameBase.level.time + Defines.FRAMETIME;
+            return true;
+        }
+    };
+    static EntThinkAdapter func_timer_think = new EntThinkAdapter() {
+        public String getID() {
+            return "func_timer_think";
+        }
+
+        public boolean think(edict_t self) {
+            GameUtil.G_UseTargets(self, self.activator);
+            self.nextthink = GameBase.level.time + self.wait + Lib.crandom()
+                    * self.random;
+            return true;
+        }
+    };
+    static EntUseAdapter func_timer_use = new EntUseAdapter() {
+        public String getID() {
+            return "func_timer_use";
+        }
+
+        public void use(edict_t self, edict_t other, edict_t activator) {
+            self.activator = activator;
+
+            // if on, turn it off
+            if (self.nextthink != 0) {
+                self.nextthink = 0;
+                return;
+            }
+
+            // turn it on
+            if (self.delay != 0)
+                self.nextthink = GameBase.level.time + self.delay;
+            else
+                func_timer_think.think(self);
+        }
+    };
+    static EntUseAdapter func_conveyor_use = new EntUseAdapter() {
+        public String getID() {
+            return "func_conveyor_use";
+        }
+
+        public void use(edict_t self, edict_t other, edict_t activator) {
+            if ((self.spawnflags & 1) != 0) {
+                self.speed = 0;
+                self.spawnflags &= ~1;
+            } else {
+                self.speed = self.count;
+                self.spawnflags |= 1;
+            }
+
+            if (0 == (self.spawnflags & 2))
+                self.count = 0;
+        }
+    };
+
+    /*
+     * QUAKED func_train (0 .5 .8) ? START_ON TOGGLE BLOCK_STOPS Trains are
+     * moving platforms that players can ride. The targets origin specifies the
+     * min point of the train at each corner. The train spawns at the first
+     * target it is pointing at. If the train is the target of a button or
+     * trigger, it will not begin moving until activated. speed default 100 dmg
+     * default 2 noise looping sound to play when the train is in motion
+     *  
+     */
+    static EntThinkAdapter SP_func_conveyor = new EntThinkAdapter() {
+        public String getID() {
+            return "sp_func_conveyor";
+        }
+
+        public boolean think(edict_t self) {
+
+            if (0 == self.speed)
+                self.speed = 100;
+
+            if (0 == (self.spawnflags & 1)) {
+                self.count = (int) self.speed;
+                self.speed = 0;
+            }
+
+            self.use = func_conveyor_use;
+
+            GameBase.gi.setmodel(self, self.model);
+            self.solid = Defines.SOLID_BSP;
+            GameBase.gi.linkentity(self);
+            return true;
+        }
+    };
+    static EntThinkAdapter door_secret_done = new EntThinkAdapter() {
+        public String getID() {
+            return "door_secret_move7";
+        }
+
+        public boolean think(edict_t self) {
+            if (null == (self.targetname)
+                    || 0 != (self.spawnflags & SECRET_ALWAYS_SHOOT)) {
+                self.health = 0;
+                self.takedamage = Defines.DAMAGE_YES;
+            }
+            door_use_areaportals(self, false);
+            return true;
+        }
+    };
+    static EntThinkAdapter door_secret_move6 = new EntThinkAdapter() {
+        public String getID() {
+            return "door_secret_move6";
+        }
+
+        public boolean think(edict_t self) {
+            Move_Calc(self, Globals.vec3_origin, door_secret_done);
+            return true;
+        }
+    };
+    static EntThinkAdapter door_secret_move5 = new EntThinkAdapter() {
+        public String getID() {
+            return "door_secret_move5";
+        }
+
+        public boolean think(edict_t self) {
+            self.nextthink = GameBase.level.time + 1.0f;
+            self.think = door_secret_move6;
+            return true;
+        }
+    };
+    static EntThinkAdapter door_secret_move4 = new EntThinkAdapter() {
+        public String getID() {
+            return "door_secret_move4";
+        }
+
+        public boolean think(edict_t self) {
+            Move_Calc(self, self.pos1, door_secret_move5);
+            return true;
+        }
+    };
+    static EntThinkAdapter door_secret_move3 = new EntThinkAdapter() {
+        public String getID() {
+            return "door_secret_move3";
+        }
+
+        public boolean think(edict_t self) {
+            if (self.wait == -1)
+                return true;
+            self.nextthink = GameBase.level.time + self.wait;
+            self.think = door_secret_move4;
+            return true;
+        }
+    };
+    static EntThinkAdapter door_secret_move2 = new EntThinkAdapter() {
+        public String getID() {
+            return "door_secret_move2";
+        }
+
+        public boolean think(edict_t self) {
+            Move_Calc(self, self.pos2, door_secret_move3);
+            return true;
+        }
+    };
+    static EntThinkAdapter door_secret_move1 = new EntThinkAdapter() {
+        public String getID() {
+            return "door_secret_move1";
+        }
+
+        public boolean think(edict_t self) {
+            self.nextthink = GameBase.level.time + 1.0f;
+            self.think = door_secret_move2;
             return true;
         }
     };
@@ -1911,100 +1640,11 @@ public class GameFunc {
      * 
      * These can used but not touched.
      */
-
-    static EntThinkAdapter func_timer_think = new EntThinkAdapter() {
-        public String getID() { return "func_timer_think";}
-        public boolean think(edict_t self) {
-            GameUtil.G_UseTargets(self, self.activator);
-            self.nextthink = GameBase.level.time + self.wait + Lib.crandom()
-                    * self.random;
-            return true;
-        }
-    };
-
-    static EntUseAdapter func_timer_use = new EntUseAdapter() {
-        public String getID() { return "func_timer_use";}
-        public void use(edict_t self, edict_t other, edict_t activator) {
-            self.activator = activator;
-
-            // if on, turn it off
-            if (self.nextthink != 0) {
-                self.nextthink = 0;
-                return;
-            }
-
-            // turn it on
-            if (self.delay != 0)
-                self.nextthink = GameBase.level.time + self.delay;
-            else
-                func_timer_think.think(self);
-        }
-    };
-
-    /*
-     * QUAKED func_conveyor (0 .5 .8) ? START_ON TOGGLE Conveyors are stationary
-     * brushes that move what's on them. The brush should be have a surface with
-     * at least one current content enabled. speed default 100
-     */
-
-    static EntUseAdapter func_conveyor_use = new EntUseAdapter() {
-        public String getID() { return "func_conveyor_use";}
-        public void use(edict_t self, edict_t other, edict_t activator) {
-            if ((self.spawnflags & 1) != 0) {
-                self.speed = 0;
-                self.spawnflags &= ~1;
-            } else {
-                self.speed = self.count;
-                self.spawnflags |= 1;
-            }
-
-            if (0 == (self.spawnflags & 2))
-                self.count = 0;
-        }
-    };
-
-    static EntThinkAdapter SP_func_conveyor = new EntThinkAdapter() {
-        public String getID() { return "sp_func_conveyor";}
-        public boolean think(edict_t self) {
-
-            if (0 == self.speed)
-                self.speed = 100;
-
-            if (0 == (self.spawnflags & 1)) {
-                self.count = (int) self.speed;
-                self.speed = 0;
-            }
-
-            self.use = func_conveyor_use;
-
-            GameBase.gi.setmodel(self, self.model);
-            self.solid = Defines.SOLID_BSP;
-            GameBase.gi.linkentity(self);
-            return true;
-        }
-    };
-
-    /*
-     * QUAKED func_door_secret (0 .5 .8) ? always_shoot 1st_left 1st_down A
-     * secret door. Slide back and then to the side.
-     * 
-     * open_once doors never closes 1st_left 1st move is left of arrow 1st_down
-     * 1st move is down from arrow always_shoot door is shootebale even if
-     * targeted
-     * 
-     * "angle" determines the direction "dmg" damage to inflic when blocked
-     * (default 2) "wait" how long to hold in the open position (default 5, -1
-     * means hold)
-     */
-
-    public final static int SECRET_ALWAYS_SHOOT = 1;
-
-    public final static int SECRET_1ST_LEFT = 2;
-
-    public final static int SECRET_1ST_DOWN = 4;
-
     static EntUseAdapter door_secret_use = new EntUseAdapter() {
-        public String getID() { return "door_secret_use";}
+        public String getID() {
+            return "door_secret_use";
+        }
+
         public void use(edict_t self, edict_t other, edict_t activator) {
             // make sure we're not already moving
             if (!Math3D.VectorEquals(self.s.origin, Globals.vec3_origin))
@@ -2014,75 +1654,11 @@ public class GameFunc {
             door_use_areaportals(self, true);
         }
     };
-
-    static EntThinkAdapter door_secret_move1 = new EntThinkAdapter() {
-        public String getID() { return "door_secret_move1";}
-        public boolean think(edict_t self) {
-            self.nextthink = GameBase.level.time + 1.0f;
-            self.think = door_secret_move2;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter door_secret_move2 = new EntThinkAdapter() {
-        public String getID() { return "door_secret_move2";}
-        public boolean think(edict_t self) {
-            Move_Calc(self, self.pos2, door_secret_move3);
-            return true;
-        }
-    };
-
-    static EntThinkAdapter door_secret_move3 = new EntThinkAdapter() {
-        public String getID() { return "door_secret_move3";}
-        public boolean think(edict_t self) {
-            if (self.wait == -1)
-                return true;
-            self.nextthink = GameBase.level.time + self.wait;
-            self.think = door_secret_move4;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter door_secret_move4 = new EntThinkAdapter() {
-        public String getID() { return "door_secret_move4";}
-        public boolean think(edict_t self) {
-            Move_Calc(self, self.pos1, door_secret_move5);
-            return true;
-        }
-    };
-
-    static EntThinkAdapter door_secret_move5 = new EntThinkAdapter() {
-        public String getID() { return "door_secret_move5";}
-        public boolean think(edict_t self) {
-            self.nextthink = GameBase.level.time + 1.0f;
-            self.think = door_secret_move6;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter door_secret_move6 = new EntThinkAdapter() {
-        public String getID() { return "door_secret_move6";}
-        public boolean think(edict_t self) {
-            Move_Calc(self, Globals.vec3_origin, door_secret_done);
-            return true;
-        }
-    };
-
-    static EntThinkAdapter door_secret_done = new EntThinkAdapter() {
-        public String getID() { return "door_secret_move7";}
-        public boolean think(edict_t self) {
-            if (null == (self.targetname)
-                    || 0 != (self.spawnflags & SECRET_ALWAYS_SHOOT)) {
-                self.health = 0;
-                self.takedamage = Defines.DAMAGE_YES;
-            }
-            door_use_areaportals(self, false);
-            return true;
-        }
-    };
-
     static EntBlockedAdapter door_secret_blocked = new EntBlockedAdapter() {
-        public String getID() { return "door_secret_blocked";}
+        public String getID() {
+            return "door_secret_blocked";
+        }
+
         public void blocked(edict_t self, edict_t other) {
             if (0 == (other.svflags & Defines.SVF_MONSTER)
                     && (null == other.client)) {
@@ -2106,19 +1682,29 @@ public class GameFunc {
         }
     };
 
+    /*
+     * QUAKED func_conveyor (0 .5 .8) ? START_ON TOGGLE Conveyors are stationary
+     * brushes that move what's on them. The brush should be have a surface with
+     * at least one current content enabled. speed default 100
+     */
     static EntDieAdapter door_secret_die = new EntDieAdapter() {
-        public String getID() { return "door_secret_die";}
+        public String getID() {
+            return "door_secret_die";
+        }
+
         public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
+                        int damage, float[] point) {
             self.takedamage = Defines.DAMAGE_NO;
             door_secret_use.use(self, attacker, attacker);
         }
     };
-
     static EntThinkAdapter SP_func_door_secret = new EntThinkAdapter() {
-        public String getID() { return "sp_func_door_secret";}
+        public String getID() {
+            return "sp_func_door_secret";
+        }
+
         public boolean think(edict_t ent) {
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 }, up = { 0, 0, 0 };
+            float[] forward = {0, 0, 0}, right = {0, 0, 0}, up = {0, 0, 0};
             float side;
             float width;
             float length;
@@ -2183,19 +1769,36 @@ public class GameFunc {
         }
     };
 
+    /*
+     * QUAKED func_door_secret (0 .5 .8) ? always_shoot 1st_left 1st_down A
+     * secret door. Slide back and then to the side.
+     * 
+     * open_once doors never closes 1st_left 1st move is left of arrow 1st_down
+     * 1st move is down from arrow always_shoot door is shootebale even if
+     * targeted
+     * 
+     * "angle" determines the direction "dmg" damage to inflic when blocked
+     * (default 2) "wait" how long to hold in the open position (default 5, -1
+     * means hold)
+     */
     /**
      * QUAKED func_killbox (1 0 0) ? Kills everything inside when fired,
      * irrespective of protection.
      */
     static EntUseAdapter use_killbox = new EntUseAdapter() {
-        public String getID() { return "use_killbox";}
+        public String getID() {
+            return "use_killbox";
+        }
+
         public void use(edict_t self, edict_t other, edict_t activator) {
             GameUtil.KillBox(self);
         }
     };
-
     static EntThinkAdapter SP_func_killbox = new EntThinkAdapter() {
-        public String getID() { return "sp_func_killbox";}
+        public String getID() {
+            return "sp_func_killbox";
+        }
+
         public boolean think(edict_t ent) {
             GameBase.gi.setmodel(ent, ent.model);
             ent.use = use_killbox;
@@ -2203,4 +1806,512 @@ public class GameFunc {
             return true;
         }
     };
+
+    static void Move_Calc(edict_t ent, float[] dest, EntThinkAdapter func) {
+        Math3D.VectorClear(ent.velocity);
+        Math3D.VectorSubtract(dest, ent.s.origin, ent.moveinfo.dir);
+        ent.moveinfo.remaining_distance = Math3D
+                .VectorNormalize(ent.moveinfo.dir);
+
+        ent.moveinfo.endfunc = func;
+
+        if (ent.moveinfo.speed == ent.moveinfo.accel
+                && ent.moveinfo.speed == ent.moveinfo.decel) {
+            if (GameBase.level.current_entity == ((ent.flags & Defines.FL_TEAMSLAVE) != 0 ? ent.teammaster
+                    : ent)) {
+                Move_Begin.think(ent);
+            } else {
+                ent.nextthink = GameBase.level.time + Defines.FRAMETIME;
+                ent.think = Move_Begin;
+            }
+        } else {
+            // accelerative
+            ent.moveinfo.current_speed = 0;
+            ent.think = Think_AccelMove;
+            ent.nextthink = GameBase.level.time + Defines.FRAMETIME;
+        }
+    }
+
+    static void AngleMove_Calc(edict_t ent, EntThinkAdapter func) {
+        Math3D.VectorClear(ent.avelocity);
+        ent.moveinfo.endfunc = func;
+        if (GameBase.level.current_entity == ((ent.flags & Defines.FL_TEAMSLAVE) != 0 ? ent.teammaster
+                : ent)) {
+            AngleMove_Begin.think(ent);
+        } else {
+            ent.nextthink = GameBase.level.time + Defines.FRAMETIME;
+            ent.think = AngleMove_Begin;
+        }
+    }
+
+    /**
+     * Think_AccelMove
+     * <p/>
+     * The team has completed a frame of movement, so change the speed for the
+     * next frame.
+     */
+    static float AccelerationDistance(float target, float rate) {
+        return target * ((target / rate) + 1) / 2;
+    }
+
+    static void plat_CalcAcceleratedMove(moveinfo_t moveinfo) {
+        float accel_dist;
+        float decel_dist;
+
+        moveinfo.move_speed = moveinfo.speed;
+
+        if (moveinfo.remaining_distance < moveinfo.accel) {
+            moveinfo.current_speed = moveinfo.remaining_distance;
+            return;
+        }
+
+        accel_dist = AccelerationDistance(moveinfo.speed, moveinfo.accel);
+        decel_dist = AccelerationDistance(moveinfo.speed, moveinfo.decel);
+
+        if ((moveinfo.remaining_distance - accel_dist - decel_dist) < 0) {
+            float f;
+
+            f = (moveinfo.accel + moveinfo.decel)
+                    / (moveinfo.accel * moveinfo.decel);
+            moveinfo.move_speed = (float) ((-2 + Math.sqrt(4 - 4 * f
+                    * (-2 * moveinfo.remaining_distance))) / (2 * f));
+            decel_dist = AccelerationDistance(moveinfo.move_speed,
+                    moveinfo.decel);
+        }
+
+        moveinfo.decel_distance = decel_dist;
+    }
+
+    static void plat_Accelerate(moveinfo_t moveinfo) {
+        // are we decelerating?
+        if (moveinfo.remaining_distance <= moveinfo.decel_distance) {
+            if (moveinfo.remaining_distance < moveinfo.decel_distance) {
+                if (moveinfo.next_speed != 0) {
+                    moveinfo.current_speed = moveinfo.next_speed;
+                    moveinfo.next_speed = 0;
+                    return;
+                }
+                if (moveinfo.current_speed > moveinfo.decel)
+                    moveinfo.current_speed -= moveinfo.decel;
+            }
+            return;
+        }
+
+        // are we at full speed and need to start decelerating during this move?
+        if (moveinfo.current_speed == moveinfo.move_speed)
+            if ((moveinfo.remaining_distance - moveinfo.current_speed) < moveinfo.decel_distance) {
+                float p1_distance;
+                float p2_distance;
+                float distance;
+
+                p1_distance = moveinfo.remaining_distance
+                        - moveinfo.decel_distance;
+                p2_distance = moveinfo.move_speed
+                        * (1.0f - (p1_distance / moveinfo.move_speed));
+                distance = p1_distance + p2_distance;
+                moveinfo.current_speed = moveinfo.move_speed;
+                moveinfo.next_speed = moveinfo.move_speed - moveinfo.decel
+                        * (p2_distance / distance);
+                return;
+            }
+
+        // are we accelerating?
+        if (moveinfo.current_speed < moveinfo.speed) {
+            float old_speed;
+            float p1_distance;
+            float p1_speed;
+            float p2_distance;
+            float distance;
+
+            old_speed = moveinfo.current_speed;
+
+            // figure simple acceleration up to move_speed
+            moveinfo.current_speed += moveinfo.accel;
+            if (moveinfo.current_speed > moveinfo.speed)
+                moveinfo.current_speed = moveinfo.speed;
+
+            // are we accelerating throughout this entire move?
+            if ((moveinfo.remaining_distance - moveinfo.current_speed) >= moveinfo.decel_distance)
+                return;
+
+            // during this move we will accelrate from current_speed to
+            // move_speed
+            // and cross over the decel_distance; figure the average speed for
+            // the
+            // entire move
+            p1_distance = moveinfo.remaining_distance - moveinfo.decel_distance;
+            p1_speed = (old_speed + moveinfo.move_speed) / 2.0f;
+            p2_distance = moveinfo.move_speed
+                    * (1.0f - (p1_distance / p1_speed));
+            distance = p1_distance + p2_distance;
+            moveinfo.current_speed = (p1_speed * (p1_distance / distance))
+                    + (moveinfo.move_speed * (p2_distance / distance));
+            moveinfo.next_speed = moveinfo.move_speed - moveinfo.decel
+                    * (p2_distance / distance);
+            return;
+        }
+
+        // we are at constant velocity (move_speed)
+        return;
+    }
+
+    static void plat_go_up(edict_t ent) {
+        if (0 == (ent.flags & Defines.FL_TEAMSLAVE)) {
+            if (ent.moveinfo.sound_start != 0)
+                GameBase.gi.sound(ent, Defines.CHAN_NO_PHS_ADD
+                                + Defines.CHAN_VOICE, ent.moveinfo.sound_start, 1,
+                        Defines.ATTN_STATIC, 0);
+            ent.s.sound = ent.moveinfo.sound_middle;
+        }
+        ent.moveinfo.state = STATE_UP;
+        Move_Calc(ent, ent.moveinfo.start_origin, plat_hit_top);
+    }
+
+    static void plat_spawn_inside_trigger(edict_t ent) {
+        edict_t trigger;
+        float[] tmin = {0, 0, 0}, tmax = {0, 0, 0};
+
+        //
+        //	   middle trigger
+        //
+        trigger = GameUtil.G_Spawn();
+        trigger.touch = Touch_Plat_Center;
+        trigger.movetype = Defines.MOVETYPE_NONE;
+        trigger.solid = Defines.SOLID_TRIGGER;
+        trigger.enemy = ent;
+
+        tmin[0] = ent.mins[0] + 25;
+        tmin[1] = ent.mins[1] + 25;
+        tmin[2] = ent.mins[2];
+
+        tmax[0] = ent.maxs[0] - 25;
+        tmax[1] = ent.maxs[1] - 25;
+        tmax[2] = ent.maxs[2] + 8;
+
+        tmin[2] = tmax[2] - (ent.pos1[2] - ent.pos2[2] + GameBase.st.lip);
+
+        if ((ent.spawnflags & PLAT_LOW_TRIGGER) != 0)
+            tmax[2] = tmin[2] + 8;
+
+        if (tmax[0] - tmin[0] <= 0) {
+            tmin[0] = (ent.mins[0] + ent.maxs[0]) * 0.5f;
+            tmax[0] = tmin[0] + 1;
+        }
+        if (tmax[1] - tmin[1] <= 0) {
+            tmin[1] = (ent.mins[1] + ent.maxs[1]) * 0.5f;
+            tmax[1] = tmin[1] + 1;
+        }
+
+        Math3D.VectorCopy(tmin, trigger.mins);
+        Math3D.VectorCopy(tmax, trigger.maxs);
+
+        GameBase.gi.linkentity(trigger);
+    }
+
+    /**
+     * QUAKED func_plat (0 .5 .8) ? PLAT_LOW_TRIGGER speed default 150
+     * <p/>
+     * Plats are always drawn in the extended position, so they will light
+     * correctly.
+     * <p/>
+     * If the plat is the target of another trigger or button, it will start out
+     * disabled in the extended position until it is trigger, when it will lower
+     * and become a normal plat.
+     * <p/>
+     * "speed" overrides default 200. "accel" overrides default 500 "lip"
+     * overrides default 8 pixel lip
+     * <p/>
+     * If the "height" key is set, that will determine the amount the plat
+     * moves, instead of being implicitly determoveinfoned by the model's
+     * height.
+     * <p/>
+     * Set "sounds" to one of the following: 1) base fast 2) chain slow
+     */
+    static void SP_func_plat(edict_t ent) {
+        Math3D.VectorClear(ent.s.angles);
+        ent.solid = Defines.SOLID_BSP;
+        ent.movetype = Defines.MOVETYPE_PUSH;
+
+        GameBase.gi.setmodel(ent, ent.model);
+
+        ent.blocked = plat_blocked;
+
+        if (0 == ent.speed)
+            ent.speed = 20;
+        else
+            ent.speed *= 0.1;
+
+        if (ent.accel == 0)
+            ent.accel = 5;
+        else
+            ent.accel *= 0.1;
+
+        if (ent.decel == 0)
+            ent.decel = 5;
+        else
+            ent.decel *= 0.1;
+
+        if (ent.dmg == 0)
+            ent.dmg = 2;
+
+        if (GameBase.st.lip == 0)
+            GameBase.st.lip = 8;
+
+        // pos1 is the top position, pos2 is the bottom
+        Math3D.VectorCopy(ent.s.origin, ent.pos1);
+        Math3D.VectorCopy(ent.s.origin, ent.pos2);
+        if (GameBase.st.height != 0)
+            ent.pos2[2] -= GameBase.st.height;
+        else
+            ent.pos2[2] -= (ent.maxs[2] - ent.mins[2]) - GameBase.st.lip;
+
+        ent.use = Use_Plat;
+
+        plat_spawn_inside_trigger(ent); // the "start moving" trigger
+
+        if (ent.targetname != null) {
+            ent.moveinfo.state = STATE_UP;
+        } else {
+            Math3D.VectorCopy(ent.pos2, ent.s.origin);
+            GameBase.gi.linkentity(ent);
+            ent.moveinfo.state = STATE_BOTTOM;
+        }
+
+        ent.moveinfo.speed = ent.speed;
+        ent.moveinfo.accel = ent.accel;
+        ent.moveinfo.decel = ent.decel;
+        ent.moveinfo.wait = ent.wait;
+        Math3D.VectorCopy(ent.pos1, ent.moveinfo.start_origin);
+        Math3D.VectorCopy(ent.s.angles, ent.moveinfo.start_angles);
+        Math3D.VectorCopy(ent.pos2, ent.moveinfo.end_origin);
+        Math3D.VectorCopy(ent.s.angles, ent.moveinfo.end_angles);
+
+        ent.moveinfo.sound_start = GameBase.gi.soundindex("plats/pt1_strt.wav");
+        ent.moveinfo.sound_middle = GameBase.gi.soundindex("plats/pt1_mid.wav");
+        ent.moveinfo.sound_end = GameBase.gi.soundindex("plats/pt1_end.wav");
+    }
+
+    /**
+     * QUAKED func_door (0 .5 .8) ? START_OPEN x CRUSHER NOMONSTER ANIMATED
+     * TOGGLE ANIMATED_FAST TOGGLE wait in both the start and end states for a
+     * trigger event. START_OPEN the door to moves to its destination when
+     * spawned, and operate in reverse. It is used to temporarily or permanently
+     * close off an area when triggered (not useful for touch or takedamage
+     * doors). NOMONSTER monsters will not trigger this door
+     * <p/>
+     * "message" is printed when the door is touched if it is a trigger door and
+     * it hasn't been fired yet "angle" determines the opening direction
+     * "targetname" if set, no touch field will be spawned and a remote button
+     * or trigger field activates the door. "health" if set, door must be shot
+     * open "speed" movement speed (100 default) "wait" wait before returning (3
+     * default, -1 = never return) "lip" lip remaining at end of move (8
+     * default) "dmg" damage to inflict when blocked (2 default) "sounds" 1)
+     * silent 2) light 3) medium 4) heavy
+     */
+
+    static void door_use_areaportals(edict_t self, boolean open) {
+        edict_t t = null;
+
+        if (self.target == null)
+            return;
+
+        EdictIterator edit = null;
+
+        while ((edit = GameBase
+                .G_Find(edit, GameBase.findByTarget, self.target)) != null) {
+            t = edit.o;
+            if (Lib.Q_stricmp(t.classname, "func_areaportal") == 0) {
+                GameBase.gi.SetAreaPortalState(t.style, open);
+            }
+        }
+    }
+
+    static void door_go_up(edict_t self, edict_t activator) {
+        if (self.moveinfo.state == STATE_UP)
+            return; // already going up
+
+        if (self.moveinfo.state == STATE_TOP) {
+            // reset top wait time
+            if (self.moveinfo.wait >= 0)
+                self.nextthink = GameBase.level.time + self.moveinfo.wait;
+            return;
+        }
+
+        if (0 == (self.flags & Defines.FL_TEAMSLAVE)) {
+            if (self.moveinfo.sound_start != 0)
+                GameBase.gi.sound(self, Defines.CHAN_NO_PHS_ADD
+                                + Defines.CHAN_VOICE, self.moveinfo.sound_start, 1,
+                        Defines.ATTN_STATIC, 0);
+            self.s.sound = self.moveinfo.sound_middle;
+        }
+        self.moveinfo.state = STATE_UP;
+        if (Lib.strcmp(self.classname, "func_door") == 0)
+            Move_Calc(self, self.moveinfo.end_origin, door_hit_top);
+        else if (Lib.strcmp(self.classname, "func_door_rotating") == 0)
+            AngleMove_Calc(self, door_hit_top);
+
+        GameUtil.G_UseTargets(self, activator);
+        door_use_areaportals(self, true);
+    }
+
+    /**
+     * QUAKED func_water (0 .5 .8) ? START_OPEN func_water is a moveable water
+     * brush. It must be targeted to operate. Use a non-water texture at your
+     * own risk.
+     * <p/>
+     * START_OPEN causes the water to move to its destination when spawned and
+     * operate in reverse.
+     * <p/>
+     * "angle" determines the opening direction (up or down only) "speed"
+     * movement speed (25 default) "wait" wait before returning (-1 default, -1 =
+     * TOGGLE) "lip" lip remaining at end of move (0 default) "sounds" (yes,
+     * these need to be changed) 0) no sound 1) water 2) lava
+     */
+
+    static void SP_func_water(edict_t self) {
+        float[] abs_movedir = {0, 0, 0};
+
+        GameBase.G_SetMovedir(self.s.angles, self.movedir);
+        self.movetype = Defines.MOVETYPE_PUSH;
+        self.solid = Defines.SOLID_BSP;
+        GameBase.gi.setmodel(self, self.model);
+
+        switch (self.sounds) {
+            default:
+                break;
+
+            case 1: // water
+                self.moveinfo.sound_start = GameBase.gi
+                        .soundindex("world/mov_watr.wav");
+                self.moveinfo.sound_end = GameBase.gi
+                        .soundindex("world/stp_watr.wav");
+                break;
+
+            case 2: // lava
+                self.moveinfo.sound_start = GameBase.gi
+                        .soundindex("world/mov_watr.wav");
+                self.moveinfo.sound_end = GameBase.gi
+                        .soundindex("world/stp_watr.wav");
+                break;
+        }
+
+        // calculate second position
+        Math3D.VectorCopy(self.s.origin, self.pos1);
+        abs_movedir[0] = Math.abs(self.movedir[0]);
+        abs_movedir[1] = Math.abs(self.movedir[1]);
+        abs_movedir[2] = Math.abs(self.movedir[2]);
+        self.moveinfo.distance = abs_movedir[0] * self.size[0] + abs_movedir[1]
+                * self.size[1] + abs_movedir[2] * self.size[2]
+                - GameBase.st.lip;
+        Math3D.VectorMA(self.pos1, self.moveinfo.distance, self.movedir,
+                self.pos2);
+
+        // if it starts open, switch the positions
+        if ((self.spawnflags & DOOR_START_OPEN) != 0) {
+            Math3D.VectorCopy(self.pos2, self.s.origin);
+            Math3D.VectorCopy(self.pos1, self.pos2);
+            Math3D.VectorCopy(self.s.origin, self.pos1);
+        }
+
+        Math3D.VectorCopy(self.pos1, self.moveinfo.start_origin);
+        Math3D.VectorCopy(self.s.angles, self.moveinfo.start_angles);
+        Math3D.VectorCopy(self.pos2, self.moveinfo.end_origin);
+        Math3D.VectorCopy(self.s.angles, self.moveinfo.end_angles);
+
+        self.moveinfo.state = STATE_BOTTOM;
+
+        if (0 == self.speed)
+            self.speed = 25;
+        self.moveinfo.accel = self.moveinfo.decel = self.moveinfo.speed = self.speed;
+
+        if (0 == self.wait)
+            self.wait = -1;
+        self.moveinfo.wait = self.wait;
+
+        self.use = door_use;
+
+        if (self.wait == -1)
+            self.spawnflags |= DOOR_TOGGLE;
+
+        self.classname = "func_door";
+
+        GameBase.gi.linkentity(self);
+    }
+
+    static void train_resume(edict_t self) {
+        edict_t ent;
+        float[] dest = {0, 0, 0};
+
+        ent = self.target_ent;
+
+        Math3D.VectorSubtract(ent.s.origin, self.mins, dest);
+        self.moveinfo.state = STATE_TOP;
+        Math3D.VectorCopy(self.s.origin, self.moveinfo.start_origin);
+        Math3D.VectorCopy(dest, self.moveinfo.end_origin);
+        Move_Calc(self, dest, train_wait);
+        self.spawnflags |= TRAIN_START_ON;
+
+    }
+
+    static void SP_func_train(edict_t self) {
+        self.movetype = Defines.MOVETYPE_PUSH;
+
+        Math3D.VectorClear(self.s.angles);
+        self.blocked = train_blocked;
+        if ((self.spawnflags & TRAIN_BLOCK_STOPS) != 0)
+            self.dmg = 0;
+        else {
+            if (0 == self.dmg)
+                self.dmg = 100;
+        }
+        self.solid = Defines.SOLID_BSP;
+        GameBase.gi.setmodel(self, self.model);
+
+        if (GameBase.st.noise != null)
+            self.moveinfo.sound_middle = GameBase.gi
+                    .soundindex(GameBase.st.noise);
+
+        if (0 == self.speed)
+            self.speed = 100;
+
+        self.moveinfo.speed = self.speed;
+        self.moveinfo.accel = self.moveinfo.decel = self.moveinfo.speed;
+
+        self.use = train_use;
+
+        GameBase.gi.linkentity(self);
+
+        if (self.target != null) {
+            // start trains on the second frame, to make sure their targets have
+            // had
+            // a chance to spawn
+            self.nextthink = GameBase.level.time + Defines.FRAMETIME;
+            self.think = func_train_find;
+        } else {
+            GameBase.gi.dprintf("func_train without a target at "
+                    + Lib.vtos(self.absmin) + "\n");
+        }
+    }
+
+    static void SP_func_timer(edict_t self) {
+        if (0 == self.wait)
+            self.wait = 1.0f;
+
+        self.use = func_timer_use;
+        self.think = func_timer_think;
+
+        if (self.random >= self.wait) {
+            self.random = self.wait - Defines.FRAMETIME;
+            GameBase.gi.dprintf("func_timer at " + Lib.vtos(self.s.origin)
+                    + " has random >= wait\n");
+        }
+
+        if ((self.spawnflags & 1) != 0) {
+            self.nextthink = GameBase.level.time + 1.0f + GameBase.st.pausetime
+                    + self.delay + self.wait + Lib.crandom() * self.random;
+            self.activator = self;
+        }
+
+        self.svflags = Defines.SVF_NOCLIENT;
+    }
 }

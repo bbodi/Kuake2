@@ -18,14 +18,14 @@
 
 package lwjake2.game;
 
-/** Helps for iterating over the gedicts[] array. RST. */
+/**
+ * Helps for iterating over the gedicts[] array. RST.
+ */
 
-public class EdictIterator
-{
-	EdictIterator(int i)
-	{
-		this.i = i;
-	}
-	public edict_t o;
-	int i;
+public class EdictIterator {
+    public edict_t o;
+    int i;
+    EdictIterator(int i) {
+        this.i = i;
+    }
 }

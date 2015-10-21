@@ -21,11 +21,7 @@ package lwjake2.client;
 import lwjake2.Defines;
 import lwjake2.Globals;
 import lwjake2.game.Cmd;
-import lwjake2.qcommon.Cbuf;
-import lwjake2.qcommon.Com;
-import lwjake2.qcommon.Cvar;
-import lwjake2.qcommon.FS;
-import lwjake2.qcommon.xcommand_t;
+import lwjake2.qcommon.*;
 import lwjake2.util.Lib;
 import lwjake2.util.Vargs;
 
@@ -75,7 +71,50 @@ public final class Console extends Globals {
             Arrays.fill(Globals.con.text, (byte) ' ');
         }
     };
+    /*
+     * ================ Con_ToggleChat_f ================
+     */
+    static xcommand_t ToggleChat_f = new xcommand_t() {
+        public void execute() {
+            Key.ClearTyping();
 
+            if (cls.key_dest == key_console) {
+                if (cls.state == ca_active) {
+                    Menu.ForceMenuOff();
+                    cls.key_dest = key_game;
+                }
+            } else
+                cls.key_dest = key_console;
+
+            ClearNotify();
+        }
+    };
+    /*
+     * ================ Con_MessageMode_f ================
+     */
+    static xcommand_t MessageMode_f = new xcommand_t() {
+        public void execute() {
+            chat_team = false;
+            cls.key_dest = key_message;
+        }
+    };
+    /*
+     * ================ Con_MessageMode2_f ================
+     */
+    static xcommand_t MessageMode2_f = new xcommand_t() {
+        public void execute() {
+            chat_team = true;
+            cls.key_dest = key_message;
+        }
+    };
+    /*
+     * ================ Con_Print
+     *
+     * Handles cursor positioning, line wrapping, etc All console printing must
+     * go through this in order to be logged to disk If no console is visible,
+     * the text will appear at the top of the game window ================
+     */
+    private static int cr;
     public static xcommand_t Dump_f = new xcommand_t() {
         public void execute() {
 
@@ -141,7 +180,7 @@ public final class Console extends Globals {
     };
 
     /**
-     *  
+     *
      */
     public static void Init() {
         Globals.con.linewidth = -1;
@@ -240,45 +279,6 @@ public final class Console extends Globals {
     }
 
     /*
-     * ================ Con_ToggleChat_f ================
-     */
-    static xcommand_t ToggleChat_f = new xcommand_t() {
-        public void execute() {
-            Key.ClearTyping();
-
-            if (cls.key_dest == key_console) {
-                if (cls.state == ca_active) {
-                    Menu.ForceMenuOff();
-                    cls.key_dest = key_game;
-                }
-            } else
-                cls.key_dest = key_console;
-
-            ClearNotify();
-        }
-    };
-
-    /*
-     * ================ Con_MessageMode_f ================
-     */
-    static xcommand_t MessageMode_f = new xcommand_t() {
-        public void execute() {
-            chat_team = false;
-            cls.key_dest = key_message;
-        }
-    };
-
-    /*
-     * ================ Con_MessageMode2_f ================
-     */
-    static xcommand_t MessageMode2_f = new xcommand_t() {
-        public void execute() {
-            chat_team = true;
-            cls.key_dest = key_message;
-        }
-    };
-
-    /*
      * =============== Con_Linefeed ===============
      */
     static void Linefeed() {
@@ -292,15 +292,6 @@ public final class Console extends Globals {
         while (i++ < e)
             Globals.con.text[i] = ' ';
     }
-
-    /*
-     * ================ Con_Print
-     * 
-     * Handles cursor positioning, line wrapping, etc All console printing must
-     * go through this in order to be logged to disk If no console is visible,
-     * the text will appear at the top of the game window ================
-     */
-    private static int cr;
 
     public static void Print(String txt) {
         int y;
@@ -343,22 +334,22 @@ public final class Console extends Globals {
             }
 
             switch (c) {
-            case '\n':
-                con.x = 0;
-                break;
-
-            case '\r':
-                con.x = 0;
-                cr = 1;
-                break;
-
-            default: // display character and advance
-                y = con.current % con.totallines;
-                con.text[y * con.linewidth + con.x] = (byte) (c | mask | con.ormask);
-                con.x++;
-                if (con.x >= con.linewidth)
+                case '\n':
                     con.x = 0;
-                break;
+                    break;
+
+                case '\r':
+                    con.x = 0;
+                    cr = 1;
+                    break;
+
+                default: // display character and advance
+                    y = con.current % con.totallines;
+                    con.text[y * con.linewidth + con.x] = (byte) (c | mask | con.ormask);
+                    con.x++;
+                    if (con.x >= con.linewidth)
+                        con.x = 0;
+                    break;
             }
         }
     }

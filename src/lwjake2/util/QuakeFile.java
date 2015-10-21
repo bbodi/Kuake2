@@ -18,11 +18,7 @@
 
 package lwjake2.util;
 
-import lwjake2.game.GameBase;
-import lwjake2.game.GameItemList;
-import lwjake2.game.SuperAdapter;
-import lwjake2.game.edict_t;
-import lwjake2.game.gitem_t;
+import lwjake2.game.*;
 import lwjake2.qcommon.Com;
 
 import java.io.FileNotFoundException;
@@ -35,27 +31,35 @@ import java.io.RandomAccessFile;
  */
 public class QuakeFile extends RandomAccessFile {
 
-    /** Standard Constructor. */
+    /**
+     * Standard Constructor.
+     */
     public QuakeFile(String filename, String mode) throws FileNotFoundException {
         super(filename, mode);
     }
 
-    /** Writes a Vector to a RandomAccessFile. */
+    /**
+     * Writes a Vector to a RandomAccessFile.
+     */
     public void writeVector(float v[]) throws IOException {
         for (int n = 0; n < 3; n++)
             writeFloat(v[n]);
     }
 
-    /** Writes a Vector to a RandomAccessFile. */
+    /**
+     * Writes a Vector to a RandomAccessFile.
+     */
     public float[] readVector() throws IOException {
-        float res[] = { 0, 0, 0 };
+        float res[] = {0, 0, 0};
         for (int n = 0; n < 3; n++)
             res[n] = readFloat();
 
         return res;
     }
 
-    /** Reads a length specified string from a file. */
+    /**
+     * Reads a length specified string from a file.
+     */
     public String readString() throws IOException {
         int len = readInt();
 
@@ -72,7 +76,9 @@ public class QuakeFile extends RandomAccessFile {
         return new String(bb, 0, len);
     }
 
-    /** Writes a length specified string to a file. */
+    /**
+     * Writes a length specified string to a file.
+     */
     public void writeString(String s) throws IOException {
         if (s == null) {
             writeInt(-1);
@@ -84,7 +90,9 @@ public class QuakeFile extends RandomAccessFile {
             writeBytes(s);
     }
 
-    /** Writes the edict reference. */
+    /**
+     * Writes the edict reference.
+     */
     public void writeEdictRef(edict_t ent) throws IOException {
         if (ent == null)
             writeInt(-1);
@@ -113,7 +121,9 @@ public class QuakeFile extends RandomAccessFile {
         return GameBase.g_edicts[i];
     }
 
-    /** Writes the Adapter-ID to the file. */
+    /**
+     * Writes the Adapter-ID to the file.
+     */
     public void writeAdapter(SuperAdapter a) throws IOException {
         writeInt(3988);
         if (a == null)
@@ -127,7 +137,9 @@ public class QuakeFile extends RandomAccessFile {
         }
     }
 
-    /** Reads the adapter id and returns the adapter. */
+    /**
+     * Reads the adapter id and returns the adapter.
+     */
     public SuperAdapter readAdapter() throws IOException {
         if (readInt() != 3988)
             Com.DPrintf("wrong read position: readadapter 3988 \n");
@@ -142,7 +154,9 @@ public class QuakeFile extends RandomAccessFile {
         return SuperAdapter.getFromID(id);
     }
 
-    /** Writes an item reference. */
+    /**
+     * Writes an item reference.
+     */
     public void writeItem(gitem_t item) throws IOException {
         if (item == null)
             writeInt(-1);
@@ -150,7 +164,9 @@ public class QuakeFile extends RandomAccessFile {
             writeInt(item.index);
     }
 
-    /** Reads the item index and returns the game item. */
+    /**
+     * Reads the item index and returns the game item.
+     */
     public gitem_t readItem() throws IOException {
         int ndx = readInt();
         if (ndx == -1)

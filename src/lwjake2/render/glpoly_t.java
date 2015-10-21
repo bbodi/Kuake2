@@ -21,50 +21,50 @@ package lwjake2.render;
 import lwjake2.util.Lib;
 
 public abstract class glpoly_t {
-	public final static int STRIDE = 7;
-	public final static int BYTE_STRIDE = 7 * Lib.SIZEOF_FLOAT;
-	public final static int MAX_VERTICES = 64;
-	
-	public glpoly_t next;
-	public glpoly_t chain;
-	public int numverts;
-	public int flags; // for SURF_UNDERWATER (not needed anymore?)
-	
-	// the array position (glDrawArrays) 
-	public int pos = 0;
-	
-	protected glpoly_t() {
-	}
-	
-	public abstract float x(int index);
-	
-	public abstract void x(int index, float value);
+    public final static int STRIDE = 7;
+    public final static int BYTE_STRIDE = 7 * Lib.SIZEOF_FLOAT;
+    public final static int MAX_VERTICES = 64;
 
-	public abstract float y(int index);
-	
-	public abstract void y(int index, float value);
-	
-	public abstract float z(int index);
-	
-	public abstract void z(int index, float value);
+    public glpoly_t next;
+    public glpoly_t chain;
+    public int numverts;
+    public int flags; // for SURF_UNDERWATER (not needed anymore?)
 
-	public abstract float s1(int index);
-	
-	public abstract void s1(int index, float value);
+    // the array position (glDrawArrays)
+    public int pos = 0;
 
-	public abstract float t1(int index);
-	
-	public abstract void t1(int index, float value);
+    protected glpoly_t() {
+    }
 
-	public abstract float s2(int index);
-	
-	public abstract void s2(int index, float value);
+    public abstract float x(int index);
 
-	public abstract float t2(int index);
-	
-	public abstract void t2(int index, float value);
-	
-	public abstract void beginScrolling(float s1);
-	
-	public abstract void endScrolling();
+    public abstract void x(int index, float value);
+
+    public abstract float y(int index);
+
+    public abstract void y(int index, float value);
+
+    public abstract float z(int index);
+
+    public abstract void z(int index, float value);
+
+    public abstract float s1(int index);
+
+    public abstract void s1(int index, float value);
+
+    public abstract float t1(int index);
+
+    public abstract void t1(int index, float value);
+
+    public abstract float s2(int index);
+
+    public abstract void s2(int index, float value);
+
+    public abstract float t2(int index);
+
+    public abstract void t2(int index, float value);
+
+    public abstract void beginScrolling(float s1);
+
+    public abstract void endScrolling();
 }

@@ -19,24 +19,24 @@
 package lwjake2.client;
 
 public class refdef_t {
-	public int		x, y, width, height;// in virtual screen coordinates
-	public float		fov_x, fov_y;
-	public float		vieworg[] ={0,0,0};
-	public float		viewangles[]={0,0,0};
-	public float		blend[]={0,0,0,0};			// rgba 0-1 full screen blend
-	public float		time;				// time is uesed to auto animate
-	public int		rdflags;			// RDF_UNDERWATER, etc
+    public int x, y, width, height;// in virtual screen coordinates
+    public float fov_x, fov_y;
+    public float vieworg[] = {0, 0, 0};
+    public float viewangles[] = {0, 0, 0};
+    public float blend[] = {0, 0, 0, 0};            // rgba 0-1 full screen blend
+    public float time;                // time is uesed to auto animate
+    public int rdflags;            // RDF_UNDERWATER, etc
 
-	public byte		areabits[];			// if not NULL, only areas with set bits will be drawn
+    public byte areabits[];            // if not NULL, only areas with set bits will be drawn
 
-	public lightstyle_t	lightstyles[];	// [MAX_LIGHTSTYLES]
+    public lightstyle_t lightstyles[];    // [MAX_LIGHTSTYLES]
 
-	public int		num_entities;
-	public entity_t	entities[];
+    public int num_entities;
+    public entity_t entities[];
 
-	public int		num_dlights;
-	public dlight_t	dlights[];
+    public int num_dlights;
+    public dlight_t dlights[];
 
-	public int		num_particles;
-	//public particle_t	particles[];
+    public int num_particles;
+    //public particle_t	particles[];
 }

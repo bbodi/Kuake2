@@ -31,41 +31,38 @@ public final class LWJake2 {
     /**
      * main is used to start the game. Quake2 for Java supports the following
      * command line arguments:
-     * 
+     *
      * @param args
      */
     public static void main(String[] args) {
-    	
-    	boolean dedicated = false;
 
-    	// check if we are in dedicated mode to hide the java dialog.
-    	for (int n = 0; n <  args.length; n++)
-    	{
-    		if (args[n].equals("+set"))
-    		{
-    			if (n++ >= args.length)
-    				break;
-    			
-    			if (!args[n].equals("dedicated"))
-    				continue;
+        boolean dedicated = false;
 
-    			if (n++ >= args.length)
-    				break;
+        // check if we are in dedicated mode to hide the java dialog.
+        for (int n = 0; n < args.length; n++) {
+            if (args[n].equals("+set")) {
+                if (n++ >= args.length)
+                    break;
 
-    			if (args[n].equals("1") || args[n].equals("\"1\""))
-    			{
-    				Com.Printf("Starting in dedicated mode.\n");
-    				dedicated = true;
-    			}
-    		}    		
-    	}
-    	
-    	// TODO: check if dedicated is set in config file
-    	
-		Globals.dedicated= Cvar.Get("dedicated", "0", Qcommon.CVAR_NOSET);
-    
-    	if (dedicated)
-    		Globals.dedicated.value = 1.0f;
+                if (!args[n].equals("dedicated"))
+                    continue;
+
+                if (n++ >= args.length)
+                    break;
+
+                if (args[n].equals("1") || args[n].equals("\"1\"")) {
+                    Com.Printf("Starting in dedicated mode.\n");
+                    dedicated = true;
+                }
+            }
+        }
+
+        // TODO: check if dedicated is set in config file
+
+        Globals.dedicated = Cvar.Get("dedicated", "0", Qcommon.CVAR_NOSET);
+
+        if (dedicated)
+            Globals.dedicated.value = 1.0f;
 
         // in C the first arg is the filename
         int argc = (args == null) ? 1 : args.length + 1;

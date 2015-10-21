@@ -28,6 +28,26 @@ import lwjake2.util.Math3D;
  */
 public class CL_newfx {
 
+    // stack variable
+    private static final float[] move = {0, 0, 0};
+    private static final float[] vec = {0, 0, 0};
+    private static final float[] right = {0, 0, 0};
+    private static final float[] up = {0, 0, 0};
+    // stack variable
+    // move, vec, right, up
+    private static final float[] dir = {0, 0, 0};
+    private static final float[] end = {0, 0, 0};
+    // stack variable
+    private static final float[] r = {0, 0, 0};
+    private static final float[] u = {0, 0, 0};
+    // stack variable
+    // move, vec, right, up
+    private static final float[] forward = {0, 0, 0};
+    private static final float[] angle_dir = {0, 0, 0};
+    private static int[] wb_colortable = {2 * 8, 13 * 8, 21 * 8, 18 * 8};
+    private static int[] nb_colortable = {110, 112, 114, 116};
+    private static int[] ws_colortable = {2 * 8, 13 * 8, 21 * 8, 18 * 8};
+
     static void Flashlight(int ent, float[] pos) {
         CL_fx.cdlight_t dl;
 
@@ -45,7 +65,7 @@ public class CL_newfx {
      * ====== CL_ColorFlash - flash of light ======
      */
     static void ColorFlash(float[] pos, int ent, int intensity, float r,
-            float g, float b) {
+                           float g, float b) {
         CL_fx.cdlight_t dl;
 
         if ((Globals.vidref_val == Defines.VIDREF_SOFT)
@@ -66,11 +86,6 @@ public class CL_newfx {
         dl.color[2] = b;
     }
 
-  	// stack variable
-  	private static final float[] move = {0, 0, 0};
-  	private static final float[] vec = {0, 0, 0};
-  	private static final float[] right = {0, 0, 0};
-  	private static final float[] up = {0, 0, 0};
     /*
      * ====== CL_DebugTrail ======
      */
@@ -124,7 +139,7 @@ public class CL_newfx {
 
     }
 
-  	// stack variable
+    // stack variable
     // move, vec
     static void ForceWall(float[] start, float[] end, int color) {
         float len;
@@ -169,12 +184,12 @@ public class CL_newfx {
         }
     }
 
-  	// stack variable
+    // stack variable
     // move, vec
     /*
      * =============== CL_BubbleTrail2 (lets you control the # of bubbles by
      * setting the distance between the spawns)
-     * 
+     *
      * ===============
      */
     static void BubbleTrail2(float[] start, float[] end, int dist) {
@@ -217,11 +232,6 @@ public class CL_newfx {
         }
     }
 
-  	// stack variable
-    // move, vec, right, up
-    private static final float[] dir = {0, 0, 0};
-    private static final float[] end = {0, 0, 0};
-    
     static void Heatbeam(float[] start, float[] forward) {
         float len;
         int j;
@@ -307,17 +317,14 @@ public class CL_newfx {
         }
     }
 
-  	// stack variable
-    private static final float[] r = {0, 0, 0};
-    private static final float[] u = {0, 0, 0};
     /*
      * =============== CL_ParticleSteamEffect
-     * 
+     *
      * Puffs with velocity along direction, with some randomness thrown in
      * ===============
      */
     static void ParticleSteamEffect(float[] org, float[] dir, int color,
-            int count, int magnitude) {
+                                    int count, int magnitude) {
         int i, j;
         cparticle_t p;
         float d;
@@ -356,7 +363,7 @@ public class CL_newfx {
         }
     }
 
-  	// stack variable
+    // stack variable
     // r, u, dir
     static void ParticleSteamEffect2(cl_sustain_t self)
     //	  float[] org, float[] dir, int color, int count, int magnitude)
@@ -401,10 +408,6 @@ public class CL_newfx {
         self.nextthink += self.thinkinterval;
     }
 
-  	// stack variable
-    // move, vec, right, up 
-    private static final float[] forward = {0, 0, 0};
-    private static final float[] angle_dir = {0, 0, 0};
     /*
      * =============== CL_TrackerTrail ===============
      */
@@ -514,8 +517,6 @@ public class CL_newfx {
         }
     }
 
-    private static int[] wb_colortable = { 2 * 8, 13 * 8, 21 * 8, 18 * 8 };
-
     // stack variable
     // dir
     static void Widowbeamout(cl_sustain_t self) {
@@ -552,8 +553,6 @@ public class CL_newfx {
         }
     }
 
-    private static int[] nb_colortable = { 110, 112, 114, 116 };
-
     // stack variable
     // dir
     static void Nukeblast(cl_sustain_t self) {
@@ -589,8 +588,6 @@ public class CL_newfx {
             // dir, p.org);
         }
     }
-
-    private static int[] ws_colortable = { 2 * 8, 13 * 8, 21 * 8, 18 * 8 };
 
     // stack variable
     // dir
@@ -708,7 +705,7 @@ public class CL_newfx {
      * unaffected by gravity ===============
      */
     static void ParticleSmokeEffect(float[] org, float[] dir, int color,
-            int count, int magnitude) {
+                                    int count, int magnitude) {
         int i, j;
         cparticle_t p;
         float d;

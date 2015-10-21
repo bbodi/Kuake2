@@ -27,7 +27,7 @@ public class mvertex_t {
 
     public static final int MEM_SIZE = 3 * Defines.SIZE_OF_FLOAT;
 
-    public float[] position = { 0, 0, 0 };
+    public float[] position = {0, 0, 0};
 
     public mvertex_t(ByteBuffer b) {
         position[0] = b.getFloat();

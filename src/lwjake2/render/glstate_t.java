@@ -18,25 +18,24 @@
 
 package lwjake2.render;
 
-public class glstate_t 
-{
-	public float inverse_intensity;
-	public boolean fullscreen;
+public class glstate_t {
+    public float inverse_intensity;
+    public boolean fullscreen;
 
-	public int prev_mode;
+    public int prev_mode;
 
-	public byte d_16to8table[];
+    public byte d_16to8table[];
 
-	public int lightmap_textures;
+    public int lightmap_textures;
 
-	public int currenttextures[]= {0,0};
-	public int currenttmu;
+    public int currenttextures[] = {0, 0};
+    public int currenttmu;
 
-	public float camera_separation;
-	public boolean stereo_enabled;
+    public float camera_separation;
+    public boolean stereo_enabled;
 
-	public byte originalRedGammaTable[]= new byte [256];
-	public byte originalGreenGammaTable[]= new byte [256];
-	public byte originalBlueGammaTable[]= new byte [256];
+    public byte originalRedGammaTable[] = new byte[256];
+    public byte originalGreenGammaTable[] = new byte[256];
+    public byte originalBlueGammaTable[] = new byte[256];
 
 }

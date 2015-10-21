@@ -19,11 +19,10 @@
 package lwjake2.game;
 
 public class spawn_t {
-	public spawn_t(String name, EntThinkAdapter spawn) {
-		this.name = name;
-		this.spawn = spawn;
-	}
-
-	String name;
-	EntThinkAdapter spawn;
+    String name;
+    EntThinkAdapter spawn;
+    public spawn_t(String name, EntThinkAdapter spawn) {
+        this.name = name;
+        this.spawn = spawn;
+    }
 }

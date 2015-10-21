@@ -16,7 +16,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-/** Father of all GameObjects. */
+/**
+ * Father of all GameObjects.
+ */
 
 package lwjake2.game;
 
@@ -31,30 +33,17 @@ import lwjake2.util.Math3D;
 import java.util.StringTokenizer;
 
 public class GameBase {
+    public final static float STOP_EPSILON = 0.1f;
     public static cplane_t dummyplane = new cplane_t();
-
     public static game_locals_t game = new game_locals_t();
-
     public static level_locals_t level = new level_locals_t();
-
     public static game_import_t gi = new game_import_t();
-
     public static spawn_temp_t st = new spawn_temp_t();
-
     public static int sm_meat_index;
-
     public static int snd_fry;
-
     public static int meansOfDeath;
-
     public static int num_edicts;
-
     public static edict_t g_edicts[] = new edict_t[Defines.MAX_EDICTS];
-    static {
-        for (int n = 0; n < Defines.MAX_EDICTS; n++)
-            g_edicts[n] = new edict_t(n);
-    }
-
     public static cvar_t deathmatch = new cvar_t();
 
     public static cvar_t coop = new cvar_t();
@@ -116,15 +105,58 @@ public class GameBase {
     public static cvar_t flood_waitdelay = new cvar_t();
 
     public static cvar_t sv_maplist = new cvar_t();
+    /**
+     * Searches all active entities for the next one that holds the matching
+     * string at fieldofs (use the FOFS() macro) in the structure.
+     *
+     * Searches beginning at the edict after from, or the beginning if null null
+     * will be returned if the end of the list is reached.
+     */
 
-    public final static float STOP_EPSILON = 0.1f;
+    public static int MAXCHOICES = 8;
+    public static float[] VEC_UP = {0, -1, 0};
+    public static float[] MOVEDIR_UP = {0, 0, 1};
+    public static float[] VEC_DOWN = {0, -2, 0};
+    public static float[] MOVEDIR_DOWN = {0, 0, -1};
+    public static pushed_t pushed[] = new pushed_t[Defines.MAX_EDICTS];
+    public static int pushed_p;
+    public static edict_t obstacle;
+    public static int c_yes, c_no;
+    public static int STEPSIZE = 18;
+    public static EdictFindFilter findByTarget = new EdictFindFilter() {
+        public boolean matches(edict_t e, String s) {
+            if (e.targetname == null)
+                return false;
+            return e.targetname.equalsIgnoreCase(s);
+        }
+    };
+    public static EdictFindFilter findByClass = new EdictFindFilter() {
+        public boolean matches(edict_t e, String s) {
+            return e.classname.equalsIgnoreCase(s);
+        }
+    };
+    /**
+     * G_TouchTriggers
+     */
+
+    static edict_t touch[] = new edict_t[Defines.MAX_EDICTS];
+
+    static {
+        for (int n = 0; n < Defines.MAX_EDICTS; n++)
+            g_edicts[n] = new edict_t(n);
+    }
+
+    static {
+        for (int n = 0; n < Defines.MAX_EDICTS; n++)
+            pushed[n] = new pushed_t();
+    }
 
     /**
      * Slide off of the impacting object returns the blocked flags (1 = floor, 2 =
      * step / wall).
      */
     public static int ClipVelocity(float[] in, float[] normal, float[] out,
-            float overbounce) {
+                                   float overbounce) {
         float backoff;
         float change;
         int i, blocked;
@@ -147,18 +179,17 @@ public class GameBase {
         return blocked;
     }
 
-
     /**
      * Searches all active entities for the next one that holds the matching
      * string at fieldofs (use the FOFS() macro) in the structure.
-     * 
+     *
      * Searches beginning at the edict after from, or the beginning if null null
      * will be returned if the end of the list is reached.
-     * 
+     *
      */
 
     public static EdictIterator G_Find(EdictIterator from, EdictFindFilter eff,
-            String s) {
+                                       String s) {
 
         if (from == null)
             from = new EdictIterator(0);
@@ -183,7 +214,7 @@ public class GameBase {
 
     // comfort version (rst)
     public static edict_t G_FindEdict(EdictIterator from, EdictFindFilter eff,
-            String s) {
+                                      String s) {
         EdictIterator ei = G_Find(from, eff, s);
         if (ei == null)
             return null;
@@ -195,8 +226,8 @@ public class GameBase {
      * Returns entities that have origins within a spherical area.
      */
     public static EdictIterator findradius(EdictIterator from, float[] org,
-            float rad) {
-        float[] eorg = { 0, 0, 0 };
+                                           float rad) {
+        float[] eorg = {0, 0, 0};
         int j;
 
         if (from == null)
@@ -224,16 +255,6 @@ public class GameBase {
         return null;
     }
 
-    /**
-     * Searches all active entities for the next one that holds the matching
-     * string at fieldofs (use the FOFS() macro) in the structure.
-     * 
-     * Searches beginning at the edict after from, or the beginning if null null
-     * will be returned if the end of the list is reached.
-     */
-
-    public static int MAXCHOICES = 8;
-
     public static edict_t G_PickTarget(String targetname) {
         int num_choices = 0;
         edict_t choice[] = new edict_t[MAXCHOICES];
@@ -259,14 +280,6 @@ public class GameBase {
         return choice[Lib.rand() % num_choices];
     }
 
-    public static float[] VEC_UP = { 0, -1, 0 };
-
-    public static float[] MOVEDIR_UP = { 0, 0, 1 };
-
-    public static float[] VEC_DOWN = { 0, -2, 0 };
-
-    public static float[] MOVEDIR_DOWN = { 0, 0, -1 };
-
     public static void G_SetMovedir(float[] angles, float[] movedir) {
         if (Math3D.VectorEquals(angles, VEC_UP)) {
             Math3D.VectorCopy(MOVEDIR_UP, movedir);
@@ -282,12 +295,6 @@ public class GameBase {
     public static String G_CopyString(String in) {
         return new String(in);
     }
-
-    /**
-     * G_TouchTriggers
-     */
-
-    static edict_t touch[] = new edict_t[Defines.MAX_EDICTS];
 
     public static void G_TouchTriggers(edict_t ent) {
         int i, num;
@@ -316,20 +323,6 @@ public class GameBase {
         }
     }
 
-    public static pushed_t pushed[] = new pushed_t[Defines.MAX_EDICTS];
-    static {
-        for (int n = 0; n < Defines.MAX_EDICTS; n++)
-            pushed[n] = new pushed_t();
-    }
-
-    public static int pushed_p;
-
-    public static edict_t obstacle;
-
-    public static int c_yes, c_no;
-
-    public static int STEPSIZE = 18;
-
     /**
      * G_RunEntity
      */
@@ -339,27 +332,27 @@ public class GameBase {
             ent.prethink.think(ent);
 
         switch ((int) ent.movetype) {
-        case Defines.MOVETYPE_PUSH:
-        case Defines.MOVETYPE_STOP:
-            SV.SV_Physics_Pusher(ent);
-            break;
-        case Defines.MOVETYPE_NONE:
-            SV.SV_Physics_None(ent);
-            break;
-        case Defines.MOVETYPE_NOCLIP:
-            SV.SV_Physics_Noclip(ent);
-            break;
-        case Defines.MOVETYPE_STEP:
-            SV.SV_Physics_Step(ent);
-            break;
-        case Defines.MOVETYPE_TOSS:
-        case Defines.MOVETYPE_BOUNCE:
-        case Defines.MOVETYPE_FLY:
-        case Defines.MOVETYPE_FLYMISSILE:
-            SV.SV_Physics_Toss(ent);
-            break;
-        default:
-            gi.error("SV_Physics: bad movetype " + (int) ent.movetype);
+            case Defines.MOVETYPE_PUSH:
+            case Defines.MOVETYPE_STOP:
+                SV.SV_Physics_Pusher(ent);
+                break;
+            case Defines.MOVETYPE_NONE:
+                SV.SV_Physics_None(ent);
+                break;
+            case Defines.MOVETYPE_NOCLIP:
+                SV.SV_Physics_Noclip(ent);
+                break;
+            case Defines.MOVETYPE_STEP:
+                SV.SV_Physics_Step(ent);
+                break;
+            case Defines.MOVETYPE_TOSS:
+            case Defines.MOVETYPE_BOUNCE:
+            case Defines.MOVETYPE_FLY:
+            case Defines.MOVETYPE_FLYMISSILE:
+                SV.SV_Physics_Toss(ent);
+                break;
+            default:
+                gi.error("SV_Physics: bad movetype " + (int) ent.movetype);
         }
     }
 
@@ -380,20 +373,6 @@ public class GameBase {
                 maxs[i] = val;
         }
     }
-
-    public static EdictFindFilter findByTarget = new EdictFindFilter() {
-        public boolean matches(edict_t e, String s) {
-            if (e.targetname == null)
-                return false;
-            return e.targetname.equalsIgnoreCase(s);
-        }
-    };
-
-    public static EdictFindFilter findByClass = new EdictFindFilter() {
-        public boolean matches(edict_t e, String s) {
-            return e.classname.equalsIgnoreCase(s);
-        }
-    };
 
     public static void ShutdownGame() {
         gi.dprintf("==== ShutdownGame ====\n");
@@ -451,18 +430,18 @@ public class GameBase {
             s = sv_maplist.string;
             f = null;
             StringTokenizer tk = new StringTokenizer(s, seps);
-            
-            while (tk.hasMoreTokens()){
-            	t = tk.nextToken();
-     
-            	// store first map
-            	if (f == null)
-            		f = t;
-            	
+
+            while (tk.hasMoreTokens()) {
+                t = tk.nextToken();
+
+                // store first map
+                if (f == null)
+                    f = t;
+
                 if (t.equalsIgnoreCase(level.mapname)) {
                     // it's in the list, go to the next one
-                	if (!tk.hasMoreTokens()) {
-                		// end of list, go to first one
+                    if (!tk.hasMoreTokens()) {
+                        // end of list, go to first one
                         if (f == null) // there isn't a first one, same level
                             PlayerHud.BeginIntermission(CreateTargetChangeLevel(level.mapname));
                         else
@@ -481,7 +460,7 @@ public class GameBase {
             EdictIterator edit = null;
             edit = G_Find(edit, findByClass, "target_changelevel");
             if (edit == null) { // the map designer didn't include a
-                                // changelevel,
+                // changelevel,
                 // so create a fake ent that goes back to the same level
                 PlayerHud.BeginIntermission(CreateTargetChangeLevel(level.mapname));
                 return;
@@ -577,7 +556,7 @@ public class GameBase {
 
     /**
      * G_RunFrame
-     *  
+     *
      * Advances the world by Defines.FRAMETIME (0.1) seconds.
      */
     public static void G_RunFrame() {

@@ -21,24 +21,24 @@ package lwjake2.render;
 import java.util.Arrays;
 
 public class mtexinfo_t {
-	// [s/t][xyz offset]
-	public float vecs[][] = {
-		 { 0, 0, 0, 0 },
-		 { 0, 0, 0, 0 }
-	};
-	public int flags;
-	public int numframes;
-	public mtexinfo_t next; // animation chain
-	public image_t image;
-	
-	public void clear() {
-		Arrays.fill(vecs[0], 0);
-		Arrays.fill(vecs[1], 0);
-		
-		flags = 0;
-		numframes = 0;
-		next = null;
-		image = null;
-	}
-	
+    // [s/t][xyz offset]
+    public float vecs[][] = {
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+    };
+    public int flags;
+    public int numframes;
+    public mtexinfo_t next; // animation chain
+    public image_t image;
+
+    public void clear() {
+        Arrays.fill(vecs[0], 0);
+        Arrays.fill(vecs[1], 0);
+
+        flags = 0;
+        numframes = 0;
+        next = null;
+        image = null;
+    }
+
 }

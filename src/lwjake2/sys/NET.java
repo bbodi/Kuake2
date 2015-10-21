@@ -38,38 +38,22 @@ import java.nio.channels.DatagramChannel;
 public final class NET {
 
     private final static int MAX_LOOPBACK = 4;
-
-    /** Local loopback adress. */
+    public static loopback_t loopbacks[] = new loopback_t[2];
+    /**
+     * Local loopback adress.
+     */
     private static netadr_t net_local_adr = new netadr_t();
 
-    public static class loopmsg_t {
-        byte data[] = new byte[Defines.MAX_MSGLEN];
+    ;
+    private static DatagramChannel[] ip_channels = {null, null};
 
-        int datalen;
-    };
+    ;
+    private static DatagramSocket[] ip_sockets = {null, null};
 
-    public static class loopback_t {
-        public loopback_t() {
-            msgs = new loopmsg_t[MAX_LOOPBACK];
-            for (int n = 0; n < MAX_LOOPBACK; n++) {
-                msgs[n] = new loopmsg_t();
-            }
-        }
-
-        loopmsg_t msgs[];
-
-        int get, send;
-    };
-
-    public static loopback_t loopbacks[] = new loopback_t[2];
     static {
         loopbacks[0] = new loopback_t();
         loopbacks[1] = new loopback_t();
     }
-
-    private static DatagramChannel[] ip_channels = { null, null };
-
-    private static DatagramSocket[] ip_sockets = { null, null };
 
     /**
      * Compares ip address and port.
@@ -148,19 +132,11 @@ public final class NET {
         return CompareAdr(adr, net_local_adr);
     }
 
-    /*
-     * ==================================================
-     * 
-     * LOOPBACK BUFFERS FOR LOCAL PLAYER
-     * 
-     * ==================================================
-     */
-
     /**
      * Gets a packet from internal loopback.
      */
     public static boolean GetLoopPacket(int sock, netadr_t net_from,
-            sizebuf_t net_message) {
+                                        sizebuf_t net_message) {
         loopback_t loop;
         loop = loopbacks[sock];
 
@@ -185,7 +161,7 @@ public final class NET {
      * Sends a packet via internal loopback.
      */
     public static void SendLoopPacket(int sock, int length, byte[] data,
-            netadr_t to) {
+                                      netadr_t to) {
         int i;
         loopback_t loop;
 
@@ -199,11 +175,19 @@ public final class NET {
         loop.msgs[i].datalen = length;
     }
 
+    /*
+     * ==================================================
+     * 
+     * LOOPBACK BUFFERS FOR LOCAL PLAYER
+     * 
+     * ==================================================
+     */
+
     /**
      * Gets a packet from a network channel
      */
     public static boolean GetPacket(int sock, netadr_t net_from,
-            sizebuf_t net_message) {
+                                    sizebuf_t net_message) {
 
         if (GetLoopPacket(sock, net_from, net_message)) {
             return true;
@@ -270,7 +254,7 @@ public final class NET {
     }
 
     /**
-     * OpenIP, creates the network sockets. 
+     * OpenIP, creates the network sockets.
      */
     public static void OpenIP() {
         cvar_t port, ip, clientport;
@@ -278,11 +262,11 @@ public final class NET {
         port = Cvar.Get("port", "" + Defines.PORT_SERVER, Defines.CVAR_NOSET);
         ip = Cvar.Get("ip", "localhost", Defines.CVAR_NOSET);
         clientport = Cvar.Get("clientport", "" + Defines.PORT_CLIENT, Defines.CVAR_NOSET);
-        
+
         if (ip_sockets[Defines.NS_SERVER] == null)
             ip_sockets[Defines.NS_SERVER] = Socket(Defines.NS_SERVER,
                     ip.string, (int) port.value);
-        
+
         if (ip_sockets[Defines.NS_CLIENT] == null)
             ip_sockets[Defines.NS_CLIENT] = Socket(Defines.NS_CLIENT,
                     ip.string, (int) clientport.value);
@@ -352,14 +336,16 @@ public final class NET {
     }
 
     /**
-     * Shutdown - closes the sockets 
+     * Shutdown - closes the sockets
      */
     public static void Shutdown() {
         // close sockets
         Config(false);
     }
 
-    /** Sleeps msec or until net socket is ready. */
+    /**
+     * Sleeps msec or until net socket is ready.
+     */
     public static void Sleep(int msec) {
         if (ip_sockets[Defines.NS_SERVER] == null
                 || (Globals.dedicated != null && Globals.dedicated.value == 0))
@@ -374,25 +360,43 @@ public final class NET {
 
         // this should wait up to 100ms until a packet
         /*
-         * struct timeval timeout; 
-         * fd_set fdset; 
+         * struct timeval timeout;
+         * fd_set fdset;
          * extern cvar_t *dedicated;
          * extern qboolean stdin_active;
-         * 
+         *
          * if (!ip_sockets[NS_SERVER] || (dedicated && !dedicated.value))
          * 		return; // we're not a server, just run full speed
-         * 
+         *
          * FD_ZERO(&fdset);
-         *  
-         * if (stdin_active) 
-         * 		FD_SET(0, &fdset); // stdin is processed too 
-         * 
-         * FD_SET(ip_sockets[NS_SERVER], &fdset); // network socket 
-         * 
-         * timeout.tv_sec = msec/1000; 
-         * timeout.tv_usec = (msec%1000)*1000; 
-         * 
+         *
+         * if (stdin_active)
+         * 		FD_SET(0, &fdset); // stdin is processed too
+         *
+         * FD_SET(ip_sockets[NS_SERVER], &fdset); // network socket
+         *
+         * timeout.tv_sec = msec/1000;
+         * timeout.tv_usec = (msec%1000)*1000;
+         *
          * select(ip_sockets[NS_SERVER]+1, &fdset, NULL, NULL, &timeout);
          */
+    }
+
+    public static class loopmsg_t {
+        byte data[] = new byte[Defines.MAX_MSGLEN];
+
+        int datalen;
+    }
+
+    public static class loopback_t {
+        loopmsg_t msgs[];
+        int get, send;
+
+        public loopback_t() {
+            msgs = new loopmsg_t[MAX_LOOPBACK];
+            for (int n = 0; n < MAX_LOOPBACK; n++) {
+                msgs[n] = new loopmsg_t();
+            }
+        }
     }
 }

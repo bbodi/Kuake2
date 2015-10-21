@@ -18,10 +18,9 @@
 
 package lwjake2.game;
 
-public class cmodel_t
-{
-	public float[] mins = { 0, 0, 0 };
-	public float[] maxs = { 0, 0, 0 };
-	public float[] origin = { 0, 0, 0 }; // for sounds or lights
-	public int headnode;
+public class cmodel_t {
+    public float[] mins = {0, 0, 0};
+    public float[] maxs = {0, 0, 0};
+    public float[] origin = {0, 0, 0}; // for sounds or lights
+    public int headnode;
 }

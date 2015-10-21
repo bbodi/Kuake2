@@ -32,7 +32,7 @@ public final class Cbuf {
     private static final byte[] tmp = new byte[8192];
 
     /**
-     *  
+     *
      */
     public static void Init() {
         SZ.Init(Globals.cmd_text, Globals.cmd_text_buf,
@@ -109,7 +109,7 @@ public final class Cbuf {
             if (text.charAt(i) == '+') {
                 i++;
 
-                for (j = i; j < text.length() && (text.charAt(j) != '+') && (text.charAt(j) != '-'); j++);
+                for (j = i; j < text.length() && (text.charAt(j) != '+') && (text.charAt(j) != '-'); j++) ;
 
                 build += text.substring(i, j);
                 build += "\n";
@@ -142,7 +142,7 @@ public final class Cbuf {
     }
 
     /**
-     *  
+     *
      */
     public static void Execute() {
 
@@ -205,17 +205,17 @@ public final class Cbuf {
 
     public static void ExecuteText(int exec_when, String text) {
         switch (exec_when) {
-        case Defines.EXEC_NOW:
-            Cmd.ExecuteString(text);
-            break;
-        case Defines.EXEC_INSERT:
-            Cbuf.InsertText(text);
-            break;
-        case Defines.EXEC_APPEND:
-            Cbuf.AddText(text);
-            break;
-        default:
-            Com.Error(Defines.ERR_FATAL, "Cbuf_ExecuteText: bad exec_when");
+            case Defines.EXEC_NOW:
+                Cmd.ExecuteString(text);
+                break;
+            case Defines.EXEC_INSERT:
+                Cbuf.InsertText(text);
+                break;
+            case Defines.EXEC_APPEND:
+                Cbuf.AddText(text);
+                break;
+            default:
+                Com.Error(Defines.ERR_FATAL, "Cbuf_ExecuteText: bad exec_when");
         }
     }
 

@@ -25,36 +25,33 @@ import java.nio.ByteOrder;
 
 public class texinfo_t {
 
-	// works fine.
-	public texinfo_t(byte[] cmod_base, int o, int len) {
-		this(ByteBuffer.wrap(cmod_base, o, len).order(ByteOrder.LITTLE_ENDIAN));
-	}
+    public static final int SIZE = 32 + 4 + 4 + 32 + 4;
+    //float			vecs[2][4];		// [s/t][xyz offset]
+    public float vecs[][] = {
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+    };
+    public int flags; // miptex flags + overrides
+    public int value; // light emission, etc
+    //char			texture[32];	// texture name (textures/*.wal)
+    public String texture = "";
+    public int nexttexinfo; // for animations, -1 = end of chain
+    // works fine.
+    public texinfo_t(byte[] cmod_base, int o, int len) {
+        this(ByteBuffer.wrap(cmod_base, o, len).order(ByteOrder.LITTLE_ENDIAN));
+    }
+    public texinfo_t(ByteBuffer bb) {
 
-	public texinfo_t(ByteBuffer bb) {
+        byte str[] = new byte[32];
 
-		byte str[] = new byte[32];
+        vecs[0] = new float[]{bb.getFloat(), bb.getFloat(), bb.getFloat(), bb.getFloat()};
+        vecs[1] = new float[]{bb.getFloat(), bb.getFloat(), bb.getFloat(), bb.getFloat()};
 
-		vecs[0] = new float[] { bb.getFloat(), bb.getFloat(), bb.getFloat(), bb.getFloat()};
-		vecs[1] = new float[] { bb.getFloat(), bb.getFloat(), bb.getFloat(), bb.getFloat()};
+        flags = bb.getInt();
+        value = bb.getInt();
 
-		flags = bb.getInt();
-		value = bb.getInt();
-
-		bb.get(str);
-		texture = new String(str, 0, Lib.strlen(str));
-		nexttexinfo = bb.getInt();
-	}
-
-	public static final int SIZE = 32 + 4 + 4 + 32 + 4;
-
-	//float			vecs[2][4];		// [s/t][xyz offset]
-	public float vecs[][] = {
-		 { 0, 0, 0, 0 },
-		 { 0, 0, 0, 0 }
-	};
-	public int flags; // miptex flags + overrides
-	public int value; // light emission, etc
-	//char			texture[32];	// texture name (textures/*.wal)
-	public String texture="";
-	public int nexttexinfo; // for animations, -1 = end of chain
+        bb.get(str);
+        texture = new String(str, 0, Lib.strlen(str));
+        nexttexinfo = bb.getInt();
+    }
 }

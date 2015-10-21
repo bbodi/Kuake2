@@ -27,253 +27,195 @@ import java.io.IOException;
 
 public class edict_t {
 
-    /** Constructor. */
-    public edict_t(int i) {
-        s.number = i;
-        index = i;
-    }
-
-    /** Used during level loading. */
-    public void cleararealinks() {
-        area = new link_t(this);
-    }
-
-    /** Integrated entity state. */
+    /**
+     * Integrated entity state.
+     */
     public entity_state_t s = new entity_state_t(this);
-
     public boolean inuse;
-
     public int linkcount;
-
     /**
      * FIXME: move these fields to a server private sv_entity_t. linked to a
      * division node or leaf.
      */
     public link_t area = new link_t(this);
-
-    /** if -1, use headnode instead. */
+    /**
+     * if -1, use headnode instead.
+     */
     public int num_clusters;
-
     public int clusternums[] = new int[Defines.MAX_ENT_CLUSTERS];
-
-    /** unused if num_clusters != -1. */
+    /**
+     * unused if num_clusters != -1.
+     */
     public int headnode;
-
     public int areanum, areanum2;
+    /**
+     * SVF_NOCLIENT, SVF_DEADMONSTER, SVF_MONSTER, etc.
+     */
+    public int svflags;
+    public float[] mins = {0, 0, 0};
 
     //================================
-
-    /** SVF_NOCLIENT, SVF_DEADMONSTER, SVF_MONSTER, etc. */
-    public int svflags;
-
-    public float[] mins = { 0, 0, 0 };
-
-    public float[] maxs = { 0, 0, 0 };
-
-    public float[] absmin = { 0, 0, 0 };
-
-    public float[] absmax = { 0, 0, 0 };
-
-    public float[] size = { 0, 0, 0 };
-
+    public float[] maxs = {0, 0, 0};
+    public float[] absmin = {0, 0, 0};
+    public float[] absmax = {0, 0, 0};
+    public float[] size = {0, 0, 0};
     public int solid;
-
     public int clipmask;
-
     //================================
     public int movetype;
-
     public int flags;
-
     public String model = null;
-
-    /** sv.time when the object was freed. */
+    /**
+     * sv.time when the object was freed.
+     */
     public float freetime;
-
     //
     // only used locally in game, not by server
     //
     public String message = null;
-
     public String classname = "";
-
     public int spawnflags;
-
     public float timestamp;
-
-    /** set in qe3, -1 = up, -2 = down */
+    /**
+     * set in qe3, -1 = up, -2 = down
+     */
     public float angle;
-
     public String target = null;
-
     public String targetname = null;
-
     public String killtarget = null;
-
     public String team = null;
-
     public String pathtarget = null;
-
     public String deathtarget = null;
-
     public String combattarget = null;
-
     public edict_t target_ent = null;
-
     public float speed, accel, decel;
-
-    public float[] movedir = { 0, 0, 0 };
-
-    public float[] pos1 = { 0, 0, 0 };
-
-    public float[] pos2 = { 0, 0, 0 };
-
-    public float[] velocity = { 0, 0, 0 };
-
-    public float[] avelocity = { 0, 0, 0 };
-
+    public float[] movedir = {0, 0, 0};
+    public float[] pos1 = {0, 0, 0};
+    public float[] pos2 = {0, 0, 0};
+    public float[] velocity = {0, 0, 0};
+    public float[] avelocity = {0, 0, 0};
     public int mass;
-
     public float air_finished;
-
-    /** per entity gravity multiplier (1.0 is normal). */
+    /**
+     * per entity gravity multiplier (1.0 is normal).
+     */
     public float gravity;
-
-    /** use for lowgrav artifact, flares. */
+    /**
+     * use for lowgrav artifact, flares.
+     */
 
     public edict_t goalentity = null;
-
     public edict_t movetarget = null;
-
     public float yaw_speed;
-
     public float ideal_yaw;
-
     public float nextthink;
-
     public EntThinkAdapter prethink = null;
-
     public EntThinkAdapter think = null;
-
     public EntBlockedAdapter blocked = null;
-
     public EntTouchAdapter touch = null;
-
     public EntUseAdapter use = null;
-
     public EntPainAdapter pain = null;
-
     public EntDieAdapter die = null;
-
-    /** Are all these legit? do we need more/less of them? */
+    /**
+     * Are all these legit? do we need more/less of them?
+     */
     public float touch_debounce_time;
-
     public float pain_debounce_time;
-
     public float damage_debounce_time;
-
-    /** Move to clientinfo. */
+    /**
+     * Move to clientinfo.
+     */
     public float fly_sound_debounce_time;
-
     public float last_move_time;
-
     public int health;
-
     public int max_health;
-
     public int gib_health;
-
     public int deadflag;
-
     public int show_hostile;
-
     public float powerarmor_time;
-
-    /** target_changelevel. */
+    /**
+     * target_changelevel.
+     */
     public String map = null;
-
-    /** Height above origin where eyesight is determined. */
+    /**
+     * Height above origin where eyesight is determined.
+     */
     public int viewheight;
-
     public int takedamage;
-
     public int dmg;
-
     public int radius_dmg;
-
     public float dmg_radius;
-
-    /** make this a spawntemp var? */
+    /**
+     * make this a spawntemp var?
+     */
     public int sounds;
-
     public int count;
-
     public edict_t chain = null;
-
     public edict_t enemy = null;
-
     public edict_t oldenemy = null;
-
     public edict_t activator = null;
-
     public edict_t groundentity = null;
-
     public int groundentity_linkcount;
-
     public edict_t teamchain = null;
-
     public edict_t teammaster = null;
-
-    /** can go in client only. */
+    /**
+     * can go in client only.
+     */
     public edict_t mynoise = null;
-
     public edict_t mynoise2 = null;
-
     public int noise_index;
-
     public int noise_index2;
-
     public float volume;
-
     public float attenuation;
-
-    /** Timing variables. */
+    /**
+     * Timing variables.
+     */
     public float wait;
-
-    /** before firing targets... */
+    /**
+     * before firing targets...
+     */
     public float delay;
-
     public float random;
-
     public float teleport_time;
-
     public int watertype;
-
     public int waterlevel;
-
-    public float[] move_origin = { 0, 0, 0 };
-
-    public float[] move_angles = { 0, 0, 0 };
-
-    /** move this to clientinfo? . */
+    public float[] move_origin = {0, 0, 0};
+    public float[] move_angles = {0, 0, 0};
+    /**
+     * move this to clientinfo? .
+     */
     public int light_level;
-
-    /** also used as areaportal number. */
+    /**
+     * also used as areaportal number.
+     */
     public int style;
-
     public gitem_t item; // for bonus items
-
-    /** common integrated data blocks. */
+    /**
+     * common integrated data blocks.
+     */
     public moveinfo_t moveinfo = new moveinfo_t();
-
     public monsterinfo_t monsterinfo = new monsterinfo_t();
-
     public gclient_t client;
-
     public edict_t owner;
-
-    /** Introduced by rst. */
+    /**
+     * Introduced by rst.
+     */
     public int index;
+
+    /**
+     * Constructor.
+     */
+    public edict_t(int i) {
+        s.number = i;
+        index = i;
+    }
+
+    /**
+     * Used during level loading.
+     */
+    public void cleararealinks() {
+        area = new link_t(this);
+    }
 
     /////////////////////////////////////////////////
 
@@ -434,7 +376,7 @@ public class edict_t {
         } // F_VECTOR),
 
         if (key.equals("angle")) {
-            s.angles = new float[] { 0, Lib.atof(value), 0 };
+            s.angles = new float[]{0, Lib.atof(value), 0};
             return true;
         } // F_ANGLEHACK),
 
@@ -446,7 +388,9 @@ public class edict_t {
         return false;
     }
 
-    /** Writes the entity to the file. */
+    /**
+     * Writes the entity to the file.
+     */
     public void write(QuakeFile f) throws IOException {
 
         s.write(f);
@@ -605,7 +549,9 @@ public class edict_t {
         f.writeInt(9876);
     }
 
-    /** Reads the entity from the file. */
+    /**
+     * Reads the entity from the file.
+     */
     public void read(QuakeFile f) throws IOException {
         s.read(f);
         inuse = f.readBoolean();

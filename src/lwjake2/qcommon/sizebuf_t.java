@@ -24,18 +24,17 @@ import java.util.Arrays;
  * sizebuf_t
  */
 public final class sizebuf_t {
-	public boolean allowoverflow = false;
-	public boolean overflowed = false;
-	public byte[] data = null;
-	public int maxsize = 0;
-	public int cursize = 0;
-	public int readcount = 0;
-	
-	public void clear()
-	{
-		if (data!=null)		
-			Arrays.fill(data,(byte)0);
-		cursize = 0;
-		overflowed = false;
-	}
+    public boolean allowoverflow = false;
+    public boolean overflowed = false;
+    public byte[] data = null;
+    public int maxsize = 0;
+    public int cursize = 0;
+    public int readcount = 0;
+
+    public void clear() {
+        if (data != null)
+            Arrays.fill(data, (byte) 0);
+        cursize = 0;
+        overflowed = false;
+    }
 }

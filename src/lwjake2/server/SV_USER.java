@@ -20,38 +20,16 @@ package lwjake2.server;
 
 import lwjake2.Defines;
 import lwjake2.Globals;
-import lwjake2.game.Cmd;
-import lwjake2.game.GameBase;
-import lwjake2.game.Info;
-import lwjake2.game.PlayerClient;
-import lwjake2.game.edict_t;
-import lwjake2.game.entity_state_t;
-import lwjake2.game.usercmd_t;
-import lwjake2.qcommon.Cbuf;
-import lwjake2.qcommon.Com;
-import lwjake2.qcommon.Cvar;
-import lwjake2.qcommon.FS;
-import lwjake2.qcommon.MSG;
-import lwjake2.qcommon.SZ;
+import lwjake2.game.*;
+import lwjake2.qcommon.*;
 import lwjake2.util.Lib;
 
 import java.io.IOException;
 
 public class SV_USER {
 
+    public static final int MAX_STRINGCMDS = 8;
     static edict_t sv_player;
-
-    public static class ucmd_t {
-        public ucmd_t(String n, Runnable r) {
-            name = n;
-            this.r = r;
-        }
-
-        String name;
-
-        Runnable r;
-    }
-
     static ucmd_t u1 = new ucmd_t("new", new Runnable() {
         public void run() {
             SV_USER.SV_New_f();
@@ -59,32 +37,32 @@ public class SV_USER {
     });
 
     static ucmd_t ucmds[] = {
-    // auto issued
+            // auto issued
             new ucmd_t("new", new Runnable() {
                 public void run() {
                     SV_USER.SV_New_f();
                 }
             }), new ucmd_t("configstrings", new Runnable() {
-                public void run() {
-                    SV_USER.SV_Configstrings_f();
-                }
-            }), new ucmd_t("baselines", new Runnable() {
-                public void run() {
-                    SV_USER.SV_Baselines_f();
-                }
-            }), new ucmd_t("begin", new Runnable() {
-                public void run() {
-                    SV_USER.SV_Begin_f();
-                }
-            }), new ucmd_t("nextserver", new Runnable() {
-                public void run() {
-                    SV_USER.SV_Nextserver_f();
-                }
-            }), new ucmd_t("disconnect", new Runnable() {
-                public void run() {
-                    SV_USER.SV_Disconnect_f();
-                }
-            }),
+        public void run() {
+            SV_USER.SV_Configstrings_f();
+        }
+    }), new ucmd_t("baselines", new Runnable() {
+        public void run() {
+            SV_USER.SV_Baselines_f();
+        }
+    }), new ucmd_t("begin", new Runnable() {
+        public void run() {
+            SV_USER.SV_Begin_f();
+        }
+    }), new ucmd_t("nextserver", new Runnable() {
+        public void run() {
+            SV_USER.SV_Nextserver_f();
+        }
+    }), new ucmd_t("disconnect", new Runnable() {
+        public void run() {
+            SV_USER.SV_Disconnect_f();
+        }
+    }),
 
             // issued by hand at client consoles
             new ucmd_t("info", new Runnable() {
@@ -92,25 +70,14 @@ public class SV_USER {
                     SV_USER.SV_ShowServerinfo_f();
                 }
             }), new ucmd_t("download", new Runnable() {
-                public void run() {
-                    SV_USER.SV_BeginDownload_f();
-                }
-            }), new ucmd_t("nextdl", new Runnable() {
-                public void run() {
-                    SV_USER.SV_NextDownload_f();
-                }
-            }) };
-
-    public static final int MAX_STRINGCMDS = 8;
-
-    /*
-     * ============================================================
-     * 
-     * USER STRINGCMD EXECUTION
-     * 
-     * sv_client and sv_player will be valid.
-     * ============================================================
-     */
+        public void run() {
+            SV_USER.SV_BeginDownload_f();
+        }
+    }), new ucmd_t("nextdl", new Runnable() {
+        public void run() {
+            SV_USER.SV_NextDownload_f();
+        }
+    })};
 
     /*
      * ================== SV_BeginDemoServer ==================
@@ -129,8 +96,17 @@ public class SV_USER {
     }
 
     /*
-     * ================ SV_New_f
+     * ============================================================
      * 
+     * USER STRINGCMD EXECUTION
+     * 
+     * sv_client and sv_player will be valid.
+     * ============================================================
+     */
+
+    /*
+     * ================ SV_New_f
+     *
      * Sends the first message from the server to a connected client. This will
      * be sent on the initial connection and upon each server load.
      * ================
@@ -161,12 +137,12 @@ public class SV_USER {
 
         // send the serverdata
         MSG.WriteByte(SV_MAIN.sv_client.netchan.message,
-                        Defines.svc_serverdata);
+                Defines.svc_serverdata);
         MSG.WriteInt(SV_MAIN.sv_client.netchan.message,
                 Defines.PROTOCOL_VERSION);
-        
+
         MSG.WriteLong(SV_MAIN.sv_client.netchan.message,
-                        SV_INIT.svs.spawncount);
+                SV_INIT.svs.spawncount);
         MSG.WriteByte(SV_MAIN.sv_client.netchan.message,
                 SV_INIT.sv.attractloop ? 1 : 0);
         MSG.WriteString(SV_MAIN.sv_client.netchan.message, gamedir);
@@ -186,7 +162,7 @@ public class SV_USER {
 
         //
         // game server
-        // 
+        //
         if (SV_INIT.sv.state == Defines.ss_game) {
             // set up the entity for the client
             ent = GameBase.g_edicts[playernum + 1];
@@ -200,7 +176,7 @@ public class SV_USER {
             MSG.WriteString(SV_MAIN.sv_client.netchan.message,
                     "cmd configstrings " + SV_INIT.svs.spawncount + " 0\n");
         }
-        
+
     }
 
     /*
@@ -333,8 +309,6 @@ public class SV_USER {
         Cbuf.InsertFromDefer();
     }
 
-    //=============================================================================
-
     /*
      * ================== SV_NextDownload_f ==================
      */
@@ -369,6 +343,8 @@ public class SV_USER {
         SV_MAIN.sv_client.download = null;
     }
 
+    //=============================================================================
+
     /*
      * ================== SV_BeginDownload_f ==================
      */
@@ -387,20 +363,20 @@ public class SV_USER {
         if (name.indexOf("..") != -1
                 || SV_MAIN.allow_download.value == 0 // leading dot is no good
                 || name.charAt(0) == '.' // leading slash bad as well, must be
-                                         // in subdir
+                // in subdir
                 || name.charAt(0) == '/' // next up, skin check
                 || (name.startsWith("players/") && 0 == SV_MAIN.allow_download_players.value) // now
-                                                                                              // models
+                // models
                 || (name.startsWith("models/") && 0 == SV_MAIN.allow_download_models.value) // now
-                                                                                            // sounds
+                // sounds
                 || (name.startsWith("sound/") && 0 == SV_MAIN.allow_download_sounds.value)
                 // now maps (note special case for maps, must not be in pak)
                 || (name.startsWith("maps/") && 0 == SV_MAIN.allow_download_maps.value) // MUST
-                                                                                        // be
-                                                                                        // in a
-                                                                                        // subdirectory
+                // be
+                // in a
+                // subdirectory
                 || name.indexOf('/') == -1) { // don't allow anything with ..
-                                              // path
+            // path
             MSG.WriteByte(SV_MAIN.sv_client.netchan.message,
                     Defines.svc_download);
             MSG.WriteShort(SV_MAIN.sv_client.netchan.message, -1);
@@ -412,13 +388,12 @@ public class SV_USER {
             FS.FreeFile(SV_MAIN.sv_client.download);
 
         SV_MAIN.sv_client.download = FS.LoadFile(name);
-        
-        // rst: this handles loading errors, no message yet visible 
-        if (SV_MAIN.sv_client.download == null)
-        {        	
-        	return;
+
+        // rst: this handles loading errors, no message yet visible
+        if (SV_MAIN.sv_client.download == null) {
+            return;
         }
-        
+
         SV_MAIN.sv_client.downloadsize = SV_MAIN.sv_client.download.length;
         SV_MAIN.sv_client.downloadcount = offset;
 
@@ -426,9 +401,9 @@ public class SV_USER {
             SV_MAIN.sv_client.downloadcount = SV_MAIN.sv_client.downloadsize;
 
         if (SV_MAIN.sv_client.download == null // special check for maps, if it
-                                               // came from a pak file, don't
-                                               // allow
-                							   // download ZOID
+                // came from a pak file, don't
+                // allow
+                // download ZOID
                 || (name.startsWith("maps/") && FS.file_from_pak != 0)) {
             Com.DPrintf("Couldn't download " + name + " to "
                     + SV_MAIN.sv_client.name + "\n");
@@ -449,11 +424,9 @@ public class SV_USER {
                 + "\n");
     }
 
-    //============================================================================
-
     /*
      * ================= SV_Disconnect_f
-     * 
+     *
      * The client is going to disconnect, so remove the connection immediately
      * =================
      */
@@ -462,9 +435,11 @@ public class SV_USER {
         SV_MAIN.SV_DropClient(SV_MAIN.sv_client);
     }
 
+    //============================================================================
+
     /*
      * ================== SV_ShowServerinfo_f
-     * 
+     *
      * Dumps the serverinfo info string ==================
      */
     public static void SV_ShowServerinfo_f() {
@@ -476,8 +451,8 @@ public class SV_USER {
 
         //ZOID, ss_pic can be nextserver'd in coop mode
         if (SV_INIT.sv.state == Defines.ss_game
-                || (SV_INIT.sv.state == Defines.ss_pic && 
-                        0 == Cvar.VariableValue("coop")))
+                || (SV_INIT.sv.state == Defines.ss_pic &&
+                0 == Cvar.VariableValue("coop")))
             return; // can't nextserver while playing a normal game
 
         SV_INIT.svs.spawncount++; // make sure another doesn't sneak in
@@ -494,7 +469,7 @@ public class SV_USER {
 
     /*
      * ================== SV_Nextserver_f
-     * 
+     *
      * A cinematic has completed or been aborted by a client, so move to the
      * next server, ==================
      */
@@ -514,8 +489,8 @@ public class SV_USER {
      * ================== SV_ExecuteUserCommand ==================
      */
     public static void SV_ExecuteUserCommand(String s) {
-        
-        Com.dprintln("SV_ExecuteUserCommand:" + s );
+
+        Com.dprintln("SV_ExecuteUserCommand:" + s);
         SV_USER.ucmd_t u = null;
 
         Cmd.TokenizeString(s.toCharArray(), true);
@@ -538,14 +513,6 @@ public class SV_USER {
         //	SV_EndRedirect ();
     }
 
-    /*
-     * ===========================================================================
-     * 
-     * USER CMD EXECUTION
-     * 
-     * ===========================================================================
-     */
-
     public static void SV_ClientThink(client_t cl, usercmd_t cmd) {
         cl.commandMsec -= cmd.msec & 0xFF;
 
@@ -558,8 +525,16 @@ public class SV_USER {
     }
 
     /*
-     * =================== SV_ExecuteClientMessage
+     * ===========================================================================
      * 
+     * USER CMD EXECUTION
+     * 
+     * ===========================================================================
+     */
+
+    /*
+     * =================== SV_ExecuteClientMessage
+     *
      * The current net_message is parsed for the given client
      * ===================
      */
@@ -596,99 +571,109 @@ public class SV_USER {
                 break;
 
             switch (c) {
-            default:
-                Com.Printf("SV_ReadClientMessage: unknown command char\n");
-                SV_MAIN.SV_DropClient(cl);
-                return;
-
-            case Defines.clc_nop:
-                break;
-
-            case Defines.clc_userinfo:
-                cl.userinfo = MSG.ReadString(Globals.net_message);
-                SV_MAIN.SV_UserinfoChanged(cl);
-                break;
-
-            case Defines.clc_move:
-                if (move_issued)
-                    return; // someone is trying to cheat...
-
-                move_issued = true;
-                checksumIndex = Globals.net_message.readcount;
-                checksum = MSG.ReadByte(Globals.net_message);
-                lastframe = MSG.ReadLong(Globals.net_message);
-
-                if (lastframe != cl.lastframe) {
-                    cl.lastframe = lastframe;
-                    if (cl.lastframe > 0) {
-                        cl.frame_latency[cl.lastframe
-                                & (Defines.LATENCY_COUNTS - 1)] = SV_INIT.svs.realtime
-                                - cl.frames[cl.lastframe & Defines.UPDATE_MASK].senttime;
-                    }
-                }
-
-                //memset (nullcmd, 0, sizeof(nullcmd));
-                nullcmd = new usercmd_t();
-                MSG.ReadDeltaUsercmd(Globals.net_message, nullcmd, oldest);
-                MSG.ReadDeltaUsercmd(Globals.net_message, oldest, oldcmd);
-                MSG.ReadDeltaUsercmd(Globals.net_message, oldcmd, newcmd);
-
-                if (cl.state != Defines.cs_spawned) {
-                    cl.lastframe = -1;
-                    break;
-                }
-
-                // if the checksum fails, ignore the rest of the packet
-
-                calculatedChecksum = Com.BlockSequenceCRCByte(
-                        Globals.net_message.data, checksumIndex + 1,
-                        Globals.net_message.readcount - checksumIndex - 1,
-                        cl.netchan.incoming_sequence);
-
-                if ((calculatedChecksum & 0xff) != checksum) {
-                    Com.DPrintf("Failed command checksum for " + cl.name + " ("
-                            + calculatedChecksum + " != " + checksum + ")/"
-                            + cl.netchan.incoming_sequence + "\n");
+                default:
+                    Com.Printf("SV_ReadClientMessage: unknown command char\n");
+                    SV_MAIN.SV_DropClient(cl);
                     return;
-                }
 
-                if (0 == SV_MAIN.sv_paused.value) {
-                    net_drop = cl.netchan.dropped;
-                    if (net_drop < 20) {
+                case Defines.clc_nop:
+                    break;
 
-                        //if (net_drop > 2)
+                case Defines.clc_userinfo:
+                    cl.userinfo = MSG.ReadString(Globals.net_message);
+                    SV_MAIN.SV_UserinfoChanged(cl);
+                    break;
 
-                        //	Com.Printf ("drop %i\n", net_drop);
-                        while (net_drop > 2) {
-                            SV_ClientThink(cl, cl.lastcmd);
+                case Defines.clc_move:
+                    if (move_issued)
+                        return; // someone is trying to cheat...
 
-                            net_drop--;
+                    move_issued = true;
+                    checksumIndex = Globals.net_message.readcount;
+                    checksum = MSG.ReadByte(Globals.net_message);
+                    lastframe = MSG.ReadLong(Globals.net_message);
+
+                    if (lastframe != cl.lastframe) {
+                        cl.lastframe = lastframe;
+                        if (cl.lastframe > 0) {
+                            cl.frame_latency[cl.lastframe
+                                    & (Defines.LATENCY_COUNTS - 1)] = SV_INIT.svs.realtime
+                                    - cl.frames[cl.lastframe & Defines.UPDATE_MASK].senttime;
                         }
-                        if (net_drop > 1)
-                            SV_ClientThink(cl, oldest);
-
-                        if (net_drop > 0)
-                            SV_ClientThink(cl, oldcmd);
-
                     }
-                    SV_ClientThink(cl, newcmd);
-                }
 
-                // copy.
-                cl.lastcmd.set(newcmd);
-                break;
+                    //memset (nullcmd, 0, sizeof(nullcmd));
+                    nullcmd = new usercmd_t();
+                    MSG.ReadDeltaUsercmd(Globals.net_message, nullcmd, oldest);
+                    MSG.ReadDeltaUsercmd(Globals.net_message, oldest, oldcmd);
+                    MSG.ReadDeltaUsercmd(Globals.net_message, oldcmd, newcmd);
 
-            case Defines.clc_stringcmd:
-                s = MSG.ReadString(Globals.net_message);
+                    if (cl.state != Defines.cs_spawned) {
+                        cl.lastframe = -1;
+                        break;
+                    }
 
-                // malicious users may try using too many string commands
-                if (++stringCmdCount < SV_USER.MAX_STRINGCMDS)
-                    SV_ExecuteUserCommand(s);
+                    // if the checksum fails, ignore the rest of the packet
 
-                if (cl.state == Defines.cs_zombie)
-                    return; // disconnect command
-                break;
+                    calculatedChecksum = Com.BlockSequenceCRCByte(
+                            Globals.net_message.data, checksumIndex + 1,
+                            Globals.net_message.readcount - checksumIndex - 1,
+                            cl.netchan.incoming_sequence);
+
+                    if ((calculatedChecksum & 0xff) != checksum) {
+                        Com.DPrintf("Failed command checksum for " + cl.name + " ("
+                                + calculatedChecksum + " != " + checksum + ")/"
+                                + cl.netchan.incoming_sequence + "\n");
+                        return;
+                    }
+
+                    if (0 == SV_MAIN.sv_paused.value) {
+                        net_drop = cl.netchan.dropped;
+                        if (net_drop < 20) {
+
+                            //if (net_drop > 2)
+
+                            //	Com.Printf ("drop %i\n", net_drop);
+                            while (net_drop > 2) {
+                                SV_ClientThink(cl, cl.lastcmd);
+
+                                net_drop--;
+                            }
+                            if (net_drop > 1)
+                                SV_ClientThink(cl, oldest);
+
+                            if (net_drop > 0)
+                                SV_ClientThink(cl, oldcmd);
+
+                        }
+                        SV_ClientThink(cl, newcmd);
+                    }
+
+                    // copy.
+                    cl.lastcmd.set(newcmd);
+                    break;
+
+                case Defines.clc_stringcmd:
+                    s = MSG.ReadString(Globals.net_message);
+
+                    // malicious users may try using too many string commands
+                    if (++stringCmdCount < SV_USER.MAX_STRINGCMDS)
+                        SV_ExecuteUserCommand(s);
+
+                    if (cl.state == Defines.cs_zombie)
+                        return; // disconnect command
+                    break;
             }
+        }
+    }
+
+    public static class ucmd_t {
+        String name;
+        Runnable r;
+
+        public ucmd_t(String n, Runnable r) {
+            name = n;
+            this.r = r;
         }
     }
 }

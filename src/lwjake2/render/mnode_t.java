@@ -21,22 +21,22 @@ package lwjake2.render;
 import lwjake2.game.cplane_t;
 
 public class mnode_t {
-	//	common with leaf
-	public int contents; // -1, to differentiate from leafs
-	public int visframe; // node needs to be traversed if current
+    //	common with leaf
+    public int contents; // -1, to differentiate from leafs
+    public int visframe; // node needs to be traversed if current
 
-	//public float minmaxs[] = new float[6]; // for bounding box culling
-	public float mins[] = new float[3]; // for bounding box culling
-	public float maxs[] = new float[3]; // for bounding box culling
+    //public float minmaxs[] = new float[6]; // for bounding box culling
+    public float mins[] = new float[3]; // for bounding box culling
+    public float maxs[] = new float[3]; // for bounding box culling
 
-	public mnode_t parent;
+    public mnode_t parent;
 
-	//	node specific
-	public cplane_t plane;
-	public mnode_t children[] = new mnode_t[2];
+    //	node specific
+    public cplane_t plane;
+    public mnode_t children[] = new mnode_t[2];
 
-	// unsigned short
-	public int firstsurface;
-	public int numsurfaces;
+    // unsigned short
+    public int firstsurface;
+    public int numsurfaces;
 
 }

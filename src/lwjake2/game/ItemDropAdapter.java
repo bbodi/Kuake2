@@ -19,6 +19,6 @@
 package lwjake2.game;
 
 public abstract class ItemDropAdapter extends SuperAdapter {
-	public void drop(edict_t ent, gitem_t item) {
-	}
+    public void drop(edict_t ent, gitem_t item) {
+    }
 }

@@ -33,6 +33,14 @@ import java.util.regex.PatternSyntaxException;
  */
 public final class Sys extends Defines {
 
+    static File[] fdir;
+    static int fileindex;
+    static String findbase;
+    static String findpattern;
+
+
+    //============================================
+
     public static void Error(String error) {
 
         CL.Shutdown();
@@ -74,9 +82,57 @@ public final class Sys extends Defines {
         return fdir.listFiles(filter);
     }
 
+    // ok.
+    public static File FindFirst(String path, int musthave, int canthave) {
+
+        if (fdir != null)
+            Sys.Error("Sys_BeginFind without close");
+
+        //	COM_FilePath (path, findbase);
+
+        fdir = FindAll(path, canthave, musthave);
+        fileindex = 0;
+
+        if (fdir == null)
+            return null;
+
+        return FindNext();
+    }
+
+    public static File FindNext() {
+
+        if (fileindex >= fdir.length)
+            return null;
+
+        return fdir[fileindex++];
+    }
+
+    public static void FindClose() {
+        fdir = null;
+    }
+
+    public static void SendKeyEvents() {
+        Globals.re.getKeyboardHandler().Update();
+
+        // grab frame time
+        Globals.sys_frame_time = Timer.Milliseconds();
+    }
+
+    public static String GetClipboardData() {
+        // TODO: implement GetClipboardData
+        return null;
+    }
+
+    public static void ConsoleOutput(String msg) {
+        if (Globals.nostdout != null && Globals.nostdout.value != 0)
+            return;
+
+        System.out.print(msg);
+    }
+
     /**
      * Match the pattern findpattern against the filename.
-     * 
+     * <p/>
      * In the pattern string, `*' matches any sequence of characters, `?'
      * matches any character, [SET] matches any character in the specified set,
      * [!SET] matches any character not in the specified set. A set is composed
@@ -123,23 +179,23 @@ public final class Sys extends Defines {
                 c = pattern.charAt(i);
                 subst = null;
                 switch (c) {
-                case '*':
-                    subst = (!escape) ? ".*" : "*";
-                    break;
-                case '.':
-                    subst = (!escape) ? "\\." : ".";
-                    break;
-                case '!':
-                    subst = (!escape) ? "^" : "!";
-                    break;
-                case '?':
-                    subst = (!escape) ? "." : "?";
-                    break;
-                case '\\':
-                    escape = !escape;
-                    break;
-                default:
-                    escape = false;
+                    case '*':
+                        subst = (!escape) ? ".*" : "*";
+                        break;
+                    case '.':
+                        subst = (!escape) ? "\\." : ".";
+                        break;
+                    case '!':
+                        subst = (!escape) ? "^" : "!";
+                        break;
+                    case '?':
+                        subst = (!escape) ? "." : "?";
+                        break;
+                    case '\\':
+                        escape = !escape;
+                        break;
+                    default:
+                        escape = false;
                 }
                 if (subst != null) {
                     sb.append(subst);
@@ -172,65 +228,6 @@ public final class Sys extends Defines {
             return true;
         }
 
-    }
-
-
-    //============================================
-
-    static File[] fdir;
-
-    static int fileindex;
-
-    static String findbase;
-
-    static String findpattern;
-
-    // ok.
-    public static File FindFirst(String path, int musthave, int canthave) {
-
-        if (fdir != null)
-            Sys.Error("Sys_BeginFind without close");
-
-        //	COM_FilePath (path, findbase);
-
-        fdir = FindAll(path, canthave, musthave);
-        fileindex = 0;
-
-        if (fdir == null)
-            return null;
-
-        return FindNext();
-    }
-
-    public static File FindNext() {
-
-        if (fileindex >= fdir.length)
-            return null;
-
-        return fdir[fileindex++];
-    }
-
-    public static void FindClose() {
-        fdir = null;
-    }
-
-    public static void SendKeyEvents() {
-		Globals.re.getKeyboardHandler().Update();
-
-        // grab frame time
-        Globals.sys_frame_time = Timer.Milliseconds();
-    }
-
-    public static String GetClipboardData() {
-        // TODO: implement GetClipboardData
-        return null;
-    }
-
-    public static void ConsoleOutput(String msg) {
-        if (Globals.nostdout != null && Globals.nostdout.value != 0)
-            return;
-
-        System.out.print(msg);
     }
 
 }

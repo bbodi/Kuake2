@@ -34,6 +34,16 @@ import lwjake2.util.Math3D;
  */
 public final class SV {
 
+    /**
+     * SV_FlyMove
+     * <p/>
+     * The basic solid body movement clip that slides along multiple planes
+     * Returns the clipflags if the velocity was modified (hit something solid)
+     * 1 = floor 2 = wall / step 4 = dead stop
+     */
+    public final static int MAX_CLIP_PLANES = 5;
+    public static int DI_NODIR = -1;
+
     ///////////////////////////////////////
     public static edict_t[] SV_TestEntityPosition(edict_t ent) {
         trace_t trace;
@@ -104,29 +114,20 @@ public final class SV {
         if (e2.touch != null && e2.solid != Defines.SOLID_NOT)
             e2.touch.touch(e2, e1, GameBase.dummyplane, null);
     }
-    
-    /**
-     * SV_FlyMove
-     * 
-     * The basic solid body movement clip that slides along multiple planes
-     * Returns the clipflags if the velocity was modified (hit something solid)
-     * 1 = floor 2 = wall / step 4 = dead stop
-     */
-    public final static int MAX_CLIP_PLANES = 5;
 
     public static int SV_FlyMove(edict_t ent, float time, int mask) {
         edict_t hit;
         int bumpcount, numbumps;
-        float[] dir = { 0.0f, 0.0f, 0.0f };
+        float[] dir = {0.0f, 0.0f, 0.0f};
         float d;
         int numplanes;
         float[][] planes = new float[MAX_CLIP_PLANES][3];
-        float[] primal_velocity = { 0.0f, 0.0f, 0.0f };
-        float[] original_velocity = { 0.0f, 0.0f, 0.0f };
-        float[] new_velocity = { 0.0f, 0.0f, 0.0f };
+        float[] primal_velocity = {0.0f, 0.0f, 0.0f};
+        float[] original_velocity = {0.0f, 0.0f, 0.0f};
+        float[] new_velocity = {0.0f, 0.0f, 0.0f};
         int i, j;
         trace_t trace;
-        float[] end = { 0.0f, 0.0f, 0.0f };
+        float[] end = {0.0f, 0.0f, 0.0f};
         float time_left;
         int blocked;
 
@@ -185,7 +186,7 @@ public final class SV {
 
             // cliped to another plane
             if (numplanes >= MAX_CLIP_PLANES) { // this shouldn't
-                                                         // really happen
+                // really happen
                 Math3D.VectorCopy(Globals.vec3_origin, ent.velocity);
                 return 3;
             }
@@ -250,8 +251,8 @@ public final class SV {
      */
     public static trace_t SV_PushEntity(edict_t ent, float[] push) {
         trace_t trace;
-        float[] start = { 0, 0, 0 };
-        float[] end = { 0, 0, 0 };
+        float[] start = {0, 0, 0};
+        float[] end = {0, 0, 0};
         int mask;
 
         Math3D.VectorCopy(ent.s.origin, start);
@@ -301,15 +302,15 @@ public final class SV {
     public static boolean SV_Push(edict_t pusher, float[] move, float[] amove) {
         int i, e;
         edict_t check, block[];
-        float[] mins = { 0, 0, 0 };
-        float[] maxs = { 0, 0, 0 };
+        float[] mins = {0, 0, 0};
+        float[] maxs = {0, 0, 0};
         pushed_t p;
-        float[] org = { 0, 0, 0 };
-        float[] org2 = { 0, 0, 0 };
-        float[] move2 = { 0, 0, 0 };
-        float[] forward = { 0, 0, 0 };
-        float[] right = { 0, 0, 0 };
-        float[] up = { 0, 0, 0 };
+        float[] org = {0, 0, 0};
+        float[] org2 = {0, 0, 0};
+        float[] move2 = {0, 0, 0};
+        float[] forward = {0, 0, 0};
+        float[] right = {0, 0, 0};
+        float[] up = {0, 0, 0};
 
         // clamp the move to 1/8 units, so the position will
         // be accurate for client side prediction
@@ -456,12 +457,11 @@ public final class SV {
     }
 
     /**
-     * 
      * Bmodel objects don't interact with each other, but push all box objects.
      */
     public static void SV_Physics_Pusher(edict_t ent) {
-        float[] move = { 0, 0, 0 };
-        float[] amove = { 0, 0, 0 };
+        float[] move = {0, 0, 0};
+        float[] amove = {0, 0, 0};
         edict_t part, mv;
 
         // if not a team captain, so movement will be handled elsewhere
@@ -477,8 +477,8 @@ public final class SV {
             if (part.velocity[0] != 0 || part.velocity[1] != 0
                     || part.velocity[2] != 0 || part.avelocity[0] != 0
                     || part.avelocity[1] != 0 || part.avelocity[2] != 0) { // object
-                                                                           // is
-                                                                           // moving
+                // is
+                // moving
                 Math3D.VectorScale(part.velocity, Defines.FRAMETIME, move);
                 Math3D.VectorScale(part.avelocity, Defines.FRAMETIME, amove);
 
@@ -507,7 +507,6 @@ public final class SV {
             }
         }
     }
-
 
     /**
      * Non moving objects can only think.
@@ -539,12 +538,12 @@ public final class SV {
     public static void SV_Physics_Toss(edict_t ent) {
 
         trace_t trace;
-        float[] move = { 0, 0, 0 };
+        float[] move = {0, 0, 0};
         float backoff;
         edict_t slave;
         boolean wasinwater;
         boolean isinwater;
-        float[] old_origin = { 0, 0, 0 };
+        float[] old_origin = {0, 0, 0};
 
         //	   regular thinking
         SV_RunThink(ent);
@@ -632,7 +631,6 @@ public final class SV {
         }
     }
 
-
     // FIXME: hacked in for E3 demo
     public static void SV_AddRotationalFriction(edict_t ent) {
         int n;
@@ -654,11 +652,11 @@ public final class SV {
             }
         }
     }
-    
+
     /**
      * Monsters freefall when they don't have a ground entity, otherwise all
      * movement is done with discrete steps.
-     * 
+     * <p/>
      * This is also used for objects that have become still on the ground, but
      * will fall if the floor is pulled out from under them. FIXME: is this
      * true?
@@ -770,8 +768,8 @@ public final class SV {
             if (ent.groundentity != null)
                 if (!wasonground)
                     if (hitsound)
-                        GameBase.gi.sound(ent, 0, 
-                        		GameBase.gi.soundindex("world/land.wav"), 1, 1, 0);
+                        GameBase.gi.sound(ent, 0,
+                                GameBase.gi.soundindex("world/land.wav"), 1, 1, 0);
         }
 
         // regular thinking
@@ -784,19 +782,19 @@ public final class SV {
      * returned, and pr_global_struct.trace_normal is set to the normal of the
      * blocking wall.
      */
-    
+
     // FIXME: since we need to test end position contents here, can we avoid
     // doing it again later in catagorize position?
     public static boolean SV_movestep(edict_t ent, float[] move, boolean relink) {
         float dz;
-        float[] oldorg = { 0, 0, 0 };
-        float[] neworg = { 0, 0, 0 };
-        float[] end = { 0, 0, 0 };
+        float[] oldorg = {0, 0, 0};
+        float[] neworg = {0, 0, 0};
+        float[] end = {0, 0, 0};
 
         trace_t trace = null; // = new trace_t();
         int i;
         float stepsize;
-        float[] test = { 0, 0, 0 };
+        float[] test = {0, 0, 0};
         int contents;
 
         //	   try the move
@@ -953,13 +951,13 @@ public final class SV {
         return true;
     }
 
-    /** 
+    /**
      * Turns to the movement direction, and walks the current distance if facing
      * it.
      */
     public static boolean SV_StepDirection(edict_t ent, float yaw, float dist) {
-        float[] move = { 0, 0, 0 };
-        float[] oldorigin = { 0, 0, 0 };
+        float[] move = {0, 0, 0};
+        float[] oldorigin = {0, 0, 0};
         float delta;
 
         ent.ideal_yaw = yaw;
@@ -974,7 +972,7 @@ public final class SV {
         if (SV_movestep(ent, move, false)) {
             delta = ent.s.angles[Defines.YAW] - ent.ideal_yaw;
             if (delta > 45 && delta < 315) { // not turned far enough, so don't
-                                             // take the step
+                // take the step
                 Math3D.VectorCopy(oldorigin, ent.s.origin);
             }
             GameBase.gi.linkentity(ent);
@@ -988,7 +986,6 @@ public final class SV {
 
     /**
      * SV_FixCheckBottom
-     * 
      */
     public static void SV_FixCheckBottom(edict_t ent) {
         ent.flags |= Defines.FL_PARTIALGROUND;
@@ -996,7 +993,7 @@ public final class SV {
 
     public static void SV_NewChaseDir(edict_t actor, edict_t enemy, float dist) {
         float deltax, deltay;
-        float d[] = { 0, 0, 0 };
+        float d[] = {0, 0, 0};
         float tdir, olddir, turnaround;
 
         //FIXME: how did we get here with no enemy
@@ -1054,7 +1051,7 @@ public final class SV {
                 && SV_StepDirection(actor, olddir, dist))
             return;
 
-        if ((Lib.rand() & 1) != 0) /* randomly determine direction of search */{
+        if ((Lib.rand() & 1) != 0) /* randomly determine direction of search */ {
             for (tdir = 0; tdir <= 315; tdir += 45)
                 if (tdir != turnaround && SV_StepDirection(actor, tdir, dist))
                     return;
@@ -1079,7 +1076,7 @@ public final class SV {
 
     /**
      * SV_CloseEnough - returns true if distance between 2 ents is smaller than
-     * given dist.  
+     * given dist.
      */
     public static boolean SV_CloseEnough(edict_t ent, edict_t goal, float dist) {
         int i;
@@ -1092,6 +1089,4 @@ public final class SV {
         }
         return true;
     }
-
-	public static int DI_NODIR = -1;
 }

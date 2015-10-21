@@ -23,27 +23,26 @@ import lwjake2.render.image_t;
 import lwjake2.render.model_t;
 
 public class clientinfo_t {
-	String	name	="";
-	String	cinfo	="";
-	image_t skin;	// ptr
-	image_t icon;	// ptr
-	String iconname	="";
-	model_t model;	// ptr
-	model_t weaponmodel[] = new model_t[Defines.MAX_CLIENTWEAPONMODELS]; // arary of references
-	
+    String name = "";
+    String cinfo = "";
+    image_t skin;    // ptr
+    image_t icon;    // ptr
+    String iconname = "";
+    model_t model;    // ptr
+    model_t weaponmodel[] = new model_t[Defines.MAX_CLIENTWEAPONMODELS]; // arary of references
+
 //	public void reset()
 //	{
 //		set(new clientinfo_t());
 //	}
-	
-	public void set (clientinfo_t from)
-	{
-		name = from.name;
-		cinfo = from.cinfo;
-		skin = from.skin;
-		icon = from.icon;
-		iconname = from.iconname;
-		model = from.model;
-		System.arraycopy(from.weaponmodel,0, weaponmodel, 0 , Defines.MAX_CLIENTWEAPONMODELS);
-	}
+
+    public void set(clientinfo_t from) {
+        name = from.name;
+        cinfo = from.cinfo;
+        skin = from.skin;
+        icon = from.icon;
+        iconname = from.iconname;
+        model = from.model;
+        System.arraycopy(from.weaponmodel, 0, weaponmodel, 0, Defines.MAX_CLIENTWEAPONMODELS);
+    }
 }

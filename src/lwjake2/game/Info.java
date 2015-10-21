@@ -25,9 +25,11 @@ import java.util.StringTokenizer;
 
 public class Info {
 
-	/**
-	 * Returns a value for a key from an info string. 
-	 */
+    private static String fillspaces = "                     ";
+
+    /**
+     * Returns a value for a key from an info string.
+     */
     public static String Info_ValueForKey(String s, String key) {
 
         StringTokenizer tk = new StringTokenizer(s, "\\");
@@ -90,8 +92,8 @@ public class Info {
         return sb.toString();
     }
 
-    /** 
-     * Removes a key and value from an info string. 
+    /**
+     * Removes a key and value from an info string.
      */
     public static String Info_RemoveKey(String s, String key) {
 
@@ -128,8 +130,6 @@ public class Info {
     public static boolean Info_Validate(String s) {
         return !((s.indexOf('"') != -1) || (s.indexOf(';') != -1));
     }
-
-    private static String fillspaces = "                     ";
 
     public static void Print(String s) {
 

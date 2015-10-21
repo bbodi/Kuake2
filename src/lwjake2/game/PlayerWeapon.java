@@ -26,8 +26,19 @@ import lwjake2.util.Math3D;
 
 public class PlayerWeapon {
 
+    public static boolean is_quad;
+
+    /*
+     * ======================================================================
+     * 
+     * GRENADE LAUNCHER
+     * 
+     * ======================================================================
+     */
     public static EntThinkAdapter Weapon_Grenade = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_Grenade"; }
+        public String getID() {
+            return "Weapon_Grenade";
+        }
 
         public boolean think(edict_t ent) {
             if ((ent.client.newweapon != null)
@@ -78,7 +89,7 @@ public class PlayerWeapon {
             if (ent.client.weaponstate == Defines.WEAPON_FIRING) {
                 if (ent.client.ps.gunframe == 5)
                     GameBase.gi.sound(ent, Defines.CHAN_WEAPON, GameBase.gi
-                            .soundindex("weapons/hgrena1b.wav"), 1,
+                                    .soundindex("weapons/hgrena1b.wav"), 1,
                             Defines.ATTN_NORM, 0);
 
                 if (ent.client.ps.gunframe == 11) {
@@ -129,22 +140,127 @@ public class PlayerWeapon {
             return true;
         }
     };
+    public static EntThinkAdapter Weapon_GrenadeLauncher = new EntThinkAdapter() {
+        public String getID() {
+            return "Weapon_GrenadeLauncher";
+        }
+
+        public boolean think(edict_t ent) {
+
+            int pause_frames[] = {34, 51, 59, 0};
+            int fire_frames[] = {6, 0};
+
+            Weapon_Generic(ent, 5, 16, 59, 64, pause_frames, fire_frames,
+                    weapon_grenadelauncher_fire);
+            return true;
+        }
+    };
 
     /*
      * ======================================================================
      * 
-     * GRENADE LAUNCHER
+     * ROCKET
      * 
      * ======================================================================
      */
-
-    public static EntThinkAdapter weapon_grenadelauncher_fire = new EntThinkAdapter() {
-    	public String getID() { return "weapon_grenadelauncher_fire"; }
+    public static EntThinkAdapter Weapon_RocketLauncher = new EntThinkAdapter() {
+        public String getID() {
+            return "Weapon_RocketLauncher";
+        }
 
         public boolean think(edict_t ent) {
-            float[] offset = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-            float[] start = { 0, 0, 0 };
+
+            int pause_frames[] = {25, 33, 42, 50, 0};
+            int fire_frames[] = {5, 0};
+
+            Weapon_Generic(ent, 4, 12, 50, 54, pause_frames, fire_frames,
+                    Weapon_RocketLauncher_Fire);
+            return true;
+        }
+    };
+    public static EntThinkAdapter Weapon_Blaster = new EntThinkAdapter() {
+        public String getID() {
+            return "Weapon_Blaster";
+        }
+
+        public boolean think(edict_t ent) {
+
+            int pause_frames[] = {19, 32, 0};
+            int fire_frames[] = {5, 0};
+
+            Weapon_Generic(ent, 4, 8, 52, 55, pause_frames, fire_frames,
+                    Weapon_Blaster_Fire);
+            return true;
+        }
+    };
+    public static EntThinkAdapter Weapon_HyperBlaster = new EntThinkAdapter() {
+        public String getID() {
+            return "Weapon_HyperBlaster";
+        }
+
+        public boolean think(edict_t ent) {
+
+            int pause_frames[] = {0};
+            int fire_frames[] = {6, 7, 8, 9, 10, 11, 0};
+
+            Weapon_Generic(ent, 5, 20, 49, 53, pause_frames, fire_frames,
+                    Weapon_HyperBlaster_Fire);
+            return true;
+        }
+    };
+    public static EntThinkAdapter Weapon_Shotgun = new EntThinkAdapter() {
+        public String getID() {
+            return "Weapon_Shotgun";
+        }
+
+        public boolean think(edict_t ent) {
+            int pause_frames[] = {22, 28, 34, 0};
+            int fire_frames[] = {8, 9, 0};
+
+            Weapon_Generic(ent, 7, 18, 36, 39, pause_frames, fire_frames,
+                    weapon_shotgun_fire);
+            return true;
+        }
+    };
+    public static EntThinkAdapter Weapon_SuperShotgun = new EntThinkAdapter() {
+        public String getID() {
+            return "Weapon_SuperShotgun";
+        }
+
+        public boolean think(edict_t ent) {
+
+            int pause_frames[] = {29, 42, 57, 0};
+            int fire_frames[] = {7, 0};
+
+            Weapon_Generic(ent, 6, 17, 57, 61, pause_frames, fire_frames,
+                    weapon_supershotgun_fire);
+            return true;
+        }
+    };
+    public static EntThinkAdapter Weapon_Railgun = new EntThinkAdapter() {
+        public String getID() {
+            return "Weapon_Railgun";
+        }
+
+        public boolean think(edict_t ent) {
+
+            int pause_frames[] = {56, 0};
+            int fire_frames[] = {4, 0};
+            Weapon_Generic(ent, 3, 18, 56, 61, pause_frames, fire_frames,
+                    weapon_railgun_fire);
+            return true;
+        }
+    };
+    public static byte is_silenced;
+    public static EntThinkAdapter weapon_grenadelauncher_fire = new EntThinkAdapter() {
+        public String getID() {
+            return "weapon_grenadelauncher_fire";
+        }
+
+        public boolean think(edict_t ent) {
+            float[] offset = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+            float[] start = {0, 0, 0};
             int damage = 120;
             float radius;
 
@@ -178,35 +294,22 @@ public class PlayerWeapon {
         }
     };
 
-    public static EntThinkAdapter Weapon_GrenadeLauncher = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_GrenadeLauncher"; }
-
-        public boolean think(edict_t ent) {
-
-            int pause_frames[] = { 34, 51, 59, 0 };
-            int fire_frames[] = { 6, 0 };
-
-            Weapon_Generic(ent, 5, 16, 59, 64, pause_frames, fire_frames,
-                    weapon_grenadelauncher_fire);
-            return true;
-        }
-    };
-
     /*
      * ======================================================================
      * 
-     * ROCKET
+     * SHOTGUN / SUPERSHOTGUN
      * 
      * ======================================================================
      */
-
     public static EntThinkAdapter Weapon_RocketLauncher_Fire = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_RocketLauncher_Fire"; }
+        public String getID() {
+            return "Weapon_RocketLauncher_Fire";
+        }
 
         public boolean think(edict_t ent) {
 
-            float[] offset = { 0, 0, 0 }, start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
+            float[] offset = {0, 0, 0}, start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
             int damage;
             float damage_radius;
             int radius_damage;
@@ -247,23 +350,10 @@ public class PlayerWeapon {
             return true;
         }
     };
-
-    public static EntThinkAdapter Weapon_RocketLauncher = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_RocketLauncher"; }
-
-        public boolean think(edict_t ent) {
-
-            int pause_frames[] = { 25, 33, 42, 50, 0 };
-            int fire_frames[] = { 5, 0 };
-
-            Weapon_Generic(ent, 4, 12, 50, 54, pause_frames, fire_frames,
-                    Weapon_RocketLauncher_Fire);
-            return true;
-        }
-    };
-
     public static EntThinkAdapter Weapon_Blaster_Fire = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_Blaster_Fire"; }
+        public String getID() {
+            return "Weapon_Blaster_Fire";
+        }
 
         public boolean think(edict_t ent) {
 
@@ -279,27 +369,14 @@ public class PlayerWeapon {
             return true;
         }
     };
-
-    public static EntThinkAdapter Weapon_Blaster = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_Blaster"; }
-
-        public boolean think(edict_t ent) {
-
-            int pause_frames[] = { 19, 32, 0 };
-            int fire_frames[] = { 5, 0 };
-
-            Weapon_Generic(ent, 4, 8, 52, 55, pause_frames, fire_frames,
-                    Weapon_Blaster_Fire);
-            return true;
-        }
-    };
-
     public static EntThinkAdapter Weapon_HyperBlaster_Fire = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_HyperBlaster_Fire"; }
+        public String getID() {
+            return "Weapon_HyperBlaster_Fire";
+        }
 
         public boolean think(edict_t ent) {
             float rotation;
-            float[] offset = { 0, 0, 0 };
+            float[] offset = {0, 0, 0};
             int effect;
             int damage;
 
@@ -312,7 +389,7 @@ public class PlayerWeapon {
                 if (0 == ent.client.pers.inventory[ent.client.ammo_index]) {
                     if (GameBase.level.time >= ent.pain_debounce_time) {
                         GameBase.gi.sound(ent, Defines.CHAN_VOICE, GameBase.gi
-                                .soundindex("weapons/noammo.wav"), 1,
+                                        .soundindex("weapons/noammo.wav"), 1,
                                 Defines.ATTN_NORM, 0);
                         ent.pain_debounce_time = GameBase.level.time + 1;
                     }
@@ -355,7 +432,7 @@ public class PlayerWeapon {
 
             if (ent.client.ps.gunframe == 12) {
                 GameBase.gi.sound(ent, Defines.CHAN_AUTO, GameBase.gi
-                        .soundindex("weapons/hyprbd1a.wav"), 1,
+                                .soundindex("weapons/hyprbd1a.wav"), 1,
                         Defines.ATTN_NORM, 0);
                 ent.client.weapon_sound = 0;
             }
@@ -364,63 +441,16 @@ public class PlayerWeapon {
 
         }
     };
-
-    public static EntThinkAdapter Weapon_HyperBlaster = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_HyperBlaster"; }
-        public boolean think(edict_t ent) {
-
-            int pause_frames[] = { 0 };
-            int fire_frames[] = { 6, 7, 8, 9, 10, 11, 0 };
-
-            Weapon_Generic(ent, 5, 20, 49, 53, pause_frames, fire_frames,
-                    Weapon_HyperBlaster_Fire);
-            return true;
-        }
-    };
-
-    public static EntThinkAdapter Weapon_Machinegun = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_Machinegun"; }
-        public boolean think(edict_t ent) {
-
-            int pause_frames[] = { 23, 45, 0 };
-            int fire_frames[] = { 4, 5, 0 };
-
-            Weapon_Generic(ent, 3, 5, 45, 49, pause_frames, fire_frames,
-                    Machinegun_Fire);
-            return true;
-        }
-    };
-
-    public static EntThinkAdapter Weapon_Chaingun = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_Chaingun"; }
-        public boolean think(edict_t ent) {
-
-            int pause_frames[] = { 38, 43, 51, 61, 0 };
-            int fire_frames[] = { 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-                    17, 18, 19, 20, 21, 0 };
-
-            Weapon_Generic(ent, 4, 31, 61, 64, pause_frames, fire_frames,
-                    Chaingun_Fire);
-            return true;
-        }
-    };
-
-    /*
-     * ======================================================================
-     * 
-     * SHOTGUN / SUPERSHOTGUN
-     * 
-     * ======================================================================
-     */
-
     public static EntThinkAdapter weapon_shotgun_fire = new EntThinkAdapter() {
-    	public String getID() { return "weapon_shotgun_fire"; }
+        public String getID() {
+            return "weapon_shotgun_fire";
+        }
 
         public boolean think(edict_t ent) {
 
-            float[] start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-            float[] offset = { 0, 0, 0 };
+            float[] start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+            float[] offset = {0, 0, 0};
             int damage = 4;
             int kick = 8;
 
@@ -467,28 +497,17 @@ public class PlayerWeapon {
             return true;
         }
     };
-
-    public static EntThinkAdapter Weapon_Shotgun = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_Shotgun"; }
-        public boolean think(edict_t ent) {
-            int pause_frames[] = { 22, 28, 34, 0 };
-            int fire_frames[] = { 8, 9, 0 };
-
-            Weapon_Generic(ent, 7, 18, 36, 39, pause_frames, fire_frames,
-                    weapon_shotgun_fire);
-            return true;
-        }
-    };
-
     public static EntThinkAdapter weapon_supershotgun_fire = new EntThinkAdapter() {
-    	public String getID() { return "weapon_supershotgun_fire"; }
+        public String getID() {
+            return "weapon_supershotgun_fire";
+        }
 
         public boolean think(edict_t ent) {
 
-            float[] start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-            float[] offset = { 0, 0, 0 };
-            float[] v = { 0, 0, 0 };
+            float[] start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+            float[] offset = {0, 0, 0};
+            float[] v = {0, 0, 0};
             int damage = 6;
             int kick = 12;
 
@@ -537,35 +556,23 @@ public class PlayerWeapon {
             return true;
         }
     };
-
-    public static EntThinkAdapter Weapon_SuperShotgun = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_SuperShotgun"; }
-        public boolean think(edict_t ent) {
-
-            int pause_frames[] = { 29, 42, 57, 0 };
-            int fire_frames[] = { 7, 0 };
-
-            Weapon_Generic(ent, 6, 17, 57, 61, pause_frames, fire_frames,
-                    weapon_supershotgun_fire);
-            return true;
-        }
-    };
-
     /*
      * ======================================================================
-     * 
+     *
      * RAILGUN
-     * 
+     *
      * ======================================================================
      */
     public static EntThinkAdapter weapon_railgun_fire = new EntThinkAdapter() {
-    	public String getID() { return "weapon_railgun_fire"; }
+        public String getID() {
+            return "weapon_railgun_fire";
+        }
 
         public boolean think(edict_t ent) {
 
-            float[] start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-            float[] offset = { 0, 0, 0 };
+            float[] start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+            float[] offset = {0, 0, 0};
             int damage;
             int kick;
 
@@ -610,19 +617,6 @@ public class PlayerWeapon {
         }
     };
 
-    public static EntThinkAdapter Weapon_Railgun = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_Railgun"; }
-
-        public boolean think(edict_t ent) {
-
-            int pause_frames[] = { 56, 0 };
-            int fire_frames[] = { 4, 0 };
-            Weapon_Generic(ent, 3, 18, 56, 61, pause_frames, fire_frames,
-                    weapon_railgun_fire);
-            return true;
-        }
-    };
-
     /*
      * ======================================================================
      * 
@@ -630,14 +624,15 @@ public class PlayerWeapon {
      * 
      * ======================================================================
      */
-
     public static EntThinkAdapter weapon_bfg_fire = new EntThinkAdapter() {
-    	public String getID() { return "weapon_bfg_fire"; }
+        public String getID() {
+            return "weapon_bfg_fire";
+        }
 
         public boolean think(edict_t ent) {
 
-            float[] offset = { 0, 0, 0 }, start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
+            float[] offset = {0, 0, 0}, start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
             int damage;
             float damage_radius = 1000;
 
@@ -694,31 +689,17 @@ public class PlayerWeapon {
             return true;
         }
     };
-
-    public static EntThinkAdapter Weapon_BFG = new EntThinkAdapter() {
-    	public String getID() { return "Weapon_BFG"; }
-        public boolean think(edict_t ent) {
-
-            Weapon_Generic(ent, 8, 32, 55, 58, pause_frames, fire_frames,
-                    weapon_bfg_fire);
-            return true;
-        }
-    };
-
-    public static boolean is_quad;
-
-    public static byte is_silenced;
-
-
     /*
-     * ================ 
+     * ================
      * Use_Weapon
-     * 
-     * Make the weapon ready if there is ammo 
+     *
+     * Make the weapon ready if there is ammo
      * ================
      */
     public static ItemUseAdapter Use_Weapon = new ItemUseAdapter() {
-    	public String getID() { return "Use_Weapon"; }
+        public String getID() {
+            return "Use_Weapon";
+        }
 
         public void use(edict_t ent, gitem_t item) {
             int ammo_index;
@@ -730,7 +711,7 @@ public class PlayerWeapon {
 
             if (item.ammo != null && 0 == GameBase.g_select_empty.value
                     && 0 == (item.flags & Defines.IT_AMMO)) {
-                
+
                 ammo_item = GameItems.FindItem(item.ammo);
                 ammo_index = GameItems.ITEM_INDEX(ammo_item);
 
@@ -753,15 +734,11 @@ public class PlayerWeapon {
             ent.client.newweapon = item;
         }
     };
-
-    /*
-     * ================ 
-     * Drop_Weapon 
-     * ================
-     */
-
     public static ItemDropAdapter Drop_Weapon = new ItemDropAdapter() {
-    	public String getID() { return "Drop_Weapon"; }
+        public String getID() {
+            return "Drop_Weapon";
+        }
+
         public void drop(edict_t ent, gitem_t item) {
             int index;
 
@@ -781,27 +758,20 @@ public class PlayerWeapon {
             ent.client.pers.inventory[index]--;
         }
     };
-
-    /*
-     * ======================================================================
-     * 
-     * MACHINEGUN / CHAINGUN
-     * 
-     * ======================================================================
-     */
-
     public static EntThinkAdapter Machinegun_Fire = new EntThinkAdapter() {
-    	public String getID() { return "Machinegun_Fire"; }
+        public String getID() {
+            return "Machinegun_Fire";
+        }
 
         public boolean think(edict_t ent) {
 
             int i;
-            float[] start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-            float[] angles = { 0, 0, 0 };
+            float[] start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+            float[] angles = {0, 0, 0};
             int damage = 8;
             int kick = 2;
-            float[] offset = { 0, 0, 0 };
+            float[] offset = {0, 0, 0};
 
             if (0 == (ent.client.buttons & Defines.BUTTON_ATTACK)) {
                 ent.client.machinegun_shots = 0;
@@ -818,7 +788,7 @@ public class PlayerWeapon {
                 ent.client.ps.gunframe = 6;
                 if (GameBase.level.time >= ent.pain_debounce_time) {
                     GameBase.gi.sound(ent, Defines.CHAN_VOICE, GameBase.gi
-                            .soundindex("weapons/noammo.wav"), 1,
+                                    .soundindex("weapons/noammo.wav"), 1,
                             Defines.ATTN_NORM, 0);
                     ent.pain_debounce_time = GameBase.level.time + 1;
                 }
@@ -881,18 +851,40 @@ public class PlayerWeapon {
             return true;
         }
     };
+    public static EntThinkAdapter Weapon_Machinegun = new EntThinkAdapter() {
+        public String getID() {
+            return "Weapon_Machinegun";
+        }
 
+        public boolean think(edict_t ent) {
+
+            int pause_frames[] = {23, 45, 0};
+            int fire_frames[] = {4, 5, 0};
+
+            Weapon_Generic(ent, 3, 5, 45, 49, pause_frames, fire_frames,
+                    Machinegun_Fire);
+            return true;
+        }
+    };
+
+    /*
+     * ================ 
+     * Drop_Weapon 
+     * ================
+     */
     public static EntThinkAdapter Chaingun_Fire = new EntThinkAdapter() {
-    	public String getID() { return "Chaingun_Fire"; }
+        public String getID() {
+            return "Chaingun_Fire";
+        }
 
         public boolean think(edict_t ent) {
 
             int i;
             int shots;
-            float[] start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 }, up = { 0, 0, 0 };
+            float[] start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0}, up = {0, 0, 0};
             float r, u;
-            float[] offset = { 0, 0, 0 };
+            float[] offset = {0, 0, 0};
             int damage;
             int kick = 2;
 
@@ -903,7 +895,7 @@ public class PlayerWeapon {
 
             if (ent.client.ps.gunframe == 5)
                 GameBase.gi.sound(ent, Defines.CHAN_AUTO, GameBase.gi
-                        .soundindex("weapons/chngnu1a.wav"), 1,
+                                .soundindex("weapons/chngnu1a.wav"), 1,
                         Defines.ATTN_IDLE, 0);
 
             if ((ent.client.ps.gunframe == 14)
@@ -922,7 +914,7 @@ public class PlayerWeapon {
             if (ent.client.ps.gunframe == 22) {
                 ent.client.weapon_sound = 0;
                 GameBase.gi.sound(ent, Defines.CHAN_AUTO, GameBase.gi
-                        .soundindex("weapons/chngnd1a.wav"), 1,
+                                .soundindex("weapons/chngnd1a.wav"), 1,
                         Defines.ATTN_IDLE, 0);
             } else {
                 ent.client.weapon_sound = GameBase.gi
@@ -956,7 +948,7 @@ public class PlayerWeapon {
             if (0 == shots) {
                 if (GameBase.level.time >= ent.pain_debounce_time) {
                     GameBase.gi.sound(ent, Defines.CHAN_VOICE, GameBase.gi
-                            .soundindex("weapons/noammo.wav"), 1,
+                                    .soundindex("weapons/noammo.wav"), 1,
                             Defines.ATTN_NORM, 0);
                     ent.pain_debounce_time = GameBase.level.time + 1;
                 }
@@ -1005,26 +997,62 @@ public class PlayerWeapon {
         }
     };
 
-    public static int pause_frames[] = { 39, 45, 50, 55, 0 };
+    /*
+     * ======================================================================
+     * 
+     * MACHINEGUN / CHAINGUN
+     * 
+     * ======================================================================
+     */
+    public static EntThinkAdapter Weapon_Chaingun = new EntThinkAdapter() {
+        public String getID() {
+            return "Weapon_Chaingun";
+        }
 
-    public static int fire_frames[] = { 9, 17, 0 };
+        public boolean think(edict_t ent) {
 
+            int pause_frames[] = {38, 43, 51, 61, 0};
+            int fire_frames[] = {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                    17, 18, 19, 20, 21, 0};
+
+            Weapon_Generic(ent, 4, 31, 61, 64, pause_frames, fire_frames,
+                    Chaingun_Fire);
+            return true;
+        }
+    };
+    public static int pause_frames[] = {39, 45, 50, 55, 0};
+    public static int fire_frames[] = {9, 17, 0};
+    public static EntThinkAdapter Weapon_BFG = new EntThinkAdapter() {
+        public String getID() {
+            return "Weapon_BFG";
+        }
+
+        public boolean think(edict_t ent) {
+
+            Weapon_Generic(ent, 8, 32, 55, 58, pause_frames, fire_frames,
+                    weapon_bfg_fire);
+            return true;
+        }
+    };
     public static EntInteractAdapter Pickup_Weapon = new EntInteractAdapter() {
-    	public String getID() { return "Pickup_Weapon"; }
+        public String getID() {
+            return "Pickup_Weapon";
+        }
+
         public boolean interact(edict_t ent, edict_t other) {
             int index;
             gitem_t ammo;
-    
+
             index = GameItems.ITEM_INDEX(ent.item);
-    
+
             if ((((int) (GameBase.dmflags.value) & Defines.DF_WEAPONS_STAY) != 0 || GameBase.coop.value != 0)
                     && 0 != other.client.pers.inventory[index]) {
                 if (0 == (ent.spawnflags & (Defines.DROPPED_ITEM | Defines.DROPPED_PLAYER_ITEM)))
                     return false; // leave the weapon for others to pickup
             }
-    
+
             other.client.pers.inventory[index]++;
-    
+
             if (0 == (ent.spawnflags & Defines.DROPPED_ITEM)) {
                 // give them some ammo with it
                 ammo = GameItems.FindItem(ent.item.ammo);
@@ -1032,7 +1060,7 @@ public class PlayerWeapon {
                     GameItems.Add_Ammo(other, ammo, 1000);
                 else
                     GameItems.Add_Ammo(other, ammo, ammo.quantity);
-    
+
                 if (0 == (ent.spawnflags & Defines.DROPPED_PLAYER_ITEM)) {
                     if (GameBase.deathmatch.value != 0) {
                         if (((int) (GameBase.dmflags.value) & Defines.DF_WEAPONS_STAY) != 0)
@@ -1044,20 +1072,20 @@ public class PlayerWeapon {
                         ent.flags |= Defines.FL_RESPAWN;
                 }
             }
-    
+
             if (other.client.pers.weapon != ent.item
                     && (other.client.pers.inventory[index] == 1)
                     && (0 == GameBase.deathmatch.value || other.client.pers.weapon == GameItems
-                            .FindItem("blaster")))
+                    .FindItem("blaster")))
                 other.client.newweapon = ent.item;
-    
+
             return true;
         }
     };
 
     public static void P_ProjectSource(gclient_t client, float[] point,
-            float[] distance, float[] forward, float[] right, float[] result) {
-        float[] _distance = { 0, 0, 0 };
+                                       float[] distance, float[] forward, float[] right, float[] result) {
+        float[] _distance = {0, 0, 0};
 
         Math3D.VectorCopy(distance, _distance);
         if (client.pers.hand == Defines.LEFT_HANDED)
@@ -1100,7 +1128,7 @@ public class PlayerWeapon {
 
         if (ent.client.pers.weapon != null
                 && ent.client.pers.weapon.ammo != null)
-            
+
             ent.client.ammo_index = GameItems.ITEM_INDEX(GameItems
                     .FindItem(ent.client.pers.weapon.ammo));
         else
@@ -1136,42 +1164,42 @@ public class PlayerWeapon {
         if (0 != ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
                 .FindItem("slugs"))]
                 && 0 != ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
-                        .FindItem("railgun"))]) {
+                .FindItem("railgun"))]) {
             ent.client.newweapon = GameItems.FindItem("railgun");
             return;
         }
         if (0 != ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
                 .FindItem("cells"))]
                 && 0 != ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
-                        .FindItem("hyperblaster"))]) {
+                .FindItem("hyperblaster"))]) {
             ent.client.newweapon = GameItems.FindItem("hyperblaster");
             return;
         }
         if (0 != ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
                 .FindItem("bullets"))]
                 && 0 != ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
-                        .FindItem("chaingun"))]) {
+                .FindItem("chaingun"))]) {
             ent.client.newweapon = GameItems.FindItem("chaingun");
             return;
         }
         if (0 != ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
                 .FindItem("bullets"))]
                 && 0 != ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
-                        .FindItem("machinegun"))]) {
+                .FindItem("machinegun"))]) {
             ent.client.newweapon = GameItems.FindItem("machinegun");
             return;
         }
         if (ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
                 .FindItem("shells"))] > 1
                 && 0 != ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
-                        .FindItem("super shotgun"))]) {
+                .FindItem("super shotgun"))]) {
             ent.client.newweapon = GameItems.FindItem("super shotgun");
             return;
         }
         if (0 != ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
                 .FindItem("shells"))]
                 && 0 != ent.client.pers.inventory[GameItems.ITEM_INDEX(GameItems
-                        .FindItem("shotgun"))]) {
+                .FindItem("shotgun"))]) {
             ent.client.newweapon = GameItems.FindItem("shotgun");
             return;
         }
@@ -1213,9 +1241,9 @@ public class PlayerWeapon {
      */
 
     public static void Weapon_Generic(edict_t ent, int FRAME_ACTIVATE_LAST,
-            int FRAME_FIRE_LAST, int FRAME_IDLE_LAST,
-            int FRAME_DEACTIVATE_LAST, int pause_frames[], int fire_frames[],
-            EntThinkAdapter fire) {
+                                      int FRAME_FIRE_LAST, int FRAME_IDLE_LAST,
+                                      int FRAME_DEACTIVATE_LAST, int pause_frames[], int fire_frames[],
+                                      EntThinkAdapter fire) {
         int FRAME_FIRE_FIRST = (FRAME_ACTIVATE_LAST + 1);
         int FRAME_IDLE_FIRST = (FRAME_FIRE_LAST + 1);
         int FRAME_DEACTIVATE_FIRST = (FRAME_IDLE_LAST + 1);
@@ -1297,7 +1325,7 @@ public class PlayerWeapon {
                 } else {
                     if (GameBase.level.time >= ent.pain_debounce_time) {
                         GameBase.gi.sound(ent, Defines.CHAN_VOICE, GameBase.gi
-                                .soundindex("weapons/noammo.wav"), 1,
+                                        .soundindex("weapons/noammo.wav"), 1,
                                 Defines.ATTN_NORM, 0);
                         ent.pain_debounce_time = GameBase.level.time + 1;
                     }
@@ -1328,7 +1356,7 @@ public class PlayerWeapon {
                 if (ent.client.ps.gunframe == fire_frames[n]) {
                     if (ent.client.quad_framenum > GameBase.level.framenum)
                         GameBase.gi.sound(ent, Defines.CHAN_ITEM, GameBase.gi
-                                .soundindex("items/damage3.wav"), 1,
+                                        .soundindex("items/damage3.wav"), 1,
                                 Defines.ATTN_NORM, 0);
 
                     fire.think(ent);
@@ -1353,9 +1381,9 @@ public class PlayerWeapon {
      */
 
     public static void weapon_grenade_fire(edict_t ent, boolean held) {
-        float[] offset = { 0, 0, 0 };
-        float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-        float[] start = { 0, 0, 0 };
+        float[] offset = {0, 0, 0};
+        float[] forward = {0, 0, 0}, right = {0, 0, 0};
+        float[] start = {0, 0, 0};
         int damage = 125;
         float timer;
         int speed;
@@ -1409,10 +1437,10 @@ public class PlayerWeapon {
      */
 
     public static void Blaster_Fire(edict_t ent, float[] g_offset, int damage,
-            boolean hyper, int effect) {
-        float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-        float[] start = { 0, 0, 0 };
-        float[] offset = { 0, 0, 0 };
+                                    boolean hyper, int effect) {
+        float[] forward = {0, 0, 0}, right = {0, 0, 0};
+        float[] start = {0, 0, 0};
+        float[] offset = {0, 0, 0};
 
         if (is_quad)
             damage *= 4;
@@ -1452,20 +1480,20 @@ public class PlayerWeapon {
      */
     static void PlayerNoise(edict_t who, float[] where, int type) {
         edict_t noise;
-    
+
         if (type == Defines.PNOISE_WEAPON) {
             if (who.client.silencer_shots > 0) {
                 who.client.silencer_shots--;
                 return;
             }
         }
-    
+
         if (GameBase.deathmatch.value != 0)
             return;
-    
+
         if ((who.flags & Defines.FL_NOTARGET) != 0)
             return;
-    
+
         if (who.mynoise == null) {
             noise = GameUtil.G_Spawn();
             noise.classname = "player_noise";
@@ -1474,7 +1502,7 @@ public class PlayerWeapon {
             noise.owner = who;
             noise.svflags = Defines.SVF_NOCLIENT;
             who.mynoise = noise;
-    
+
             noise = GameUtil.G_Spawn();
             noise.classname = "player_noise";
             Math3D.VectorSet(noise.mins, -8, -8, -8);
@@ -1483,19 +1511,18 @@ public class PlayerWeapon {
             noise.svflags = Defines.SVF_NOCLIENT;
             who.mynoise2 = noise;
         }
-    
+
         if (type == Defines.PNOISE_SELF || type == Defines.PNOISE_WEAPON) {
             noise = who.mynoise;
             GameBase.level.sound_entity = noise;
             GameBase.level.sound_entity_framenum = GameBase.level.framenum;
-        } 
-        else // type == PNOISE_IMPACT
+        } else // type == PNOISE_IMPACT
         {
             noise = who.mynoise2;
             GameBase.level.sound2_entity = noise;
             GameBase.level.sound2_entity_framenum = GameBase.level.framenum;
         }
-    
+
         Math3D.VectorCopy(where, noise.s.origin);
         Math3D.VectorSubtract(where, noise.maxs, noise.absmin);
         Math3D.VectorAdd(where, noise.maxs, noise.absmax);

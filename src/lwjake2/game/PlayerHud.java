@@ -113,7 +113,7 @@ public class PlayerHud {
         } else {
             if (0 == GameBase.deathmatch.value) {
                 GameBase.level.exitintermission = true; // go immediately to the
-                                                        // next level
+                // next level
                 return;
             }
         }
@@ -124,7 +124,7 @@ public class PlayerHud {
         ent = GameBase.G_FindEdict(null, GameBase.findByClass,
                 "info_player_intermission");
         if (ent == null) { // the map creator forgot to put in an intermission
-                           // point...
+            // point...
             ent = GameBase.G_FindEdict(null, GameBase.findByClass,
                     "info_player_start");
             if (ent == null)
@@ -198,7 +198,7 @@ public class PlayerHud {
         // add the clients in sorted order
         if (total > 12)
             total = 12;
-        
+
         for (i = 0; i < total; i++) {
             cl = GameBase.game.clients[sorted[i]];
             cl_ent = GameBase.g_edicts[1 + sorted[i]];
@@ -234,7 +234,7 @@ public class PlayerHud {
                     .append(cl.ping)
                     .append(" ")
                     .append(
-                            (GameBase.level.framenum - cl.resp.enterframe) / 600);           
+                            (GameBase.level.framenum - cl.resp.enterframe) / 600);
         }
 
         GameBase.gi.WriteByte(Defines.svc_layout);
@@ -302,7 +302,7 @@ public class PlayerHud {
                                         * ||
                                         * !ent.client.pers.inventory[ent.client.ammo_index]
                                         */
-        ) {
+                ) {
             ent.client.ps.stats[Defines.STAT_AMMO_ICON] = 0;
             ent.client.ps.stats[Defines.STAT_AMMO] = 0;
         } else {
@@ -323,7 +323,7 @@ public class PlayerHud {
                 ent.flags &= ~Defines.FL_POWER_ARMOR;
                 GameBase.gi
                         .sound(ent, Defines.CHAN_ITEM, GameBase.gi
-                                .soundindex("misc/power2.wav"), 1,
+                                        .soundindex("misc/power2.wav"), 1,
                                 Defines.ATTN_NORM, 0);
                 power_armor_type = 0;
                 ;
@@ -333,13 +333,13 @@ public class PlayerHud {
         index = GameItems.ArmorIndex(ent);
         if (power_armor_type != 0
                 && (0 == index || 0 != (GameBase.level.framenum & 8))) { // flash
-                                                                         // between
-                                                                         // power
-                                                                         // armor
-                                                                         // and
-                                                                         // other
-                                                                         // armor
-                                                                         // icon
+            // between
+            // power
+            // armor
+            // and
+            // other
+            // armor
+            // icon
             ent.client.ps.stats[Defines.STAT_ARMOR_ICON] = (short) GameBase.gi
                     .imageindex("i_powershield");
             ent.client.ps.stats[Defines.STAT_ARMOR] = (short) cells;
@@ -489,13 +489,13 @@ public class PlayerHud {
             cl.ps.stats[Defines.STAT_CHASE] = 0;
     }
 
-    /** 
+    /**
      * HelpComputer. Draws the help computer.
      */
     public static void HelpComputer(edict_t ent) {
         StringBuffer sb = new StringBuffer(256);
         String sk;
-    
+
         if (GameBase.skill.value == 0)
             sk = "easy";
         else if (GameBase.skill.value == 1)
@@ -504,7 +504,7 @@ public class PlayerHud {
             sk = "hard";
         else
             sk = "hard+";
-    
+
         // send the layout
         sb.append("xv 32 yv 8 picn help "); // background
         sb.append("xv 202 yv 12 string2 \"").append(sk).append("\" "); // skill
@@ -523,7 +523,7 @@ public class PlayerHud {
                         GameBase.level.total_goals).add(
                         GameBase.level.found_secrets).add(
                         GameBase.level.total_secrets)));
-    
+
         GameBase.gi.WriteByte(Defines.svc_layout);
         GameBase.gi.WriteString(sb.toString());
         GameBase.gi.unicast(ent, true);

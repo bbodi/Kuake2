@@ -20,23 +20,8 @@ package lwjake2.client;
 
 import lwjake2.Defines;
 import lwjake2.Globals;
-import lwjake2.game.Cmd;
-import lwjake2.game.EndianHandler;
-import lwjake2.game.Info;
-import lwjake2.game.cvar_t;
-import lwjake2.game.entity_state_t;
-import lwjake2.qcommon.CM;
-import lwjake2.qcommon.Cbuf;
-import lwjake2.qcommon.Com;
-import lwjake2.qcommon.Cvar;
-import lwjake2.qcommon.FS;
-import lwjake2.qcommon.MSG;
-import lwjake2.qcommon.Netchan;
-import lwjake2.qcommon.SZ;
-import lwjake2.qcommon.netadr_t;
-import lwjake2.qcommon.qfiles;
-import lwjake2.qcommon.sizebuf_t;
-import lwjake2.qcommon.xcommand_t;
+import lwjake2.game.*;
+import lwjake2.qcommon.*;
 import lwjake2.server.SV_MAIN;
 import lwjake2.sound.S;
 import lwjake2.sys.IN;
@@ -56,50 +41,29 @@ import java.nio.ByteOrder;
  * CL
  */
 public final class CL {
-    
-    static int precache_check; // for autodownload of precache items
-
-    static int precache_spawncount;
-
-    static int precache_tex;
-
-    static int precache_model_skin;
-
-    static byte precache_model[]; // used for skin checking in alias models
 
     public static final int PLAYER_MULT = 5;
-
-    public static class cheatvar_t {
-        String name;
-
-        String value;
-
-        cvar_t var;
-    }
-
-    public static String cheatvarsinfo[][] = { { "timescale", "1" },
-            { "timedemo", "0" }, { "r_drawworld", "1" },
-            { "cl_testlights", "0" }, { "r_fullbright", "0" },
-            { "r_drawflat", "0" }, { "paused", "0" }, { "fixedtime", "0" },
-            { "sw_draworder", "0" }, { "gl_lightmap", "0" },
-            { "gl_saturatelighting", "0" }, { null, null } };
-
+    //	   ENV_CNT is map load, ENV_CNT+1 is first env map
+    public static final int ENV_CNT = (Defines.CS_PLAYERSKINS + Defines.MAX_CLIENTS
+            * CL.PLAYER_MULT);
+    public static final int TEXTURE_CNT = (ENV_CNT + 13);
+    public static String cheatvarsinfo[][] = {{"timescale", "1"},
+            {"timedemo", "0"}, {"r_drawworld", "1"},
+            {"cl_testlights", "0"}, {"r_fullbright", "0"},
+            {"r_drawflat", "0"}, {"paused", "0"}, {"fixedtime", "0"},
+            {"sw_draworder", "0"}, {"gl_lightmap", "0"},
+            {"gl_saturatelighting", "0"}, {null, null}};
     public static cheatvar_t cheatvars[];
-
-    static {
-        cheatvars = new cheatvar_t[cheatvarsinfo.length];
-        for (int n = 0; n < cheatvarsinfo.length; n++) {
-            cheatvars[n] = new cheatvar_t();
-            cheatvars[n].name = cheatvarsinfo[n][0];
-            cheatvars[n].value = cheatvarsinfo[n][1];
-        }
-    }
-
+    static int precache_check; // for autodownload of precache items
+    static int precache_spawncount;
+    static int precache_tex;
+    static int precache_model_skin;
+    static byte precache_model[]; // used for skin checking in alias models
     static int numcheatvars;
 
     /**
      * Stop_f
-     * 
+     * <p/>
      * Stop recording a demo.
      */
     static xcommand_t Stop_f = new xcommand_t() {
@@ -129,7 +93,7 @@ public final class CL {
 
     /**
      * Record_f
-     * 
+     * <p/>
      * record &lt;demoname&gt;
      * Begins recording a demo from the current position.
      */
@@ -194,7 +158,7 @@ public final class CL {
                 for (i = 0; i < Defines.MAX_CONFIGSTRINGS; i++) {
                     if (Globals.cl.configstrings[i].length() > 0) {
                         if (buf.cursize + Globals.cl.configstrings[i].length()
-                                + 32 > buf.maxsize) { 
+                                + 32 > buf.maxsize) {
                             // write it out
                             Globals.cls.demofile.writeInt(EndianHandler.swapInt(buf.cursize));
                             Globals.cls.demofile
@@ -276,17 +240,6 @@ public final class CL {
             Cvar.SetValue("paused", Globals.cl_paused.value);
         }
     };
-
-    /**
-     * Quit_f
-     */
-    static xcommand_t Quit_f = new xcommand_t() {
-        public void execute() {
-            Disconnect();
-            Com.Quit();
-        }
-    };
-
     /**
      * Connect_f
      */
@@ -319,10 +272,9 @@ public final class CL {
             // CL_CheckForResend() will fire immediately
         }
     };
-
     /**
      * Rcon_f
-     * 
+     * <p/>
      * Send the rest of the command line over as an unconnected command.
      */
     static xcommand_t Rcon_f = new xcommand_t() {
@@ -370,16 +322,9 @@ public final class CL {
             NET.SendPacket(Defines.NS_CLIENT, b.length(), Lib.stringToBytes(b), to);
         }
     };
-
-    static xcommand_t Disconnect_f = new xcommand_t() {
-        public void execute() {
-            Com.Error(Defines.ERR_DROP, "Disconnected from server");
-        }
-    };
-
     /**
      * Changing_f
-     * 
+     * <p/>
      * Just sent as a hint to the client that they should drop to full console.
      */
     static xcommand_t Changing_f = new xcommand_t() {
@@ -393,14 +338,13 @@ public final class CL {
 
             SCR.BeginLoadingPlaque();
             Globals.cls.state = Defines.ca_connected; // not active anymore, but
-                                                      // not disconnected
+            // not disconnected
             Com.Printf("\nChanging map...\n");
         }
     };
-
     /**
      * Reconnect_f
-     * 
+     * <p/>
      * The server is changing levels.
      */
     static xcommand_t Reconnect_f = new xcommand_t() {
@@ -433,7 +377,6 @@ public final class CL {
             }
         }
     };
-
     /**
      * PingServers_f
      */
@@ -492,10 +435,9 @@ public final class CL {
             }
         }
     };
-
     /**
      * Skins_f
-     * 
+     * <p/>
      * Load or download any custom player skins and models.
      */
     static xcommand_t Skins_f = new xcommand_t() {
@@ -514,7 +456,6 @@ public final class CL {
             }
         }
     };
-
     /**
      * Userinfo_f
      */
@@ -524,10 +465,9 @@ public final class CL {
             Info.Print(Cvar.Userinfo());
         }
     };
-
     /**
      * Snd_Restart_f
-     * 
+     * <p/>
      * Restart the sound subsystem so it can pick up new parameters and flush
      * all sounds.
      */
@@ -538,15 +478,7 @@ public final class CL {
             CL_parse.RegisterSounds();
         }
     };
-
-    //	   ENV_CNT is map load, ENV_CNT+1 is first env map
-    public static final int ENV_CNT = (Defines.CS_PLAYERSKINS + Defines.MAX_CLIENTS
-            * CL.PLAYER_MULT);
-
-    public static final int TEXTURE_CNT = (ENV_CNT + 13);
-
-    static String env_suf[] = { "rt", "bk", "lf", "ft", "up", "dn" };
-
+    static String env_suf[] = {"rt", "bk", "lf", "ft", "up", "dn"};
     /**
      * The server will send this command right before allowing the client into
      * the server.
@@ -556,7 +488,7 @@ public final class CL {
             // Yet another hack to let old demos work the old precache sequence.
             if (Cmd.Argc() < 2) {
 
-                int iw[] = { 0 }; // for detecting cheater maps
+                int iw[] = {0}; // for detecting cheater maps
 
                 CM.CM_LoadMap(Globals.cl.configstrings[Defines.CS_MODELS + 1],
                         true, iw);
@@ -574,22 +506,43 @@ public final class CL {
             RequestNextDownload();
         }
     };
-
-    private static int extratime;
-
-    //	  ============================================================================
-
     /**
      * Shutdown
-     * 
+     * <p/>
      * FIXME: this is a callback from Sys_Quit and Com_Error. It would be better
      * to run quit through here before the final handoff to the sys code.
      */
     static boolean isdown = false;
+    /**
+     * Quit_f
+     */
+    static xcommand_t Quit_f = new xcommand_t() {
+        public void execute() {
+            Disconnect();
+            Com.Quit();
+        }
+    };
+    static xcommand_t Disconnect_f = new xcommand_t() {
+        public void execute() {
+            Com.Error(Defines.ERR_DROP, "Disconnected from server");
+        }
+    };
+    private static int extratime;
+
+    static {
+        cheatvars = new cheatvar_t[cheatvarsinfo.length];
+        for (int n = 0; n < cheatvarsinfo.length; n++) {
+            cheatvars[n] = new cheatvar_t();
+            cheatvars[n].name = cheatvarsinfo[n][0];
+            cheatvars[n].value = cheatvarsinfo[n][1];
+        }
+    }
+
+    //	  ============================================================================
 
     /**
      * WriteDemoMessage
-     * 
+     * <p/>
      * Dumps the current net message, prefixed by the length
      */
     static void WriteDemoMessage() {
@@ -608,7 +561,7 @@ public final class CL {
 
     /**
      * SendConnectPacket
-     * 
+     * <p/>
      * We have gotten a challenge from the server, so try and connect.
      */
     static void SendConnectPacket() {
@@ -634,7 +587,7 @@ public final class CL {
 
     /**
      * CheckForResend
-     * 
+     * <p/>
      * Resend a connect message if the last one has timed out.
      */
     static void CheckForResend() {
@@ -676,7 +629,6 @@ public final class CL {
 
     /**
      * ClearState
-     * 
      */
     static void ClearState() {
         S.StopAllSounds();
@@ -695,7 +647,7 @@ public final class CL {
 
     /**
      * Disconnect
-     * 
+     * <p/>
      * Goes from a connected state to full screen console state Sends a
      * disconnect message to the server This is also called on Com_Error, so it
      * shouldn't cause any errors.
@@ -719,7 +671,7 @@ public final class CL {
         }
 
         Math3D.VectorClear(Globals.cl.refdef.blend);
-        
+
         Globals.re.CinematicSetPalette(null);
 
         Menu.ForceMenuOff();
@@ -750,7 +702,7 @@ public final class CL {
 
     /**
      * ParseStatusMessage
-     * 
+     * <p/>
      * Handle a reply from a ping.
      */
     static void ParseStatusMessage() {
@@ -764,7 +716,7 @@ public final class CL {
 
     /**
      * ConnectionlessPacket
-     * 
+     * <p/>
      * Responses to broadcasts, etc
      */
     static void ConnectionlessPacket() {
@@ -779,7 +731,7 @@ public final class CL {
         Cmd.TokenizeString(s.toCharArray(), false);
 
         c = Cmd.Argv(0);
-        
+
         Com.Println(Globals.net_from.toString() + ": " + c);
 
         // server connection
@@ -817,7 +769,7 @@ public final class CL {
         if (c.equals("print")) {
             s = MSG.ReadString(Globals.net_message);
             if (s.length() > 0)
-            	Com.Printf(s);
+                Com.Printf(s);
             return;
         }
 
@@ -844,7 +796,6 @@ public final class CL {
         Com.Printf("Unknown command.\n");
     }
 
-
     /**
      * ReadPackets
      */
@@ -854,7 +805,7 @@ public final class CL {
 
             //
             // remote command packet
-            //		
+            //
             if (Globals.net_message.data[0] == -1
                     && Globals.net_message.data[1] == -1
                     && Globals.net_message.data[2] == -1
@@ -903,8 +854,6 @@ public final class CL {
             Globals.cl.timeoutcount = 0;
     }
 
-    //	  =============================================================================
-
     /**
      * FixUpGender_f
      */
@@ -930,6 +879,8 @@ public final class CL {
             Globals.gender.modified = false;
         }
     }
+
+    //	  =============================================================================
 
     public static void RequestNextDownload() {
         int map_checksum = 0; // for detecting cheater maps
@@ -960,7 +911,7 @@ public final class CL {
                         && Globals.cl.configstrings[CL.precache_check].length() > 0) {
                     if (Globals.cl.configstrings[CL.precache_check].charAt(0) == '*'
                             || Globals.cl.configstrings[CL.precache_check]
-                                    .charAt(0) == '#') {
+                            .charAt(0) == '#') {
                         CL.precache_check++;
                         continue;
                     }
@@ -1076,7 +1027,7 @@ public final class CL {
         // so precache_check is now *3
         if (CL.precache_check >= Defines.CS_PLAYERSKINS
                 && CL.precache_check < Defines.CS_PLAYERSKINS
-                        + Defines.MAX_CLIENTS * CL.PLAYER_MULT) {
+                + Defines.MAX_CLIENTS * CL.PLAYER_MULT) {
             if (SV_MAIN.allow_download_players.value != 0) {
                 while (CL.precache_check < Defines.CS_PLAYERSKINS
                         + Defines.MAX_CLIENTS * CL.PLAYER_MULT) {
@@ -1098,74 +1049,74 @@ public final class CL {
                     }
 
                     int pos = Globals.cl.configstrings[Defines.CS_PLAYERSKINS + i].indexOf('\\');
-                    
+
                     if (pos != -1)
                         pos++;
                     else
                         pos = 0;
 
                     int pos2 = Globals.cl.configstrings[Defines.CS_PLAYERSKINS + i].indexOf('\\', pos);
-                    
+
                     if (pos2 == -1)
                         pos2 = Globals.cl.configstrings[Defines.CS_PLAYERSKINS + i].indexOf('/', pos);
-                    
-                    
+
+
                     model = Globals.cl.configstrings[Defines.CS_PLAYERSKINS + i]
                             .substring(pos, pos2);
-                                        
+
                     skin = Globals.cl.configstrings[Defines.CS_PLAYERSKINS + i].substring(pos2 + 1);
-                    
+
                     switch (n) {
-                    case 0: // model
-                        fn = "players/" + model + "/tris.md2";
-                        if (!CL_parse.CheckOrDownloadFile(fn)) {
-                            CL.precache_check = Defines.CS_PLAYERSKINS + i
-                                    * CL.PLAYER_MULT + 1;
-                            return; // started a download
-                        }
-                        n++;
+                        case 0: // model
+                            fn = "players/" + model + "/tris.md2";
+                            if (!CL_parse.CheckOrDownloadFile(fn)) {
+                                CL.precache_check = Defines.CS_PLAYERSKINS + i
+                                        * CL.PLAYER_MULT + 1;
+                                return; // started a download
+                            }
+                            n++;
                     /* FALL THROUGH */
 
-                    case 1: // weapon model
-                        fn = "players/" + model + "/weapon.md2";
-                        if (!CL_parse.CheckOrDownloadFile(fn)) {
-                            CL.precache_check = Defines.CS_PLAYERSKINS + i
-                                    * CL.PLAYER_MULT + 2;
-                            return; // started a download
-                        }
-                        n++;
+                        case 1: // weapon model
+                            fn = "players/" + model + "/weapon.md2";
+                            if (!CL_parse.CheckOrDownloadFile(fn)) {
+                                CL.precache_check = Defines.CS_PLAYERSKINS + i
+                                        * CL.PLAYER_MULT + 2;
+                                return; // started a download
+                            }
+                            n++;
                     /* FALL THROUGH */
 
-                    case 2: // weapon skin
-                        fn = "players/" + model + "/weapon.pcx";
-                        if (!CL_parse.CheckOrDownloadFile(fn)) {
-                            CL.precache_check = Defines.CS_PLAYERSKINS + i
-                                    * CL.PLAYER_MULT + 3;
-                            return; // started a download
-                        }
-                        n++;
+                        case 2: // weapon skin
+                            fn = "players/" + model + "/weapon.pcx";
+                            if (!CL_parse.CheckOrDownloadFile(fn)) {
+                                CL.precache_check = Defines.CS_PLAYERSKINS + i
+                                        * CL.PLAYER_MULT + 3;
+                                return; // started a download
+                            }
+                            n++;
                     /* FALL THROUGH */
 
-                    case 3: // skin
-                        fn = "players/" + model + "/" + skin + ".pcx";
-                        if (!CL_parse.CheckOrDownloadFile(fn)) {
-                            CL.precache_check = Defines.CS_PLAYERSKINS + i
-                                    * CL.PLAYER_MULT + 4;
-                            return; // started a download
-                        }
-                        n++;
+                        case 3: // skin
+                            fn = "players/" + model + "/" + skin + ".pcx";
+                            if (!CL_parse.CheckOrDownloadFile(fn)) {
+                                CL.precache_check = Defines.CS_PLAYERSKINS + i
+                                        * CL.PLAYER_MULT + 4;
+                                return; // started a download
+                            }
+                            n++;
                     /* FALL THROUGH */
 
-                    case 4: // skin_i
-                        fn = "players/" + model + "/" + skin + "_i.pcx";
-                        if (!CL_parse.CheckOrDownloadFile(fn)) {
-                            CL.precache_check = Defines.CS_PLAYERSKINS + i
-                                    * CL.PLAYER_MULT + 5;
-                            return; // started a download
-                        }
-                        // move on to next model
-                        CL.precache_check = Defines.CS_PLAYERSKINS + (i + 1)
-                                * CL.PLAYER_MULT;
+                        case 4: // skin_i
+                            fn = "players/" + model + "/" + skin + "_i.pcx";
+                            if (!CL_parse.CheckOrDownloadFile(fn)) {
+                                CL.precache_check = Defines.CS_PLAYERSKINS + i
+                                        * CL.PLAYER_MULT + 5;
+                                return; // started a download
+                            }
+                            // move on to next model
+                            CL.precache_check = Defines.CS_PLAYERSKINS + (i + 1)
+                                    * CL.PLAYER_MULT;
                     }
                 }
             }
@@ -1176,7 +1127,7 @@ public final class CL {
         if (CL.precache_check == ENV_CNT) {
             CL.precache_check = ENV_CNT + 1;
 
-            int iw[] = { map_checksum };
+            int iw[] = {map_checksum};
 
             CM.CM_LoadMap(Globals.cl.configstrings[Defines.CS_MODELS + 1],
                     true, iw);
@@ -1340,7 +1291,7 @@ public final class CL {
         Globals.gender_auto = Cvar
                 .Get("gender_auto", "1", Defines.CVAR_ARCHIVE);
         Globals.gender.modified = false; // clear this so we know when user sets
-                                         // it manually
+        // it manually
 
         Globals.cl_vwep = Cvar.Get("cl_vwep", "1", Defines.CVAR_ARCHIVE);
 
@@ -1401,7 +1352,7 @@ public final class CL {
 
     /**
      * WriteConfiguration
-     * 
+     * <p/>
      * Writes key bindings and archived cvars to config.cfg.
      */
     public static void WriteConfiguration() {
@@ -1441,7 +1392,7 @@ public final class CL {
 
         if ("1".equals(Globals.cl.configstrings[Defines.CS_MAXCLIENTS])
                 || 0 == Globals.cl.configstrings[Defines.CS_MAXCLIENTS]
-                        .length())
+                .length())
             return; // single player can cheat
 
         // find all the cvars if we haven't done it yet
@@ -1462,8 +1413,6 @@ public final class CL {
             }
         }
     }
-
-    //	  =============================================================
 
     /**
      * SendCommand
@@ -1488,13 +1437,13 @@ public final class CL {
         CheckForResend();
     }
 
-    //	private static int lasttimecalled;
+    //	  =============================================================
 
     /**
      * Frame
      */
     public static void Frame(int msec) {
-        
+
         if (Globals.dedicated.value != 0)
             return;
 
@@ -1567,6 +1516,8 @@ public final class CL {
         }
     }
 
+    //	private static int lasttimecalled;
+
     /**
      * Shutdown
      */
@@ -1630,5 +1581,13 @@ public final class CL {
         // drop loading plaque unless this is the initial game start
         if (Globals.cls.disable_servercount != -1)
             SCR.EndLoadingPlaque(); // get rid of loading plaque
+    }
+
+    public static class cheatvar_t {
+        String name;
+
+        String value;
+
+        cvar_t var;
     }
 }

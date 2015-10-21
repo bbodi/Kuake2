@@ -19,18 +19,7 @@
 package lwjake2.game.monsters;
 
 import lwjake2.Defines;
-import lwjake2.game.EntDieAdapter;
-import lwjake2.game.EntInteractAdapter;
-import lwjake2.game.EntPainAdapter;
-import lwjake2.game.EntThinkAdapter;
-import lwjake2.game.GameAI;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameMisc;
-import lwjake2.game.GameUtil;
-import lwjake2.game.GameWeapon;
-import lwjake2.game.edict_t;
-import lwjake2.game.mframe_t;
-import lwjake2.game.mmove_t;
+import lwjake2.game.*;
 import lwjake2.util.Lib;
 import lwjake2.util.Math3D;
 
@@ -539,7 +528,10 @@ public class M_Berserk {
     static int sound_search;
 
     static EntInteractAdapter berserk_sight = new EntInteractAdapter() {
-        public String getID() { return "berserk_sight";}
+        public String getID() {
+            return "berserk_sight";
+        }
+
         public boolean interact(edict_t self, edict_t other) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_sight, 1,
                     Defines.ATTN_NORM, 0);
@@ -548,16 +540,62 @@ public class M_Berserk {
     };
 
     static EntThinkAdapter berserk_search = new EntThinkAdapter() {
-        public String getID() { return "berserk_search";}
+        public String getID() {
+            return "berserk_search";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_search, 1,
                     Defines.ATTN_NORM, 0);
             return true;
         }
     };
+    static mframe_t berserk_frames_stand[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_stand, 0, berserk_fidget),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null)};
+    static mmove_t berserk_move_stand = new mmove_t(FRAME_stand1, FRAME_stand5,
+            berserk_frames_stand, null);
+    static EntThinkAdapter berserk_stand = new EntThinkAdapter() {
+        public String getID() {
+            return "berserk_stand";
+        }
 
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = berserk_move_stand;
+            return true;
+        }
+    };
+    static mframe_t berserk_frames_stand_fidget[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null),
+            new mframe_t(GameAI.ai_stand, 0, null)};
+    static mmove_t berserk_move_stand_fidget = new mmove_t(FRAME_standb1,
+            FRAME_standb20, berserk_frames_stand_fidget, berserk_stand);
     static EntThinkAdapter berserk_fidget = new EntThinkAdapter() {
-        public String getID() { return "berserk_fidget";}
+        public String getID() {
+            return "berserk_fidget";
+        }
+
         public boolean think(edict_t self) {
             if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
                 return true;
@@ -571,51 +609,7 @@ public class M_Berserk {
             return true;
         }
     };
-
-    static mframe_t berserk_frames_stand[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_stand, 0, berserk_fidget),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null) };
-
-    static mmove_t berserk_move_stand = new mmove_t(FRAME_stand1, FRAME_stand5,
-            berserk_frames_stand, null);
-
-    static EntThinkAdapter berserk_stand = new EntThinkAdapter() {
-        public String getID() { return "berserk_stand";}
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = berserk_move_stand;
-            return true;
-        }
-    };
-
-    static mframe_t berserk_frames_stand_fidget[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null) };
-
-    static mmove_t berserk_move_stand_fidget = new mmove_t(FRAME_standb1,
-            FRAME_standb20, berserk_frames_stand_fidget, berserk_stand);
-
-    static mframe_t berserk_frames_walk[] = new mframe_t[] {
+    static mframe_t berserk_frames_walk[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 9.1f, null),
             new mframe_t(GameAI.ai_walk, 6.3f, null),
             new mframe_t(GameAI.ai_walk, 4.9f, null),
@@ -627,13 +621,16 @@ public class M_Berserk {
             new mframe_t(GameAI.ai_walk, 4.9f, null),
             new mframe_t(GameAI.ai_walk, 4.7f, null),
             new mframe_t(GameAI.ai_walk, 4.7f, null),
-            new mframe_t(GameAI.ai_walk, 4.8f, null) };
+            new mframe_t(GameAI.ai_walk, 4.8f, null)};
 
     static mmove_t berserk_move_walk = new mmove_t(FRAME_walkc1, FRAME_walkc11,
             berserk_frames_walk, null);
 
     static EntThinkAdapter berserk_walk = new EntThinkAdapter() {
-        public String getID() { return "berserk_walk";}
+        public String getID() {
+            return "berserk_walk";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.currentmove = berserk_move_walk;
             return true;
@@ -662,19 +659,22 @@ public class M_Berserk {
      * {ai_run(19);}; // running with arm in air : end loop
      */
 
-    static mframe_t berserk_frames_run1[] = new mframe_t[] {
+    static mframe_t berserk_frames_run1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_run, 21, null),
             new mframe_t(GameAI.ai_run, 11, null),
             new mframe_t(GameAI.ai_run, 21, null),
             new mframe_t(GameAI.ai_run, 25, null),
             new mframe_t(GameAI.ai_run, 18, null),
-            new mframe_t(GameAI.ai_run, 19, null) };
+            new mframe_t(GameAI.ai_run, 19, null)};
 
     static mmove_t berserk_move_run1 = new mmove_t(FRAME_run1, FRAME_run6,
             berserk_frames_run1, null);
 
     static EntThinkAdapter berserk_run = new EntThinkAdapter() {
-        public String getID() { return "berserk_run";}
+        public String getID() {
+            return "berserk_run";
+        }
+
         public boolean think(edict_t self) {
             if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
                 self.monsterinfo.currentmove = berserk_move_stand;
@@ -685,9 +685,12 @@ public class M_Berserk {
     };
 
     static EntThinkAdapter berserk_attack_spike = new EntThinkAdapter() {
-        public String getID() { return "berserk_attack_spike";}
+        public String getID() {
+            return "berserk_attack_spike";
+        }
+
         public boolean think(edict_t self) {
-            float[] aim = { Defines.MELEE_DISTANCE, 0f, -24f };
+            float[] aim = {Defines.MELEE_DISTANCE, 0f, -24f};
 
             GameWeapon.fire_hit(self, aim, (15 + (Lib.rand() % 6)), 400);
             //	Faster attack -- upwards and backwards
@@ -697,7 +700,10 @@ public class M_Berserk {
     };
 
     static EntThinkAdapter berserk_swing = new EntThinkAdapter() {
-        public String getID() { return "berserk_swing";}
+        public String getID() {
+            return "berserk_swing";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_WEAPON, sound_punch, 1,
                     Defines.ATTN_NORM, 0);
@@ -705,7 +711,7 @@ public class M_Berserk {
         }
     };
 
-    static mframe_t berserk_frames_attack_spike[] = new mframe_t[] {
+    static mframe_t berserk_frames_attack_spike[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, berserk_swing),
@@ -713,25 +719,28 @@ public class M_Berserk {
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null) };
+            new mframe_t(GameAI.ai_charge, 0, null)};
 
     static mmove_t berserk_move_attack_spike = new mmove_t(FRAME_att_c1,
             FRAME_att_c8, berserk_frames_attack_spike, berserk_run);
 
     static EntThinkAdapter berserk_attack_club = new EntThinkAdapter() {
-        public String getID() { return "berserk_attack_club";}
+        public String getID() {
+            return "berserk_attack_club";
+        }
+
         public boolean think(edict_t self) {
-            float aim[] = { 0, 0, 0 };
+            float aim[] = {0, 0, 0};
 
             Math3D.VectorSet(aim, Defines.MELEE_DISTANCE, self.mins[0], -4);
             GameWeapon.fire_hit(self, aim, (5 + (Lib.rand() % 6)), 400); // Slower
-                                                                   // attack
+            // attack
 
             return true;
         }
     };
 
-    static mframe_t berserk_frames_attack_club[] = new mframe_t[] {
+    static mframe_t berserk_frames_attack_club[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
@@ -743,19 +752,22 @@ public class M_Berserk {
             new mframe_t(GameAI.ai_charge, 0, berserk_attack_club),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
-            new mframe_t(GameAI.ai_charge, 0, null) };
+            new mframe_t(GameAI.ai_charge, 0, null)};
 
     static mmove_t berserk_move_attack_club = new mmove_t(FRAME_att_c9,
             FRAME_att_c20, berserk_frames_attack_club, berserk_run);
 
     static EntThinkAdapter berserk_strike = new EntThinkAdapter() {
-        public String getID() { return "berserk_strike";}
+        public String getID() {
+            return "berserk_strike";
+        }
+
         public boolean think(edict_t self) {
             return true;
         }
     };
 
-    static mframe_t berserk_frames_attack_strike[] = new mframe_t[] {
+    static mframe_t berserk_frames_attack_strike[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -769,13 +781,16 @@ public class M_Berserk {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 9.7f, null),
-            new mframe_t(GameAI.ai_move, 13.6f, null) };
+            new mframe_t(GameAI.ai_move, 13.6f, null)};
 
     static mmove_t berserk_move_attack_strike = new mmove_t(FRAME_att_c21,
             FRAME_att_c34, berserk_frames_attack_strike, berserk_run);
 
     static EntThinkAdapter berserk_melee = new EntThinkAdapter() {
-        public String getID() { return "berserk_melee";}
+        public String getID() {
+            return "berserk_melee";
+        }
+
         public boolean think(edict_t self) {
             if ((Lib.rand() % 2) == 0)
                 self.monsterinfo.currentmove = berserk_move_attack_spike;
@@ -806,16 +821,16 @@ public class M_Berserk {
      * berserk_atke18 =[ $r_attb18, berserk_run1 ] {ai_run(7.8);};
      */
 
-    static mframe_t berserk_frames_pain1[] = new mframe_t[] {
+    static mframe_t berserk_frames_pain1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t berserk_move_pain1 = new mmove_t(FRAME_painc1, FRAME_painc4,
             berserk_frames_pain1, berserk_run);
 
-    static mframe_t berserk_frames_pain2[] = new mframe_t[] {
+    static mframe_t berserk_frames_pain2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -835,13 +850,16 @@ public class M_Berserk {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t berserk_move_pain2 = new mmove_t(FRAME_painb1,
             FRAME_painb20, berserk_frames_pain2, berserk_run);
 
     static EntPainAdapter berserk_pain = new EntPainAdapter() {
-        public String getID() { return "berserk_pain";}
+        public String getID() {
+            return "berserk_pain";
+        }
+
         public void pain(edict_t self, edict_t other, float kick, int damage) {
             if (self.health < (self.max_health / 2))
                 self.s.skinnum = 1;
@@ -864,7 +882,10 @@ public class M_Berserk {
     };
 
     static EntThinkAdapter berserk_dead = new EntThinkAdapter() {
-        public String getID() { return "berserk_dead";}
+        public String getID() {
+            return "berserk_dead";
+        }
+
         public boolean think(edict_t self) {
             Math3D.VectorSet(self.mins, -16, -16, -24);
             Math3D.VectorSet(self.maxs, 16, 16, -8);
@@ -876,7 +897,7 @@ public class M_Berserk {
         }
     };
 
-    static mframe_t berserk_frames_death1[] = new mframe_t[] {
+    static mframe_t berserk_frames_death1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -889,12 +910,12 @@ public class M_Berserk {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t berserk_move_death1 = new mmove_t(FRAME_death1,
             FRAME_death13, berserk_frames_death1, berserk_dead);
 
-    static mframe_t berserk_frames_death2[] = new mframe_t[] {
+    static mframe_t berserk_frames_death2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -902,21 +923,24 @@ public class M_Berserk {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t berserk_move_death2 = new mmove_t(FRAME_deathc1,
             FRAME_deathc8, berserk_frames_death2, berserk_dead);
 
     static EntDieAdapter berserk_die = new EntDieAdapter() {
-        public String getID() { return "berserk_die";}
+        public String getID() {
+            return "berserk_die";
+        }
+
         public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float point[]) {
+                        int damage, float point[]) {
             int n;
 
             if (self.health <= self.gib_health) {
                 GameBase.gi
                         .sound(self, Defines.CHAN_VOICE, GameBase.gi
-                                .soundindex("misc/udeath.wav"), 1,
+                                        .soundindex("misc/udeath.wav"), 1,
                                 Defines.ATTN_NORM, 0);
                 for (n = 0; n < 2; n++)
                     GameMisc.ThrowGib(self, "models/objects/gibs/bone/tris.md2",

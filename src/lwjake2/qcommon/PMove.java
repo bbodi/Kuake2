@@ -32,53 +32,22 @@ public class PMove {
     // pmove, just to make damn sure we don't have
     // any differences when running on client or server
 
-    public static class pml_t {
-        public float[] origin = { 0, 0, 0 }; // full float precision
-
-        public float[] velocity = { 0, 0, 0 }; // full float precision
-
-        public float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 }, up = { 0, 0,
-                0 };
-
-        public float frametime;
-
-        public csurface_t groundsurface;
-
-        public int groundcontents;
-
-        public float[] previous_origin = { 0, 0, 0 };
-
-        public boolean ladder;
-    }
-
     public static pmove_t pm;
-
     public static pml_t pml = new pml_t();
-
     // movement parameters
     public static float pm_stopspeed = 100;
-
     public static float pm_maxspeed = 300;
-
     public static float pm_duckspeed = 100;
-
     public static float pm_accelerate = 10;
-
     public static float pm_airaccelerate = 0;
-
     public static float pm_wateraccelerate = 10;
-
     public static float pm_friction = 6;
-
     public static float pm_waterfriction = 1;
-
     public static float pm_waterspeed = 400;
-
     // try all single bits first
-    public static int jitterbits[] = { 0, 4, 1, 2, 3, 5, 6, 7 };
-
-    public static int offset[] = { 0, -1, 1 };
-
+    public static int jitterbits[] = {0, 4, 1, 2, 3, 5, 6, 7};
+    public static int offset[] = {0, -1, 1};
+    static float[] planes[] = new float[SV.MAX_CLIP_PLANES][3];
 
     /**
      * Slide off of the impacting object returns the blocked flags (1 = floor, 2 = step / wall)
@@ -99,18 +68,16 @@ public class PMove {
         }
     }
 
-    static float[] planes[] = new float[SV.MAX_CLIP_PLANES][3];
-    
     public static void PM_StepSlideMove_() {
         int bumpcount, numbumps;
-        float[] dir = { 0, 0, 0 };
+        float[] dir = {0, 0, 0};
         float d;
         int numplanes;
-        
-        float[] primal_velocity = { 0, 0, 0 };
+
+        float[] primal_velocity = {0, 0, 0};
         int i, j;
         trace_t trace;
-        float[] end = { 0, 0, 0 };
+        float[] end = {0, 0, 0};
         float time_left;
 
         numbumps = 4;
@@ -150,8 +117,8 @@ public class PMove {
             time_left -= time_left * trace.fraction;
 
             // slide along this plane
-            if (numplanes >= SV.MAX_CLIP_PLANES) { 
-            	// this shouldn't really happen
+            if (numplanes >= SV.MAX_CLIP_PLANES) {
+                // this shouldn't really happen
                 Math3D.VectorCopy(Globals.vec3_origin, pml.velocity);
                 break;
             }
@@ -172,10 +139,10 @@ public class PMove {
                     break;
             }
 
-            if (i != numplanes) { 
-            	// go along this plane
-            } else { 
-            	// go along the crease
+            if (i != numplanes) {
+                // go along this plane
+            } else {
+                // go along the crease
                 if (numplanes != 2) {
                     // Com.printf("clip velocity, numplanes == " + numplanes + "\n");
                     Math3D.VectorCopy(Globals.vec3_origin, pml.velocity);
@@ -201,19 +168,19 @@ public class PMove {
     }
 
     /**
-     * Each intersection will try to step over the obstruction instead of 
+     * Each intersection will try to step over the obstruction instead of
      * sliding along it.
-     * 
+     * <p/>
      * Returns a new origin, velocity, and contact entity.
      * Does not modify any world state?
      */
     public static void PM_StepSlideMove() {
-        float[] start_o = { 0, 0, 0 }, start_v = { 0, 0, 0 };
-        float[] down_o = { 0, 0, 0 }, down_v = { 0, 0, 0 };
+        float[] start_o = {0, 0, 0}, start_v = {0, 0, 0};
+        float[] down_o = {0, 0, 0}, down_v = {0, 0, 0};
         trace_t trace;
         float down_dist, up_dist;
         //	float [] delta;
-        float[] up = { 0, 0, 0 }, down = { 0, 0, 0 };
+        float[] up = {0, 0, 0}, down = {0, 0, 0};
 
         Math3D.VectorCopy(pml.origin, start_o);
         Math3D.VectorCopy(pml.velocity, start_v);
@@ -284,8 +251,8 @@ public class PMove {
         drop = 0;
 
         // apply ground friction
-        if ((pm.groundentity != null && pml.groundsurface != null && 
-        		0 == (pml.groundsurface.flags & Defines.SURF_SLICK))
+        if ((pm.groundentity != null && pml.groundsurface != null &&
+                0 == (pml.groundsurface.flags & Defines.SURF_SLICK))
                 || (pml.ladder)) {
             friction = pm_friction;
             control = speed < pm_stopspeed ? pm_stopspeed : speed;
@@ -313,7 +280,7 @@ public class PMove {
      * Handles user intended acceleration.
      */
     public static void PM_Accelerate(float[] wishdir, float wishspeed,
-            float accel) {
+                                     float accel) {
         int i;
         float addspeed, accelspeed, currentspeed;
 
@@ -328,13 +295,13 @@ public class PMove {
         for (i = 0; i < 3; i++)
             pml.velocity[i] += accelspeed * wishdir[i];
     }
-    
+
     /**
      * PM_AirAccelerate.
      */
 
     public static void PM_AirAccelerate(float[] wishdir, float wishspeed,
-            float accel) {
+                                        float accel) {
         int i;
         float addspeed, accelspeed, currentspeed, wishspd = wishspeed;
 
@@ -356,7 +323,7 @@ public class PMove {
      * PM_AddCurrents.
      */
     public static void PM_AddCurrents(float[] wishvel) {
-        float[] v = { 0, 0, 0 };
+        float[] v = {0, 0, 0};
         float s;
 
         // account for ladders
@@ -436,11 +403,11 @@ public class PMove {
      */
     public static void PM_WaterMove() {
         int i;
-        float[] wishvel = { 0, 0, 0 };
+        float[] wishvel = {0, 0, 0};
         float wishspeed;
-        float[] wishdir = { 0, 0, 0 };
+        float[] wishdir = {0, 0, 0};
 
-      
+
         // user intentions
         for (i = 0; i < 3; i++)
             wishvel[i] = pml.forward[i] * pm.cmd.forwardmove
@@ -472,9 +439,9 @@ public class PMove {
      * PM_AirMove.
      */
     public static void PM_AirMove() {
-        float[] wishvel = { 0, 0, 0 };
+        float[] wishvel = {0, 0, 0};
         float fmove, smove;
-        float[] wishdir = { 0, 0, 0 };
+        float[] wishdir = {0, 0, 0};
         float wishspeed;
         float maxspeed;
 
@@ -483,7 +450,7 @@ public class PMove {
 
         wishvel[0] = pml.forward[0] * fmove + pml.right[0] * smove;
         wishvel[1] = pml.forward[1] * fmove + pml.right[1] * smove;
-        
+
         wishvel[2] = 0;
 
         PM_AddCurrents(wishvel);
@@ -491,7 +458,7 @@ public class PMove {
         Math3D.VectorCopy(wishvel, wishdir);
         wishspeed = Math3D.VectorNormalize(wishdir);
 
-        
+
         // clamp to server defined max speed
         maxspeed = (pm.s.pm_flags & pmove_t.PMF_DUCKED) != 0 ? pm_duckspeed
                 : pm_maxspeed;
@@ -540,11 +507,11 @@ public class PMove {
         }
     }
 
-    /** 
+    /**
      * PM_CatagorizePosition.
      */
     public static void PM_CatagorizePosition() {
-        float[] point = { 0, 0, 0 };
+        float[] point = {0, 0, 0};
         int cont;
         trace_t trace;
         int sample1;
@@ -558,7 +525,7 @@ public class PMove {
         point[1] = pml.origin[1];
         point[2] = pml.origin[2] - 0.25f;
         if (pml.velocity[2] > 180) //!!ZOID changed from 100 to 180 (ramp
-                                         // accel)
+        // accel)
         {
             pm.s.pm_flags &= ~pmove_t.PMF_ON_GROUND;
             pm.groundentity = null;
@@ -582,9 +549,9 @@ public class PMove {
                 }
 
                 if (0 == (pm.s.pm_flags & pmove_t.PMF_ON_GROUND)) {
-                	
-                	// just hit the ground
-                    pm.s.pm_flags |= pmove_t.PMF_ON_GROUND;                    
+
+                    // just hit the ground
+                    pm.s.pm_flags |= pmove_t.PMF_ON_GROUND;
                     // don't do landing time if we were just going down a slope
                     if (pml.velocity[2] < -200) {
                         pm.s.pm_flags |= pmove_t.PMF_TIME_LAND;
@@ -605,7 +572,7 @@ public class PMove {
 
 
         // get waterlevel, accounting for ducking
-        
+
         pm.waterlevel = 0;
         pm.watertype = 0;
 
@@ -682,9 +649,9 @@ public class PMove {
      * PM_CheckSpecialMovement.
      */
     public static void PM_CheckSpecialMovement() {
-        float[] spot = { 0, 0, 0 };
+        float[] spot = {0, 0, 0};
         int cont;
-        float[] flatforward = { 0, 0, 0 };
+        float[] flatforward = {0, 0, 0};
         trace_t trace;
 
         if (pm.s.pm_time != 0)
@@ -734,11 +701,11 @@ public class PMove {
         float speed, drop, friction, control, newspeed;
         float currentspeed, addspeed, accelspeed;
         int i;
-        float[] wishvel = { 0, 0, 0 };
+        float[] wishvel = {0, 0, 0};
         float fmove, smove;
-        float[] wishdir = { 0, 0, 0 };
+        float[] wishdir = {0, 0, 0};
         float wishspeed;
-        float[] end = { 0, 0, 0 };
+        float[] end = {0, 0, 0};
         trace_t trace;
 
         pm.viewheight = 22;
@@ -875,7 +842,7 @@ public class PMove {
 
     public static boolean PM_GoodPosition() {
         trace_t trace;
-        float[] origin = { 0, 0, 0 }, end = { 0, 0, 0 };
+        float[] origin = {0, 0, 0}, end = {0, 0, 0};
         int i;
 
         if (pm.s.pm_type == Defines.PM_SPECTATOR)
@@ -894,9 +861,9 @@ public class PMove {
      */
 
     public static void PM_SnapPosition() {
-        int sign[] = { 0, 0, 0 };
+        int sign[] = {0, 0, 0};
         int i, j, bits;
-        short base[] = { 0, 0, 0 };
+        short base[] = {0, 0, 0};
 
         // snap velocity to eigths
         for (i = 0; i < 3; i++)
@@ -930,12 +897,12 @@ public class PMove {
         // Com.DPrintf("using previous_origin\n");
     }
 
-    /** 
+    /**
      * Snaps the origin of the player move to 0.125 grid.
      */
     public static void PM_InitialSnapPosition() {
         int x, y, z;
-        short base[] = { 0, 0, 0 };
+        short base[] = {0, 0, 0};
 
         Math3D.VectorCopy(pm.s.origin, base);
 
@@ -1068,12 +1035,12 @@ public class PMove {
         }
 
         if ((pm.s.pm_flags & pmove_t.PMF_TIME_TELEPORT) != 0) {
-        	// teleport pause stays exaclty in place
+            // teleport pause stays exaclty in place
         } else if ((pm.s.pm_flags & pmove_t.PMF_TIME_WATERJUMP) != 0) {
-        	// waterjump has no control, but falls 
+            // waterjump has no control, but falls
             pml.velocity[2] -= pm.s.gravity * pml.frametime;
-            if (pml.velocity[2] < 0) { 
-            	// cancel as soon as we are falling down again
+            if (pml.velocity[2] < 0) {
+                // cancel as soon as we are falling down again
                 pm.s.pm_flags &= ~(pmove_t.PMF_TIME_WATERJUMP
                         | pmove_t.PMF_TIME_LAND | pmove_t.PMF_TIME_TELEPORT);
                 pm.s.pm_time = 0;
@@ -1088,13 +1055,13 @@ public class PMove {
             if (pm.waterlevel >= 2)
                 PM_WaterMove();
             else {
-                float[] angles = { 0, 0, 0 };
+                float[] angles = {0, 0, 0};
 
                 Math3D.VectorCopy(pm.viewangles, angles);
-                
+
                 if (angles[Defines.PITCH] > 180)
                     angles[Defines.PITCH] = angles[Defines.PITCH] - 360;
-                
+
                 angles[Defines.PITCH] /= 3;
 
                 Math3D.AngleVectors(angles, pml.forward, pml.right, pml.up);
@@ -1106,5 +1073,24 @@ public class PMove {
         // set groundentity, watertype, and waterlevel for final spot
         PM_CatagorizePosition();
         PM_SnapPosition();
+    }
+
+    public static class pml_t {
+        public float[] origin = {0, 0, 0}; // full float precision
+
+        public float[] velocity = {0, 0, 0}; // full float precision
+
+        public float[] forward = {0, 0, 0}, right = {0, 0, 0}, up = {0, 0,
+                0};
+
+        public float frametime;
+
+        public csurface_t groundsurface;
+
+        public int groundcontents;
+
+        public float[] previous_origin = {0, 0, 0};
+
+        public boolean ladder;
     }
 }

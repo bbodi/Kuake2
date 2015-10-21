@@ -18,9 +18,8 @@
 
 package lwjake2.client;
 
-public class dlight_t
-{
-	public float origin[] = { 0, 0, 0 };
-	public float color[] = { 0, 0, 0 };
-	public float intensity;
+public class dlight_t {
+    public float origin[] = {0, 0, 0};
+    public float color[] = {0, 0, 0};
+    public float intensity;
 }

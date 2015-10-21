@@ -23,37 +23,38 @@ import lwjake2.util.Math3D;
 
 /**
  * PlaySound
- * 
+ *
  * @author cwei
  */
 public class PlaySound {
-    
-	final static int MAX_PLAYSOUNDS = 128;
-	
-	// list with sentinel
-	private static PlaySound freeList;
-	private static PlaySound playableList;
-	
-	private static PlaySound[] backbuffer = new PlaySound[MAX_PLAYSOUNDS];
-	static {
-	    for (int i = 0; i < backbuffer.length; i++) {
-	        backbuffer[i] = new PlaySound();
+
+    final static int MAX_PLAYSOUNDS = 128;
+
+    // list with sentinel
+    private static PlaySound freeList;
+    private static PlaySound playableList;
+
+    private static PlaySound[] backbuffer = new PlaySound[MAX_PLAYSOUNDS];
+
+    static {
+        for (int i = 0; i < backbuffer.length; i++) {
+            backbuffer[i] = new PlaySound();
         }
-	    // init the sentinels
-	    freeList = new PlaySound();
-	    playableList = new PlaySound();
-	    // reset the lists
-	    reset();
-	}
-	
+        // init the sentinels
+        freeList = new PlaySound();
+        playableList = new PlaySound();
+        // reset the lists
+        reset();
+    }
+
     // sound attributes
     int type;
-	int entnum;
-	int entchannel;
+    int entnum;
+    int entchannel;
     int bufferId;
     float volume;
     float attenuation;
-    float[] origin = {0,0,0};
+    float[] origin = {0, 0, 0};
 
     // begin time in ms
     private long beginTime;
@@ -65,31 +66,24 @@ public class PlaySound {
         prev = next = null;
         this.clear();
     }
-    
-    private void clear() {
-		type = bufferId = entnum = entchannel = -1;
-        // volume = attenuation = beginTime = 0;
-        attenuation = beginTime = 0;
-        // Math3D.VectorClear(origin);
-    }
 
     static void reset() {
         // init the sentinels
         freeList.next = freeList.prev = freeList;
         playableList.next = playableList.prev = playableList;
-        
+
         // concat the the freeList
         PlaySound ps;
-	    for (int i = 0; i < backbuffer.length; i++) {
-	        ps = backbuffer[i];
-	        ps.clear();
-	        ps.prev = freeList;
+        for (int i = 0; i < backbuffer.length; i++) {
+            ps = backbuffer[i];
+            ps.clear();
+            ps.prev = freeList;
             ps.next = freeList.next;
             ps.prev.next = ps;
             ps.next.prev = ps;
         }
     }
-    
+
     static PlaySound nextPlayableSound() {
         PlaySound ps = null;
         while (true) {
@@ -100,22 +94,22 @@ public class PlaySound {
             return ps;
         }
     }
-    
+
     private static PlaySound get() {
         PlaySound ps = freeList.next;
         if (ps == freeList)
             return null;
-        
+
         ps.prev.next = ps.next;
         ps.next.prev = ps.prev;
         return ps;
     }
 
     private static void add(PlaySound ps) {
-        
+
         PlaySound sort = playableList.next;
-        
-        for (; sort != playableList && sort.beginTime < ps.beginTime; sort = sort.next);
+
+        for (; sort != playableList && sort.beginTime < ps.beginTime; sort = sort.next) ;
         ps.next = sort;
         ps.prev = sort.prev;
         ps.next.prev = ps;
@@ -131,9 +125,9 @@ public class PlaySound {
         ps.prev = freeList;
         freeList.next = ps;
     }
-    
+
     static void allocate(float[] origin, int entnum, int entchannel,
-            int bufferId, float volume, float attenuation, float timeoffset) {
+                         int bufferId, float volume, float attenuation, float timeoffset) {
 
         PlaySound ps = PlaySound.get();
 
@@ -152,10 +146,17 @@ public class PlaySound {
             ps.bufferId = bufferId;
             ps.volume = volume;
             ps.attenuation = attenuation;
-            ps.beginTime = Globals.cl.time + (long)(timeoffset * 1000);
+            ps.beginTime = Globals.cl.time + (long) (timeoffset * 1000);
             PlaySound.add(ps);
         } else {
             System.err.println("PlaySounds out of Limit");
         }
+    }
+
+    private void clear() {
+        type = bufferId = entnum = entchannel = -1;
+        // volume = attenuation = beginTime = 0;
+        attenuation = beginTime = 0;
+        // Math3D.VectorClear(origin);
     }
 }

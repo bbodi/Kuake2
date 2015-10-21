@@ -19,18 +19,7 @@
 package lwjake2.game.monsters;
 
 import lwjake2.Defines;
-import lwjake2.game.EntDieAdapter;
-import lwjake2.game.EntPainAdapter;
-import lwjake2.game.EntThinkAdapter;
-import lwjake2.game.GameAI;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameMisc;
-import lwjake2.game.GameUtil;
-import lwjake2.game.Monster;
-import lwjake2.game.edict_t;
-import lwjake2.game.mframe_t;
-import lwjake2.game.mmove_t;
-import lwjake2.game.monsters.M_Flash;
+import lwjake2.game.*;
 import lwjake2.util.Lib;
 import lwjake2.util.Math3D;
 
@@ -547,23 +536,93 @@ public class M_Supertank {
     public final static int FRAME_stand_60 = 253;
 
     public final static float MODEL_SCALE = 1.000000f;
+    /**
+     * Common Boss explode animation.
+     */
 
+    public static EntThinkAdapter BossExplode = new EntThinkAdapter() {
+        public String getID() {
+            return "BossExplode";
+        }
+
+        public boolean think(edict_t self) {
+            float[] org = {0, 0, 0};
+
+            int n;
+
+            self.think = BossExplode;
+            Math3D.VectorCopy(self.s.origin, org);
+            org[2] += 24 + (Lib.rand() & 15);
+            switch (self.count++) {
+                case 0:
+                    org[0] -= 24;
+                    org[1] -= 24;
+                    break;
+                case 1:
+                    org[0] += 24;
+                    org[1] += 24;
+                    break;
+                case 2:
+                    org[0] += 24;
+                    org[1] -= 24;
+                    break;
+                case 3:
+                    org[0] -= 24;
+                    org[1] += 24;
+                    break;
+                case 4:
+                    org[0] -= 48;
+                    org[1] -= 48;
+                    break;
+                case 5:
+                    org[0] += 48;
+                    org[1] += 48;
+                    break;
+                case 6:
+                    org[0] -= 48;
+                    org[1] += 48;
+                    break;
+                case 7:
+                    org[0] += 48;
+                    org[1] -= 48;
+                    break;
+                case 8:
+                    self.s.sound = 0;
+                    for (n = 0; n < 4; n++)
+                        GameMisc.ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", 500,
+                                Defines.GIB_ORGANIC);
+                    for (n = 0; n < 8; n++)
+                        GameMisc.ThrowGib(self, "models/objects/gibs/sm_metal/tris.md2",
+                                500, Defines.GIB_METALLIC);
+                    GameMisc.ThrowGib(self, "models/objects/gibs/chest/tris.md2", 500,
+                            Defines.GIB_ORGANIC);
+                    GameMisc.ThrowHead(self, "models/objects/gibs/gear/tris.md2", 500,
+                            Defines.GIB_METALLIC);
+                    self.deadflag = Defines.DEAD_DEAD;
+                    return true;
+            }
+
+            GameBase.gi.WriteByte(Defines.svc_temp_entity);
+            GameBase.gi.WriteByte(Defines.TE_EXPLOSION1);
+            GameBase.gi.WritePosition(org);
+            GameBase.gi.multicast(self.s.origin, Defines.MULTICAST_PVS);
+
+            self.nextthink = GameBase.level.time + 0.1f;
+            return true;
+        }
+    };
     static int sound_pain1;
-
     static int sound_pain2;
-
     static int sound_pain3;
-
     static int sound_death;
-
     static int sound_search1;
-
     static int sound_search2;
-
     static int tread_sound;
-
     static EntThinkAdapter TreadSound = new EntThinkAdapter() {
-    	public String getID(){ return "TreadSound"; }
+        public String getID() {
+            return "TreadSound";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, tread_sound, 1,
                     Defines.ATTN_NORM, 0);
@@ -571,8 +630,14 @@ public class M_Supertank {
         }
     };
 
+    //
+    // stand
+    //
     static EntThinkAdapter supertank_search = new EntThinkAdapter() {
-    	public String getID(){ return "supertank_search"; }
+        public String getID() {
+            return "supertank_search";
+        }
+
         public boolean think(edict_t self) {
             if (Lib.random() < 0.5)
                 GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_search1, 1,
@@ -583,12 +648,7 @@ public class M_Supertank {
             return true;
         }
     };
-
-    //
-    // stand
-    //
-
-    static mframe_t supertank_frames_stand[] = new mframe_t[] {
+    static mframe_t supertank_frames_stand[] = new mframe_t[]{
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
@@ -648,20 +708,20 @@ public class M_Supertank {
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, null) };
-
+            new mframe_t(GameAI.ai_stand, 0, null)};
     static mmove_t supertank_move_stand = new mmove_t(FRAME_stand_1,
             FRAME_stand_60, supertank_frames_stand, null);
-
     static EntThinkAdapter supertank_stand = new EntThinkAdapter() {
-    	public String getID() { return "supertank_stand"; }
+        public String getID() {
+            return "supertank_stand";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.currentmove = supertank_move_stand;
             return true;
         }
     };
-
-    static mframe_t supertank_frames_run[] = new mframe_t[] {
+    static mframe_t supertank_frames_run[] = new mframe_t[]{
             new mframe_t(GameAI.ai_run, 12, TreadSound),
             new mframe_t(GameAI.ai_run, 12, null),
             new mframe_t(GameAI.ai_run, 12, null),
@@ -679,16 +739,14 @@ public class M_Supertank {
             new mframe_t(GameAI.ai_run, 12, null),
             new mframe_t(GameAI.ai_run, 12, null),
             new mframe_t(GameAI.ai_run, 12, null),
-            new mframe_t(GameAI.ai_run, 12, null) };
-
-    static mmove_t supertank_move_run = new mmove_t(FRAME_forwrd_1,
-            FRAME_forwrd_18, supertank_frames_run, null);
+            new mframe_t(GameAI.ai_run, 12, null)};
 
     //
     // walk
     //
-
-    static mframe_t supertank_frames_forward[] = new mframe_t[] {
+    static mmove_t supertank_move_run = new mmove_t(FRAME_forwrd_1,
+            FRAME_forwrd_18, supertank_frames_run, null);
+    static mframe_t supertank_frames_forward[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 4, TreadSound),
             new mframe_t(GameAI.ai_walk, 4, null),
             new mframe_t(GameAI.ai_walk, 4, null),
@@ -706,29 +764,34 @@ public class M_Supertank {
             new mframe_t(GameAI.ai_walk, 4, null),
             new mframe_t(GameAI.ai_walk, 4, null),
             new mframe_t(GameAI.ai_walk, 4, null),
-            new mframe_t(GameAI.ai_walk, 4, null) };
-
+            new mframe_t(GameAI.ai_walk, 4, null)};
     static mmove_t supertank_move_forward = new mmove_t(FRAME_forwrd_1,
             FRAME_forwrd_18, supertank_frames_forward, null);
-
     static EntThinkAdapter supertank_forward = new EntThinkAdapter() {
-    	public String getID(){ return "supertank_forward"; }
+        public String getID() {
+            return "supertank_forward";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.currentmove = supertank_move_forward;
             return true;
         }
     };
-
     static EntThinkAdapter supertank_walk = new EntThinkAdapter() {
-    	public String getID(){ return "supertank_walk"; }
+        public String getID() {
+            return "supertank_walk";
+        }
+
         public boolean think(edict_t self) {
             self.monsterinfo.currentmove = supertank_move_forward;
             return true;
         }
     };
-
     static EntThinkAdapter supertank_run = new EntThinkAdapter() {
-    	public String getID(){ return "supertank_run"; }
+        public String getID() {
+            return "supertank_run";
+        }
+
         public boolean think(edict_t self) {
             if ((self.monsterinfo.aiflags & Defines.AI_STAND_GROUND) != 0)
                 self.monsterinfo.currentmove = supertank_move_stand;
@@ -737,12 +800,14 @@ public class M_Supertank {
             return true;
         }
     };
-
     //
     // death
     //
     static EntThinkAdapter supertank_dead = new EntThinkAdapter() {
-    	public String getID(){ return "supertank_dead"; }
+        public String getID() {
+            return "supertank_dead";
+        }
+
         public boolean think(edict_t self) {
             Math3D.VectorSet(self.mins, -60, -60, 0);
             Math3D.VectorSet(self.maxs, 60, 60, 72);
@@ -753,14 +818,16 @@ public class M_Supertank {
             return true;
         }
     };
-
     static EntThinkAdapter supertankRocket = new EntThinkAdapter() {
-    	public String getID(){ return "supertankRocket"; }
+        public String getID() {
+            return "supertankRocket";
+        }
+
         public boolean think(edict_t self) {
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
-            float[] start = { 0, 0, 0 };
-            float[] dir = { 0, 0, 0 };
-            float[] vec = { 0, 0, 0 };
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
+            float[] start = {0, 0, 0};
+            float[] dir = {0, 0, 0};
+            float[] vec = {0, 0, 0};
             int flash_number;
 
             if (self.s.frame == FRAME_attak2_8)
@@ -787,14 +854,16 @@ public class M_Supertank {
             return true;
         }
     };
-
     static EntThinkAdapter supertankMachineGun = new EntThinkAdapter() {
-    	public String getID(){ return "supertankMachineGun"; }
+        public String getID() {
+            return "supertankMachineGun";
+        }
+
         public boolean think(edict_t self) {
-            float[] dir = { 0, 0, 0 };
-            float[] vec = { 0, 0, 0 };
-            float[] start = { 0, 0, 0 };
-            float[] forward = { 0, 0, 0 }, right = { 0, 0, 0 };
+            float[] dir = {0, 0, 0};
+            float[] vec = {0, 0, 0};
+            float[] start = {0, 0, 0};
+            float[] forward = {0, 0, 0}, right = {0, 0, 0};
             int flash_number;
 
             flash_number = Defines.MZ2_SUPERTANK_MACHINEGUN_1
@@ -824,35 +893,7 @@ public class M_Supertank {
             return true;
         }
     };
-
-    static EntThinkAdapter supertank_attack = new EntThinkAdapter() {
-    	public String getID(){ return "supertank_attack"; }
-        public boolean think(edict_t self) {
-            float[] vec = { 0, 0, 0 };
-            float range;
-            //float r;
-
-            Math3D.VectorSubtract(self.enemy.s.origin, self.s.origin, vec);
-            range = Math3D.VectorLength(vec);
-
-            //r = random();
-
-            // Attack 1 == Chaingun
-            // Attack 2 == Rocket Launcher
-
-            if (range <= 160) {
-                self.monsterinfo.currentmove = supertank_move_attack1;
-            } else { // fire rockets more often at distance
-                if (Lib.random() < 0.3)
-                    self.monsterinfo.currentmove = supertank_move_attack1;
-                else
-                    self.monsterinfo.currentmove = supertank_move_attack2;
-            }
-            return true;
-        }
-    };
-
-    static mframe_t supertank_frames_turn_right[] = new mframe_t[] {
+    static mframe_t supertank_frames_turn_right[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, TreadSound),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -870,12 +911,12 @@ public class M_Supertank {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t supertank_move_turn_right = new mmove_t(FRAME_right_1,
             FRAME_right_18, supertank_frames_turn_right, supertank_run);
 
-    static mframe_t supertank_frames_turn_left[] = new mframe_t[] {
+    static mframe_t supertank_frames_turn_left[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, TreadSound),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -893,39 +934,39 @@ public class M_Supertank {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t supertank_move_turn_left = new mmove_t(FRAME_left_1,
             FRAME_left_18, supertank_frames_turn_left, supertank_run);
 
-    static mframe_t supertank_frames_pain3[] = new mframe_t[] {
+    static mframe_t supertank_frames_pain3[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t supertank_move_pain3 = new mmove_t(FRAME_pain3_9,
             FRAME_pain3_12, supertank_frames_pain3, supertank_run);
 
-    static mframe_t supertank_frames_pain2[] = new mframe_t[] {
+    static mframe_t supertank_frames_pain2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t supertank_move_pain2 = new mmove_t(FRAME_pain2_5,
             FRAME_pain2_8, supertank_frames_pain2, supertank_run);
 
-    static mframe_t supertank_frames_pain1[] = new mframe_t[] {
+    static mframe_t supertank_frames_pain1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t supertank_move_pain1 = new mmove_t(FRAME_pain1_1,
             FRAME_pain1_4, supertank_frames_pain1, supertank_run);
 
-    static mframe_t supertank_frames_death1[] = new mframe_t[] {
+    static mframe_t supertank_frames_death1[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -949,12 +990,12 @@ public class M_Supertank {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, M_Supertank.BossExplode) };
+            new mframe_t(GameAI.ai_move, 0, M_Supertank.BossExplode)};
 
     static mmove_t supertank_move_death = new mmove_t(FRAME_death_1,
             FRAME_death_24, supertank_frames_death1, supertank_dead);
 
-    static mframe_t supertank_frames_backward[] = new mframe_t[] {
+    static mframe_t supertank_frames_backward[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 0, TreadSound),
             new mframe_t(GameAI.ai_walk, 0, null),
             new mframe_t(GameAI.ai_walk, 0, null),
@@ -972,23 +1013,23 @@ public class M_Supertank {
             new mframe_t(GameAI.ai_walk, 0, null),
             new mframe_t(GameAI.ai_walk, 0, null),
             new mframe_t(GameAI.ai_walk, 0, null),
-            new mframe_t(GameAI.ai_walk, 0, null) };
+            new mframe_t(GameAI.ai_walk, 0, null)};
 
     static mmove_t supertank_move_backward = new mmove_t(FRAME_backwd_1,
             FRAME_backwd_18, supertank_frames_backward, null);
 
-    static mframe_t supertank_frames_attack4[] = new mframe_t[] {
+    static mframe_t supertank_frames_attack4[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t supertank_move_attack4 = new mmove_t(FRAME_attak4_1,
             FRAME_attak4_6, supertank_frames_attack4, supertank_run);
 
-    static mframe_t supertank_frames_attack3[] = new mframe_t[] {
+    static mframe_t supertank_frames_attack3[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -1015,12 +1056,12 @@ public class M_Supertank {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t supertank_move_attack3 = new mmove_t(FRAME_attak3_1,
             FRAME_attak3_27, supertank_frames_attack3, supertank_run);
 
-    static mframe_t supertank_frames_attack2[] = new mframe_t[] {
+    static mframe_t supertank_frames_attack2[] = new mframe_t[]{
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
             new mframe_t(GameAI.ai_charge, 0, null),
@@ -1047,13 +1088,71 @@ public class M_Supertank {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
+            new mframe_t(GameAI.ai_move, 0, null)};
 
     static mmove_t supertank_move_attack2 = new mmove_t(FRAME_attak2_1,
             FRAME_attak2_27, supertank_frames_attack2, supertank_run);
+    static mframe_t supertank_frames_attack1[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun),
+            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun),
+            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun),
+            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun),
+            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun),
+            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun),};
+    static mmove_t supertank_move_attack1 = new mmove_t(FRAME_attak1_1,
+            FRAME_attak1_6, supertank_frames_attack1, supertank_reattack1);
+    static EntThinkAdapter supertank_attack = new EntThinkAdapter() {
+        public String getID() {
+            return "supertank_attack";
+        }
 
+        public boolean think(edict_t self) {
+            float[] vec = {0, 0, 0};
+            float range;
+            //float r;
+
+            Math3D.VectorSubtract(self.enemy.s.origin, self.s.origin, vec);
+            range = Math3D.VectorLength(vec);
+
+            //r = random();
+
+            // Attack 1 == Chaingun
+            // Attack 2 == Rocket Launcher
+
+            if (range <= 160) {
+                self.monsterinfo.currentmove = supertank_move_attack1;
+            } else { // fire rockets more often at distance
+                if (Lib.random() < 0.3)
+                    self.monsterinfo.currentmove = supertank_move_attack1;
+                else
+                    self.monsterinfo.currentmove = supertank_move_attack2;
+            }
+            return true;
+        }
+    };
+    static mframe_t supertank_frames_end_attack1[] = new mframe_t[]{
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null),
+            new mframe_t(GameAI.ai_move, 0, null)};
+
+    static mmove_t supertank_move_end_attack1 = new mmove_t(FRAME_attak1_7,
+            FRAME_attak1_20, supertank_frames_end_attack1, supertank_run);
     static EntThinkAdapter supertank_reattack1 = new EntThinkAdapter() {
-    	public String getID(){ return "supertank_reattack1"; }
+        public String getID() {
+            return "supertank_reattack1";
+        }
+
         public boolean think(edict_t self) {
             if (GameUtil.visible(self, self.enemy))
                 if (Lib.random() < 0.9)
@@ -1065,39 +1164,11 @@ public class M_Supertank {
             return true;
         }
     };
-
-    static mframe_t supertank_frames_attack1[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun),
-            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun),
-            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun),
-            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun),
-            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun),
-            new mframe_t(GameAI.ai_charge, 0, supertankMachineGun), };
-
-    static mmove_t supertank_move_attack1 = new mmove_t(FRAME_attak1_1,
-            FRAME_attak1_6, supertank_frames_attack1, supertank_reattack1);
-
-    static mframe_t supertank_frames_end_attack1[] = new mframe_t[] {
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
-    static mmove_t supertank_move_end_attack1 = new mmove_t(FRAME_attak1_7,
-            FRAME_attak1_20, supertank_frames_end_attack1, supertank_run);
-
     static EntPainAdapter supertank_pain = new EntPainAdapter() {
-    	public String getID(){ return "supertank_pain"; }
+        public String getID() {
+            return "supertank_pain";
+        }
+
         public void pain(edict_t self, edict_t other, float kick, int damage) {
             if (self.health < (self.max_health / 2))
                 self.s.skinnum = 1;
@@ -1137,10 +1208,16 @@ public class M_Supertank {
         }
     };
 
+    //
+    // monster_supertank
+    //
     static EntDieAdapter supertank_die = new EntDieAdapter() {
-    	public String getID(){ return "supertank_die"; }
+        public String getID() {
+            return "supertank_die";
+        }
+
         public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
+                        int damage, float[] point) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_death, 1,
                     Defines.ATTN_NORM, 0);
             self.deadflag = Defines.DEAD_DEAD;
@@ -1149,17 +1226,15 @@ public class M_Supertank {
             self.monsterinfo.currentmove = supertank_move_death;
         }
     };
-
-    //
-    // monster_supertank
-    //
-
     /*
      * QUAKED monster_supertank (1 .5 0) (-64 -64 0) (64 64 72) Ambush
      * Trigger_Spawn Sight
      */
     public static EntThinkAdapter SP_monster_supertank = new EntThinkAdapter() {
-    	public String getID(){ return "SP_monster_supertank"; }
+        public String getID() {
+            return "SP_monster_supertank";
+        }
+
         public boolean think(edict_t self) {
             if (GameBase.deathmatch.value != 0) {
                 GameUtil.G_FreeEdict(self);
@@ -1204,77 +1279,6 @@ public class M_Supertank {
             self.monsterinfo.scale = MODEL_SCALE;
 
             GameAI.walkmonster_start.think(self);
-            return true;
-        }
-    };
-
-    /** Common Boss explode animation. */
-    
-    public static EntThinkAdapter BossExplode = new EntThinkAdapter() {
-    	public String getID(){ return "BossExplode"; }
-        public boolean think(edict_t self) {
-            float[] org = { 0, 0, 0 };
-    
-            int n;
-    
-            self.think = BossExplode;
-            Math3D.VectorCopy(self.s.origin, org);
-            org[2] += 24 + (Lib.rand() & 15);
-            switch (self.count++) {
-            case 0:
-                org[0] -= 24;
-                org[1] -= 24;
-                break;
-            case 1:
-                org[0] += 24;
-                org[1] += 24;
-                break;
-            case 2:
-                org[0] += 24;
-                org[1] -= 24;
-                break;
-            case 3:
-                org[0] -= 24;
-                org[1] += 24;
-                break;
-            case 4:
-                org[0] -= 48;
-                org[1] -= 48;
-                break;
-            case 5:
-                org[0] += 48;
-                org[1] += 48;
-                break;
-            case 6:
-                org[0] -= 48;
-                org[1] += 48;
-                break;
-            case 7:
-                org[0] += 48;
-                org[1] -= 48;
-                break;
-            case 8:
-                self.s.sound = 0;
-                for (n = 0; n < 4; n++)
-                    GameMisc.ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", 500,
-                            Defines.GIB_ORGANIC);
-                for (n = 0; n < 8; n++)
-                    GameMisc.ThrowGib(self, "models/objects/gibs/sm_metal/tris.md2",
-                            500, Defines.GIB_METALLIC);
-                GameMisc.ThrowGib(self, "models/objects/gibs/chest/tris.md2", 500,
-                        Defines.GIB_ORGANIC);
-                GameMisc.ThrowHead(self, "models/objects/gibs/gear/tris.md2", 500,
-                        Defines.GIB_METALLIC);
-                self.deadflag = Defines.DEAD_DEAD;
-                return true;
-            }
-    
-            GameBase.gi.WriteByte(Defines.svc_temp_entity);
-            GameBase.gi.WriteByte(Defines.TE_EXPLOSION1);
-            GameBase.gi.WritePosition(org);
-            GameBase.gi.multicast(self.s.origin, Defines.MULTICAST_PVS);
-    
-            self.nextthink = GameBase.level.time + 0.1f;
             return true;
         }
     };

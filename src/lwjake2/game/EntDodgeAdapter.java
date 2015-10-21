@@ -18,7 +18,6 @@
 
 package lwjake2.game;
 
-public abstract class EntDodgeAdapter extends SuperAdapter
-{
-	public abstract void dodge(edict_t self, edict_t other, float eta);
+public abstract class EntDodgeAdapter extends SuperAdapter {
+    public abstract void dodge(edict_t self, edict_t other, float eta);
 }

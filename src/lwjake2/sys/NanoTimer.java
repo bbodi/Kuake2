@@ -20,19 +20,19 @@ package lwjake2.sys;
 
 public class NanoTimer extends Timer {
 
-	private long base;
+    private long base;
 
-	NanoTimer() {
-		base = System.nanoTime();
-	}
-	
-	public long currentTimeMillis() {
-		long time = System.nanoTime();
-		long delta = time - base;
-		if (delta < 0) {
-			delta += Long.MAX_VALUE + 1;
-		}
-		return (long)(delta * 0.000001);
-	}
+    NanoTimer() {
+        base = System.nanoTime();
+    }
+
+    public long currentTimeMillis() {
+        long time = System.nanoTime();
+        long delta = time - base;
+        if (delta < 0) {
+            delta += Long.MAX_VALUE + 1;
+        }
+        return (long) (delta * 0.000001);
+    }
 
 }

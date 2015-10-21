@@ -19,11 +19,7 @@
 package lwjake2.game;
 
 import lwjake2.Defines;
-import lwjake2.qcommon.CM;
-import lwjake2.qcommon.Cbuf;
-import lwjake2.qcommon.Com;
-import lwjake2.qcommon.Cvar;
-import lwjake2.qcommon.PMove;
+import lwjake2.qcommon.*;
 import lwjake2.server.SV_GAME;
 import lwjake2.server.SV_INIT;
 import lwjake2.server.SV_SEND;
@@ -33,6 +29,12 @@ import lwjake2.server.SV_WORLD;
 //	collection of functions provided by the main engine
 //
 public class game_import_t {
+    public pmove_t.PointContentsAdapter pointcontents = new pmove_t.PointContentsAdapter() {
+        public int pointcontents(float[] o) {
+            return 0;
+        }
+    };
+
     // special messages
     public void bprintf(int printlevel, String s) {
         SV_SEND.SV_BroadcastPrintf(printlevel, s);
@@ -51,13 +53,13 @@ public class game_import_t {
     }
 
     public void sound(edict_t ent, int channel, int soundindex, float volume,
-            float attenuation, float timeofs) {
+                      float attenuation, float timeofs) {
         SV_GAME.PF_StartSound(ent, channel, soundindex, volume, attenuation,
                 timeofs);
     }
 
     public void positioned_sound(float[] origin, edict_t ent, int channel,
-            int soundinedex, float volume, float attenuation, float timeofs) {
+                                 int soundinedex, float volume, float attenuation, float timeofs) {
 
         SV_SEND.SV_StartSound(origin, ent, channel, soundinedex, volume,
                 attenuation, timeofs);
@@ -98,15 +100,9 @@ public class game_import_t {
 
     // collision detection
     public trace_t trace(float[] start, float[] mins, float[] maxs,
-            float[] end, edict_t passent, int contentmask) {
+                         float[] end, edict_t passent, int contentmask) {
         return SV_WORLD.SV_Trace(start, mins, maxs, end, passent, contentmask);
     }
-
-    public pmove_t.PointContentsAdapter pointcontents = new pmove_t.PointContentsAdapter() {
-        public int pointcontents(float[] o) {
-            return 0;
-        }
-    };
 
     public boolean inPHS(float[] p1, float[] p2) {
         return SV_GAME.PF_inPHS(p1, p2);
@@ -133,7 +129,7 @@ public class game_import_t {
 
     // call before removing an interactive edict
     public int BoxEdicts(float[] mins, float[] maxs, edict_t list[],
-            int maxcount, int areatype) {
+                         int maxcount, int areatype) {
         return SV_WORLD.SV_AreaEdicts(mins, maxs, list, maxcount, areatype);
     }
 

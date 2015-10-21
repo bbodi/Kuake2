@@ -23,5 +23,5 @@ package lwjake2.qcommon;
  */
 public abstract class xcommand_t {
 
-	abstract public void execute();
+    abstract public void execute();
 }

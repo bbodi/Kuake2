@@ -22,34 +22,30 @@ import lwjake2.util.QuakeFile;
 
 import java.io.IOException;
 
-public class mframe_t
-{
-	public mframe_t(AIAdapter ai, float dist, EntThinkAdapter think)
-	{
-		this.ai= ai;
-		this.dist= dist;
-		this.think= think;
-	}
-	
-	/** Empty constructor. */	
-	public mframe_t()
-	{}
+public class mframe_t {
+    public AIAdapter ai;
+    public float dist;
+    public EntThinkAdapter think;
+    public mframe_t(AIAdapter ai, float dist, EntThinkAdapter think) {
+        this.ai = ai;
+        this.dist = dist;
+        this.think = think;
+    }
+    /**
+     * Empty constructor.
+     */
+    public mframe_t() {
+    }
 
-	public AIAdapter ai;
-	public float dist;
-	public EntThinkAdapter think;
+    public void write(QuakeFile f) throws IOException {
+        f.writeAdapter(ai);
+        f.writeFloat(dist);
+        f.writeAdapter(think);
+    }
 
-	public void write(QuakeFile f) throws IOException
-	{
-		f.writeAdapter(ai);
-		f.writeFloat(dist);
-		f.writeAdapter(think);
-	}
-
-	public void read(QuakeFile f) throws IOException
-	{
-		ai= (AIAdapter) f.readAdapter();
-		dist= f.readFloat();
-		think= (EntThinkAdapter) f.readAdapter();
-	}
+    public void read(QuakeFile f) throws IOException {
+        ai = (AIAdapter) f.readAdapter();
+        dist = f.readFloat();
+        think = (EntThinkAdapter) f.readAdapter();
+    }
 }

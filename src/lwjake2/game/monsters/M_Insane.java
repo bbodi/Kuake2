@@ -19,16 +19,7 @@
 package lwjake2.game.monsters;
 
 import lwjake2.Defines;
-import lwjake2.game.EntDieAdapter;
-import lwjake2.game.EntPainAdapter;
-import lwjake2.game.EntThinkAdapter;
-import lwjake2.game.GameAI;
-import lwjake2.game.GameBase;
-import lwjake2.game.GameMisc;
-import lwjake2.game.GameUtil;
-import lwjake2.game.edict_t;
-import lwjake2.game.mframe_t;
-import lwjake2.game.mmove_t;
+import lwjake2.game.*;
 import lwjake2.util.Lib;
 import lwjake2.util.Math3D;
 
@@ -607,10 +598,13 @@ public class M_Insane {
 
     static int sound_moan;
 
-    static int sound_scream[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    static int sound_scream[] = {0, 0, 0, 0, 0, 0, 0, 0};
 
     static EntThinkAdapter insane_fist = new EntThinkAdapter() {
-    	public String getID() { return "insane_fist"; }
+        public String getID() {
+            return "insane_fist";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_fist, 1,
                     Defines.ATTN_IDLE, 0);
@@ -619,7 +613,10 @@ public class M_Insane {
     };
 
     static EntThinkAdapter insane_shake = new EntThinkAdapter() {
-    	public String getID() { return "insane_shake"; }
+        public String getID() {
+            return "insane_shake";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_shake, 1,
                     Defines.ATTN_IDLE, 0);
@@ -628,7 +625,10 @@ public class M_Insane {
     };
 
     static EntThinkAdapter insane_moan = new EntThinkAdapter() {
-    	public String getID() { return "insane_moan"; }
+        public String getID() {
+            return "insane_moan";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE, sound_moan, 1,
                     Defines.ATTN_IDLE, 0);
@@ -637,161 +637,21 @@ public class M_Insane {
     };
 
     static EntThinkAdapter insane_scream = new EntThinkAdapter() {
-    	public String getID() { return "insane_scream"; }
+        public String getID() {
+            return "insane_scream";
+        }
+
         public boolean think(edict_t self) {
             GameBase.gi.sound(self, Defines.CHAN_VOICE,
                     sound_scream[Lib.rand() % 8], 1, Defines.ATTN_IDLE, 0);
             return true;
         }
     };
-
-    static EntThinkAdapter insane_cross = new EntThinkAdapter() {
-    	public String getID() { return "insane_cross"; }
-        public boolean think(edict_t self) {
-            if (Lib.random() < 0.8)
-                self.monsterinfo.currentmove = insane_move_cross;
-            else
-                self.monsterinfo.currentmove = insane_move_struggle_cross;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter insane_walk = new EntThinkAdapter() {
-    	public String getID() { return "insane_walk"; }
-        public boolean think(edict_t self) {
-            if ((self.spawnflags & 16) != 0) // Hold Ground?
-                if (self.s.frame == FRAME_cr_pain10) {
-                    self.monsterinfo.currentmove = insane_move_down;
-                    return true;
-                }
-            if ((self.spawnflags & 4) != 0)
-                self.monsterinfo.currentmove = insane_move_crawl;
-            else if (Lib.random() <= 0.5)
-                self.monsterinfo.currentmove = insane_move_walk_normal;
-            else
-                self.monsterinfo.currentmove = insane_move_walk_insane;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter insane_run = new EntThinkAdapter() {
-    	public String getID() { return "insane_run"; }
-        public boolean think(edict_t self) {
-            if ((self.spawnflags & 16) != 0) // Hold Ground?
-                if (self.s.frame == FRAME_cr_pain10) {
-                    self.monsterinfo.currentmove = insane_move_down;
-                    return true;
-                }
-            if ((self.spawnflags & 4) != 0) // Crawling?
-                self.monsterinfo.currentmove = insane_move_runcrawl;
-            else if (Lib.random() <= 0.5) // Else, mix it up
-                self.monsterinfo.currentmove = insane_move_run_normal;
-            else
-                self.monsterinfo.currentmove = insane_move_run_insane;
-            return true;
-        }
-    };
-
-    static EntPainAdapter insane_pain = new EntPainAdapter() {
-    	public String getID() { return "insane_pain"; }
-        public void pain(edict_t self, edict_t other, float kick, int damage) {
-            int l, r;
-
-            //	 if (self.health < (self.max_health / 2))
-            //		 self.s.skinnum = 1;
-
-            if (GameBase.level.time < self.pain_debounce_time)
-                return;
-
-            self.pain_debounce_time = GameBase.level.time + 3;
-
-            r = 1 + (Lib.rand() & 1);
-            if (self.health < 25)
-                l = 25;
-            else if (self.health < 50)
-                l = 50;
-            else if (self.health < 75)
-                l = 75;
-            else
-                l = 100;
-            GameBase.gi.sound(self, Defines.CHAN_VOICE, GameBase.gi
-                    .soundindex("player/male/pain" + l + "_" + r + ".wav"), 1,
-                    Defines.ATTN_IDLE, 0);
-
-            if (GameBase.skill.value == 3)
-                return; // no pain anims in nightmare
-
-            // Don't go into pain frames if crucified.
-            if ((self.spawnflags & 8) != 0) {
-                self.monsterinfo.currentmove = insane_move_struggle_cross;
-                return;
-            }
-
-            if (((self.s.frame >= FRAME_crawl1) && (self.s.frame <= FRAME_crawl9))
-                    || ((self.s.frame >= FRAME_stand99) && (self.s.frame <= FRAME_stand160))) {
-                self.monsterinfo.currentmove = insane_move_crawl_pain;
-            } else
-                self.monsterinfo.currentmove = insane_move_stand_pain;
-        }
-    };
-
-    static EntThinkAdapter insane_onground = new EntThinkAdapter() {
-    	public String getID() { return "insane_onground"; }
-        public boolean think(edict_t self) {
-            self.monsterinfo.currentmove = insane_move_down;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter insane_checkdown = new EntThinkAdapter() {
-    	public String getID() { return "insane_checkdown"; }
-        public boolean think(edict_t self) {
-            //			if ( (self.s.frame == FRAME_stand94) || (self.s.frame ==
-            // FRAME_stand65) )
-            if ((self.spawnflags & 32) != 0) // Always stand
-                return true;
-            if (Lib.random() < 0.3)
-                if (Lib.random() < 0.5)
-                    self.monsterinfo.currentmove = insane_move_uptodown;
-                else
-                    self.monsterinfo.currentmove = insane_move_jumpdown;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter insane_checkup = new EntThinkAdapter() {
-    	public String getID() { return "insane_checkup"; }
-        public boolean think(edict_t self) {
-            //			If Hold_Ground and Crawl are set
-            if ((self.spawnflags & 4) != 0 && (self.spawnflags & 16) != 0)
-                return true;
-            if (Lib.random() < 0.5)
-                self.monsterinfo.currentmove = insane_move_downtoup;
-            return true;
-        }
-    };
-
-    static EntThinkAdapter insane_stand = new EntThinkAdapter() {
-    	public String getID() { return "insane_stand"; }
-        public boolean think(edict_t self) {
-            if ((self.spawnflags & 8) != 0) // If crucified
-            {
-                self.monsterinfo.currentmove = insane_move_cross;
-                self.monsterinfo.aiflags |= Defines.AI_STAND_GROUND;
-            }
-            // If Hold_Ground and Crawl are set
-            else if ((self.spawnflags & 4) != 0 && (self.spawnflags & 16) != 0)
-                self.monsterinfo.currentmove = insane_move_down;
-            else if (Lib.random() < 0.5)
-                self.monsterinfo.currentmove = insane_move_stand_normal;
-            else
-                self.monsterinfo.currentmove = insane_move_stand_insane;
-            return true;
-        }
-    };
-
     static EntThinkAdapter insane_dead = new EntThinkAdapter() {
-    	public String getID() { return "insane_dead"; }
+        public String getID() {
+            return "insane_dead";
+        }
+
         public boolean think(edict_t self) {
             if ((self.spawnflags & 8) != 0) {
                 self.flags |= Defines.FL_FLY;
@@ -806,66 +666,16 @@ public class M_Insane {
             return true;
         }
     };
-
-    static EntDieAdapter insane_die = new EntDieAdapter() {
-    	public String getID() { return "insane_die"; }
-        public void die(edict_t self, edict_t inflictor, edict_t attacker,
-                int damage, float[] point) {
-            int n;
-
-            if (self.health <= self.gib_health) {
-                GameBase.gi
-                        .sound(self, Defines.CHAN_VOICE, GameBase.gi
-                                .soundindex("misc/udeath.wav"), 1,
-                                Defines.ATTN_IDLE, 0);
-                for (n = 0; n < 2; n++)
-                    GameMisc.ThrowGib(self, "models/objects/gibs/bone/tris.md2",
-                            damage, Defines.GIB_ORGANIC);
-                for (n = 0; n < 4; n++)
-                    GameMisc.ThrowGib(self,
-                            "models/objects/gibs/sm_meat/tris.md2", damage,
-                            Defines.GIB_ORGANIC);
-                GameMisc.ThrowHead(self, "models/objects/gibs/head2/tris.md2",
-                        damage, Defines.GIB_ORGANIC);
-                self.deadflag = Defines.DEAD_DEAD;
-                return;
-            }
-
-            if (self.deadflag == Defines.DEAD_DEAD)
-                return;
-
-            GameBase.gi.sound(self, Defines.CHAN_VOICE, GameBase.gi
-                    .soundindex("player/male/death" + ((Lib.rand() % 4) + 1)
-                            + ".wav"), 1, Defines.ATTN_IDLE, 0);
-
-            self.deadflag = Defines.DEAD_DEAD;
-            self.takedamage = Defines.DAMAGE_YES;
-
-            if ((self.spawnflags & 8) != 0) {
-                insane_dead.think(self);
-            } else {
-                if (((self.s.frame >= FRAME_crawl1) && (self.s.frame <= FRAME_crawl9))
-                        || ((self.s.frame >= FRAME_stand99) && (self.s.frame <= FRAME_stand160)))
-                    self.monsterinfo.currentmove = insane_move_crawl_death;
-                else
-                    self.monsterinfo.currentmove = insane_move_stand_death;
-            }
-        }
-
-    };
-
-    static mframe_t insane_frames_stand_normal[] = new mframe_t[] {
+    static mframe_t insane_frames_stand_normal[] = new mframe_t[]{
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, insane_checkdown) };
-
+            new mframe_t(GameAI.ai_stand, 0, insane_checkdown)};
     static mmove_t insane_move_stand_normal = new mmove_t(FRAME_stand60,
             FRAME_stand65, insane_frames_stand_normal, insane_stand);
-
-    static mframe_t insane_frames_stand_insane[] = new mframe_t[] {
+    static mframe_t insane_frames_stand_insane[] = new mframe_t[]{
             new mframe_t(GameAI.ai_stand, 0, insane_shake),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
@@ -895,12 +705,10 @@ public class M_Insane {
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
             new mframe_t(GameAI.ai_stand, 0, null),
-            new mframe_t(GameAI.ai_stand, 0, insane_checkdown) };
-
+            new mframe_t(GameAI.ai_stand, 0, insane_checkdown)};
     static mmove_t insane_move_stand_insane = new mmove_t(FRAME_stand65,
             FRAME_stand94, insane_frames_stand_insane, insane_stand);
-
-    static mframe_t insane_frames_uptodown[] = new mframe_t[] {
+    static mframe_t insane_frames_uptodown[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -940,12 +748,10 @@ public class M_Insane {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t insane_move_uptodown = new mmove_t(FRAME_stand1,
             FRAME_stand40, insane_frames_uptodown, insane_onground);
-
-    static mframe_t insane_frames_downtoup[] = new mframe_t[] {
+    static mframe_t insane_frames_downtoup[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, -0.7f, null), // 41
             new mframe_t(GameAI.ai_move, -1.2f, null), // 42
             new mframe_t(GameAI.ai_move, -1.5f, null), // 43
@@ -966,21 +772,49 @@ public class M_Insane {
             new mframe_t(GameAI.ai_move, 0, null), // 58
             new mframe_t(GameAI.ai_move, 0, null) // 59
     };
-
     static mmove_t insane_move_downtoup = new mmove_t(FRAME_stand41,
             FRAME_stand59, insane_frames_downtoup, insane_stand);
+    static EntThinkAdapter insane_checkup = new EntThinkAdapter() {
+        public String getID() {
+            return "insane_checkup";
+        }
 
-    static mframe_t insane_frames_jumpdown[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            //			If Hold_Ground and Crawl are set
+            if ((self.spawnflags & 4) != 0 && (self.spawnflags & 16) != 0)
+                return true;
+            if (Lib.random() < 0.5)
+                self.monsterinfo.currentmove = insane_move_downtoup;
+            return true;
+        }
+    };
+    static mframe_t insane_frames_jumpdown[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0.2f, null),
             new mframe_t(GameAI.ai_move, 11.5f, null),
             new mframe_t(GameAI.ai_move, 5.1f, null),
             new mframe_t(GameAI.ai_move, 7.1f, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t insane_move_jumpdown = new mmove_t(FRAME_stand96,
             FRAME_stand100, insane_frames_jumpdown, insane_onground);
+    static EntThinkAdapter insane_checkdown = new EntThinkAdapter() {
+        public String getID() {
+            return "insane_checkdown";
+        }
 
-    static mframe_t insane_frames_down[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            //			if ( (self.s.frame == FRAME_stand94) || (self.s.frame ==
+            // FRAME_stand65) )
+            if ((self.spawnflags & 32) != 0) // Always stand
+                return true;
+            if (Lib.random() < 0.3)
+                if (Lib.random() < 0.5)
+                    self.monsterinfo.currentmove = insane_move_uptodown;
+                else
+                    self.monsterinfo.currentmove = insane_move_jumpdown;
+            return true;
+        }
+    };
+    static mframe_t insane_frames_down[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null), // 100)
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -1048,11 +882,19 @@ public class M_Insane {
             new mframe_t(GameAI.ai_move, 0.7f, null),
             new mframe_t(GameAI.ai_move, 0, insane_checkup) // 160
     };
-
     static mmove_t insane_move_down = new mmove_t(FRAME_stand100,
             FRAME_stand160, insane_frames_down, insane_onground);
+    static EntThinkAdapter insane_onground = new EntThinkAdapter() {
+        public String getID() {
+            return "insane_onground";
+        }
 
-    static mframe_t insane_frames_walk_normal[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            self.monsterinfo.currentmove = insane_move_down;
+            return true;
+        }
+    };
+    static mframe_t insane_frames_walk_normal[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 0, insane_scream),
             new mframe_t(GameAI.ai_walk, 2.5f, null),
             new mframe_t(GameAI.ai_walk, 3.5f, null),
@@ -1065,15 +907,12 @@ public class M_Insane {
             new mframe_t(GameAI.ai_walk, 3.3f, null),
             new mframe_t(GameAI.ai_walk, 2.4f, null),
             new mframe_t(GameAI.ai_walk, 0.9f, null),
-            new mframe_t(GameAI.ai_walk, 0, null) };
-
+            new mframe_t(GameAI.ai_walk, 0, null)};
     static mmove_t insane_move_walk_normal = new mmove_t(FRAME_walk27,
             FRAME_walk39, insane_frames_walk_normal, insane_walk);
-
     static mmove_t insane_move_run_normal = new mmove_t(FRAME_walk27,
             FRAME_walk39, insane_frames_walk_normal, insane_run);
-
-    static mframe_t insane_frames_walk_insane[] = new mframe_t[] {
+    static mframe_t insane_frames_walk_insane[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 0, insane_scream), // walk 1
             new mframe_t(GameAI.ai_walk, 3.4f, null), // walk 2
             new mframe_t(GameAI.ai_walk, 3.6f, null), // 3
@@ -1101,14 +940,11 @@ public class M_Insane {
             new mframe_t(GameAI.ai_walk, 1.8f, null), // 25
             new mframe_t(GameAI.ai_walk, 0, null) // 26
     };
-
     static mmove_t insane_move_walk_insane = new mmove_t(FRAME_walk1,
             FRAME_walk26, insane_frames_walk_insane, insane_walk);
-
     static mmove_t insane_move_run_insane = new mmove_t(FRAME_walk1,
             FRAME_walk26, insane_frames_walk_insane, insane_run);
-
-    static mframe_t insane_frames_stand_pain[] = new mframe_t[] {
+    static mframe_t insane_frames_stand_pain[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -1119,12 +955,10 @@ public class M_Insane {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t insane_move_stand_pain = new mmove_t(FRAME_st_pain2,
             FRAME_st_pain12, insane_frames_stand_pain, insane_run);
-
-    static mframe_t insane_frames_stand_death[] = new mframe_t[] {
+    static mframe_t insane_frames_stand_death[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -1141,12 +975,10 @@ public class M_Insane {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t insane_move_stand_death = new mmove_t(FRAME_st_death2,
             FRAME_st_death18, insane_frames_stand_death, insane_dead);
-
-    static mframe_t insane_frames_crawl[] = new mframe_t[] {
+    static mframe_t insane_frames_crawl[] = new mframe_t[]{
             new mframe_t(GameAI.ai_walk, 0, insane_scream),
             new mframe_t(GameAI.ai_walk, 1.5f, null),
             new mframe_t(GameAI.ai_walk, 2.1f, null),
@@ -1155,15 +987,52 @@ public class M_Insane {
             new mframe_t(GameAI.ai_walk, 0.9f, null),
             new mframe_t(GameAI.ai_walk, 3f, null),
             new mframe_t(GameAI.ai_walk, 3.4f, null),
-            new mframe_t(GameAI.ai_walk, 2.4f, null) };
-
+            new mframe_t(GameAI.ai_walk, 2.4f, null)};
     static mmove_t insane_move_crawl = new mmove_t(FRAME_crawl1, FRAME_crawl9,
             insane_frames_crawl, null);
+    static EntThinkAdapter insane_walk = new EntThinkAdapter() {
+        public String getID() {
+            return "insane_walk";
+        }
 
+        public boolean think(edict_t self) {
+            if ((self.spawnflags & 16) != 0) // Hold Ground?
+                if (self.s.frame == FRAME_cr_pain10) {
+                    self.monsterinfo.currentmove = insane_move_down;
+                    return true;
+                }
+            if ((self.spawnflags & 4) != 0)
+                self.monsterinfo.currentmove = insane_move_crawl;
+            else if (Lib.random() <= 0.5)
+                self.monsterinfo.currentmove = insane_move_walk_normal;
+            else
+                self.monsterinfo.currentmove = insane_move_walk_insane;
+            return true;
+        }
+    };
     static mmove_t insane_move_runcrawl = new mmove_t(FRAME_crawl1,
             FRAME_crawl9, insane_frames_crawl, null);
+    static EntThinkAdapter insane_run = new EntThinkAdapter() {
+        public String getID() {
+            return "insane_run";
+        }
 
-    static mframe_t insane_frames_crawl_pain[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            if ((self.spawnflags & 16) != 0) // Hold Ground?
+                if (self.s.frame == FRAME_cr_pain10) {
+                    self.monsterinfo.currentmove = insane_move_down;
+                    return true;
+                }
+            if ((self.spawnflags & 4) != 0) // Crawling?
+                self.monsterinfo.currentmove = insane_move_runcrawl;
+            else if (Lib.random() <= 0.5) // Else, mix it up
+                self.monsterinfo.currentmove = insane_move_run_normal;
+            else
+                self.monsterinfo.currentmove = insane_move_run_insane;
+            return true;
+        }
+    };
+    static mframe_t insane_frames_crawl_pain[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -1172,24 +1041,69 @@ public class M_Insane {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t insane_move_crawl_pain = new mmove_t(FRAME_cr_pain2,
             FRAME_cr_pain10, insane_frames_crawl_pain, insane_run);
-
-    static mframe_t insane_frames_crawl_death[] = new mframe_t[] {
+    static mframe_t insane_frames_crawl_death[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t insane_move_crawl_death = new mmove_t(FRAME_cr_death10,
             FRAME_cr_death16, insane_frames_crawl_death, insane_dead);
+    static EntDieAdapter insane_die = new EntDieAdapter() {
+        public String getID() {
+            return "insane_die";
+        }
 
-    static mframe_t insane_frames_cross[] = new mframe_t[] {
+        public void die(edict_t self, edict_t inflictor, edict_t attacker,
+                        int damage, float[] point) {
+            int n;
+
+            if (self.health <= self.gib_health) {
+                GameBase.gi
+                        .sound(self, Defines.CHAN_VOICE, GameBase.gi
+                                        .soundindex("misc/udeath.wav"), 1,
+                                Defines.ATTN_IDLE, 0);
+                for (n = 0; n < 2; n++)
+                    GameMisc.ThrowGib(self, "models/objects/gibs/bone/tris.md2",
+                            damage, Defines.GIB_ORGANIC);
+                for (n = 0; n < 4; n++)
+                    GameMisc.ThrowGib(self,
+                            "models/objects/gibs/sm_meat/tris.md2", damage,
+                            Defines.GIB_ORGANIC);
+                GameMisc.ThrowHead(self, "models/objects/gibs/head2/tris.md2",
+                        damage, Defines.GIB_ORGANIC);
+                self.deadflag = Defines.DEAD_DEAD;
+                return;
+            }
+
+            if (self.deadflag == Defines.DEAD_DEAD)
+                return;
+
+            GameBase.gi.sound(self, Defines.CHAN_VOICE, GameBase.gi
+                    .soundindex("player/male/death" + ((Lib.rand() % 4) + 1)
+                            + ".wav"), 1, Defines.ATTN_IDLE, 0);
+
+            self.deadflag = Defines.DEAD_DEAD;
+            self.takedamage = Defines.DAMAGE_YES;
+
+            if ((self.spawnflags & 8) != 0) {
+                insane_dead.think(self);
+            } else {
+                if (((self.s.frame >= FRAME_crawl1) && (self.s.frame <= FRAME_crawl9))
+                        || ((self.s.frame >= FRAME_stand99) && (self.s.frame <= FRAME_stand160)))
+                    self.monsterinfo.currentmove = insane_move_crawl_death;
+                else
+                    self.monsterinfo.currentmove = insane_move_stand_death;
+            }
+        }
+
+    };
+    static mframe_t insane_frames_cross[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, insane_moan),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -1204,12 +1118,31 @@ public class M_Insane {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t insane_move_cross = new mmove_t(FRAME_cross1, FRAME_cross15,
             insane_frames_cross, insane_cross);
+    static EntThinkAdapter insane_stand = new EntThinkAdapter() {
+        public String getID() {
+            return "insane_stand";
+        }
 
-    static mframe_t insane_frames_struggle_cross[] = new mframe_t[] {
+        public boolean think(edict_t self) {
+            if ((self.spawnflags & 8) != 0) // If crucified
+            {
+                self.monsterinfo.currentmove = insane_move_cross;
+                self.monsterinfo.aiflags |= Defines.AI_STAND_GROUND;
+            }
+            // If Hold_Ground and Crawl are set
+            else if ((self.spawnflags & 4) != 0 && (self.spawnflags & 16) != 0)
+                self.monsterinfo.currentmove = insane_move_down;
+            else if (Lib.random() < 0.5)
+                self.monsterinfo.currentmove = insane_move_stand_normal;
+            else
+                self.monsterinfo.currentmove = insane_move_stand_insane;
+            return true;
+        }
+    };
+    static mframe_t insane_frames_struggle_cross[] = new mframe_t[]{
             new mframe_t(GameAI.ai_move, 0, insane_scream),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
@@ -1224,10 +1157,67 @@ public class M_Insane {
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
             new mframe_t(GameAI.ai_move, 0, null),
-            new mframe_t(GameAI.ai_move, 0, null) };
-
+            new mframe_t(GameAI.ai_move, 0, null)};
     static mmove_t insane_move_struggle_cross = new mmove_t(FRAME_cross16,
             FRAME_cross30, insane_frames_struggle_cross, insane_cross);
+    static EntThinkAdapter insane_cross = new EntThinkAdapter() {
+        public String getID() {
+            return "insane_cross";
+        }
+
+        public boolean think(edict_t self) {
+            if (Lib.random() < 0.8)
+                self.monsterinfo.currentmove = insane_move_cross;
+            else
+                self.monsterinfo.currentmove = insane_move_struggle_cross;
+            return true;
+        }
+    };
+    static EntPainAdapter insane_pain = new EntPainAdapter() {
+        public String getID() {
+            return "insane_pain";
+        }
+
+        public void pain(edict_t self, edict_t other, float kick, int damage) {
+            int l, r;
+
+            //	 if (self.health < (self.max_health / 2))
+            //		 self.s.skinnum = 1;
+
+            if (GameBase.level.time < self.pain_debounce_time)
+                return;
+
+            self.pain_debounce_time = GameBase.level.time + 3;
+
+            r = 1 + (Lib.rand() & 1);
+            if (self.health < 25)
+                l = 25;
+            else if (self.health < 50)
+                l = 50;
+            else if (self.health < 75)
+                l = 75;
+            else
+                l = 100;
+            GameBase.gi.sound(self, Defines.CHAN_VOICE, GameBase.gi
+                            .soundindex("player/male/pain" + l + "_" + r + ".wav"), 1,
+                    Defines.ATTN_IDLE, 0);
+
+            if (GameBase.skill.value == 3)
+                return; // no pain anims in nightmare
+
+            // Don't go into pain frames if crucified.
+            if ((self.spawnflags & 8) != 0) {
+                self.monsterinfo.currentmove = insane_move_struggle_cross;
+                return;
+            }
+
+            if (((self.s.frame >= FRAME_crawl1) && (self.s.frame <= FRAME_crawl9))
+                    || ((self.s.frame >= FRAME_stand99) && (self.s.frame <= FRAME_stand160))) {
+                self.monsterinfo.currentmove = insane_move_crawl_pain;
+            } else
+                self.monsterinfo.currentmove = insane_move_stand_pain;
+        }
+    };
 
     /*
      * QUAKED misc_insane (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn

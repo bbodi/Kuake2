@@ -19,6 +19,6 @@
 package lwjake2.game;
 
 public class mapsurface_t {
-	public csurface_t c = new csurface_t();
-	public String rname;
+    public csurface_t c = new csurface_t();
+    public String rname;
 }
