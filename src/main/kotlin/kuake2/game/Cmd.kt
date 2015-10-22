@@ -28,7 +28,6 @@ import kuake2.util.Math3D
 
 import java.util.Arrays
 import java.util.Comparator
-import java.util.Vector
 
 /**
  * Cmd
@@ -53,10 +52,10 @@ object Cmd {
 
     internal var List_f: xcommand_t = object : xcommand_t() {
         public override fun execute() {
-            cmd_functions.values().forEach { cmd ->
+            cmd_functions.values.forEach { cmd ->
                 Com.Printf(cmd.name!! + '\n')
             }
-            Com.Printf("${cmd_functions.size()} commands\n")
+            Com.Printf("${cmd_functions.size} commands\n")
         }
     }
     internal var Exec_f: xcommand_t = object : xcommand_t() {
@@ -88,10 +87,9 @@ object Cmd {
     }
     internal var Alias_f: xcommand_t = object : xcommand_t() {
         public override fun execute() {
-            var a: cmdalias_t? = null
             if (Cmd.Argc() == 1) {
                 Com.Printf("Current alias commands:\n")
-                a = Globals.cmd_alias
+                var a = Globals.cmd_alias
                 while (a != null) {
                     Com.Printf(a.name + " : " + a.value)
                     a = a.next
@@ -100,15 +98,15 @@ object Cmd {
             }
 
             val s = Cmd.Argv(1)
-            if (s.length() > Defines.MAX_ALIAS_NAME) {
+            if (s.length > Defines.MAX_ALIAS_NAME) {
                 Com.Printf("Alias name is too long\n")
                 return
             }
 
             // if the alias already exists, reuse it
-            a = Globals.cmd_alias
+            var a = Globals.cmd_alias
             while (a != null) {
-                if (s.equalsIgnoreCase(a.name)) {
+                if (s.equals(a.name, ignoreCase = true)) {
                     a.value = null
                     break
                 }
@@ -193,7 +191,7 @@ object Cmd {
 
             token = Cvar.VariableString(token)
 
-            var j = token.length()
+            var j = token.length
 
             len += j
 
@@ -203,11 +201,11 @@ object Cmd {
             }
 
             System.arraycopy(scan, 0, temporary, 0, i)
-            System.arraycopy(token.toCharArray(), 0, temporary, i, token.length())
+            System.arraycopy(token.toCharArray(), 0, temporary, i, token.length)
             System.arraycopy(ph.data, ph.index, temporary, i + j, len - ph.index - j)
 
             System.arraycopy(temporary, 0, expanded, 0, 0)
-            var scan = expanded
+            scan = expanded
             i--
             if (++count == 100) {
                 Com.Printf("Macro expansion loop, discarded.\n")
@@ -254,7 +252,7 @@ object Cmd {
 
             if (c == '\n') {
                 // a newline seperates commands in the buffer
-                c = ph.nextchar()
+                ph.nextchar()
                 break
             }
 
@@ -282,7 +280,7 @@ object Cmd {
     @JvmStatic fun AddCommand(cmd_name: String, function: xcommand_t?) {
         //Com.DPrintf("Cmd_AddCommand: " + cmd_name + "\n");
         // fail if the command is a variable name
-        if ((Cvar.VariableString(cmd_name)).length() > 0) {
+        if ((Cvar.VariableString(cmd_name)).length > 0) {
             Com.Printf("Cmd_AddCommand: $cmd_name already defined as a var\n")
             return
         }
@@ -938,7 +936,7 @@ object Cmd {
             val netname = GameBase.game.clients[index[i]!!.toInt()].pers.netname
             var small = "$stats $netname\n"
 
-            if (small.length() + large.length() > 1024 - 100) {
+            if (small.length + large.length > 1024 - 100) {
                 // can't print all of them in one packet
                 large += "...\n"
                 break
@@ -1026,13 +1024,13 @@ object Cmd {
             text += Cmd.Args()
         } else {
             if (Cmd.Args().startsWith("\""))
-                text += Cmd.Args().substring(1, Cmd.Args().length() - 1)
+                text += Cmd.Args().substring(1, Cmd.Args().length - 1)
             else
                 text += Cmd.Args()
         }
 
         // don't let text be too long for malicious reasons
-        if (text.length() > 150)
+        if (text.length > 150)
         //text[150] = 0;
             text = text.substring(0, 150)
 
@@ -1102,7 +1100,7 @@ object Cmd {
 
             val st = "" + (GameBase.level.framenum - e2.client.resp.enterframe) / 600 + ":" + ((GameBase.level.framenum - e2.client.resp.enterframe) % 600) / 10 + " " + e2.client.ping + " " + e2.client.resp.score + " " + e2.client.pers.netname + " " + (if (e2.client.resp.spectator) " (spectator)" else "") + "\n"
 
-            if (text.length() + st.length() > 1024 - 50) {
+            if (text.length + st.length > 1024 - 50) {
                 text += "And more...\n"
                 SV_GAME.PF_cprintfhigh(ent, "" + text + "")
                 return
@@ -1122,8 +1120,8 @@ object Cmd {
         val cmd: String
 
         cmd = Cmd.Argv(0)
-        if (Globals.cls.state <= Defines.ca_connected || cmd.charAt(0) == '-' || cmd.charAt(0) == '+') {
-            Com.Printf("Unknown command \"" + cmd + "\"\n")
+        if (Globals.cls.state <= Defines.ca_connected || cmd[0] == '-' || cmd[0] == '+') {
+            Com.Printf("Unknown command \"$cmd\"\n")
             return
         }
 
@@ -1141,7 +1139,7 @@ object Cmd {
     @JvmStatic fun CompleteCommand(partial: String): List<String> {
         val cmds = cmd_functions.filter {
             it.key.startsWith(partial)
-        }.keySet().toArrayList()
+        }.keys.toArrayList()
         var a: cmdalias_t? = Globals.cmd_alias
         while (a != null) {
             if (a.name.startsWith(partial))
