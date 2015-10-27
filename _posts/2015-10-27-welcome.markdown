@@ -30,6 +30,14 @@ A project eme stádiumát blogbejegyzésekben követem végig, ahol a motor egye
 - Átirni az eseménykezelést Q3-típusúra (minden eseményt átalakítok egy közös belső event típura, hasonló a Windows eseménykezeléséhez)
 - a kurzor által mutatott szörny méretének módosítása.
 - Hogyan működik a Medic nevű szörny aurája?
+  M.M_SetEffects
+  ```
+        if ((ent.monsterinfo.aiflags & Defines.AI_RESURRECTING) != 0) {
+            ent.s.effects |= Defines.EF_COLOR_SHELL;
+            ent.s.renderfx |= Defines.RF_SHELL_RED;
+        }
+  ```
+- Lelassítani, felgyorsítani a játékot
 
 A második stádiumban portolom, refaktorálom az alkalmazást [Kotlin][kotlin]-ra, Tiszta Kódot használva. A Jake2 az eredeti kód tükörmásolata, minden rossz tulajdonságát megtartva. Tele van nehezen érthető változó- és metódusnevekkel, globális változókkal, nem hatékony/kényelmes adatstruktúrák használatával.
 
