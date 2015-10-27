@@ -372,14 +372,19 @@ object Cmd {
     }
 
     fun Spawn_f(ent: edict_t) {
-        val spawned_ent = GameUtil.G_Spawn()
-        val forward = floatArrayOf(0f, 0f, 0f)
-        Math3D.AngleVectors(ent.s.angles, forward, null, null)
-        Math3D.VectorCopy(ent.s.origin, spawned_ent.s.origin)
-        Math3D.VectorScale(forward, 100f, forward)
-        Math3D.VectorAdd(spawned_ent.s.origin, forward, spawned_ent.s.origin)
-        spawned_ent.classname = Cmd.Argv(1)
-        GameSpawn.ED_CallSpawn(spawned_ent)
+        val count = if (Cmd.Argc() >= 3) Lib.atoi(Cmd.Argv(2)) else 1
+        for (i in 1 .. count) {
+            Lib.crand()
+            val spawned_ent = GameUtil.G_Spawn()
+            val forward = floatArrayOf(0f, 0f, 0f)
+            Math3D.AngleVectors(ent.s.angles, forward, null, null)
+            Math3D.VectorCopy(ent.s.origin, spawned_ent.s.origin)
+            Math3D.VectorScale(forward, 200f, forward)
+            Math3D.VectorAdd(spawned_ent.s.origin, forward, spawned_ent.s.origin)
+            spawned_ent.classname = Cmd.Argv(1)
+            GameSpawn.ED_CallSpawn(spawned_ent)
+            GameBase.gi.linkentity(spawned_ent);
+        }
     }
 
     /**

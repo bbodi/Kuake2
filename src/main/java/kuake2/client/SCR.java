@@ -1197,14 +1197,12 @@ public final class SCR extends Globals {
                 CheckDrawCenterString();
                 DrawFPS();
 
-                //
-                //				if (scr_timegraph->value)
-                //					SCR_DebugGraph (cls.frametime*300, 0);
-                //
-                //				if (scr_debuggraph->value || scr_timegraph->value ||
-                // scr_netgraph->value)
-                //					SCR_DrawDebugGraph ();
-                //
+                if (scr_timegraph.value == 1)
+                    SCR.DebugGraph(cls.frametime * 300, 0);
+
+                if (scr_debuggraph.value == 1 || scr_timegraph.value == 1 ||
+                        scr_netgraph.value == 1)
+                    SCR.DrawDebugGraph();
                 DrawPause();
                 DrawConsole();
                 Menu.Draw();
@@ -1393,7 +1391,7 @@ public final class SCR extends Globals {
 
     /**
      * FinishCinematic
-     * <p/>
+     * <p>
      * Called when either the cinematic completes, or it is aborted
      */
     static void FinishCinematic() {
@@ -1429,7 +1427,7 @@ public final class SCR extends Globals {
 
     /**
      * Huff1TableInit
-     * <p/>
+     * <p>
      * Reads the 64k counts table and initializes the node trees.
      */
     private static void Huff1TableInit() {
@@ -1676,7 +1674,7 @@ public final class SCR extends Globals {
 
     /**
      * DrawCinematic
-     * <p/>
+     * <p>
      * Returns true if a cinematic is active, meaning the view rendering should
      * be skipped.
      */
