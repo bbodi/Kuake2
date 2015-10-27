@@ -8,12 +8,14 @@ categories: jekyll update
 ## A projectről
 A Kuake2 egy többlépcsős project.
 
+A végső cél, hogy az engine-t felhasználva egy régóta dédelgetett álmomat valósítsam meg.
+
+Ehhez viszont szükséges az engine mély ismerete és kipofozása.
+
 Első körben célom, hogy tanulmányozom a Quake 2 forráskódját, architektúráját és működését. Ehhez nem az eredeti,
-C-ben írt forrást fogom használni, kényelmi okokból a Java-s verziót, azaz a [Jake2][jake2]-t használom.
+C-ben írt forrást fogom használni, kényelmi okokból a Java-s verziót, azaz a [Jake2][jake2]-t használom. Ez sokkal kényelmesebb és egyszerűbb a tanulmányozás szempontjából, valamint a további fejlesztéseket is megkönnyíti.
 
-Néhány perces konfigurálás után debug módban tudom futtatni IDE-ből, vagy akár futás közben módsítani a kódot.
-
-A project eme stádiumát blogbejegyzésekben követem végig, ahol a motor egyes részét elemzem ki, többek között:
+A project eme stádiumát blogbejegyzésekben követem végig, ahol a motor egyes részeit elemzem ki, többek között:
 
 - Hogy működik az input?
 - Hogy, hol működik a hálózati kód.
@@ -23,10 +25,17 @@ A project eme stádiumát blogbejegyzésekben követem végig, ahol a motor egye
 - Hogyan tudom a pályát Wire-frameként megjeleníteni?
 - Hogyan tudom a modelleket wireframe-ként megjeleníteni?
 - Egy sprite-tot meg tudok jeleníteni, ami nem az XY síkban, hanem a XZ-ben (a padlóra merőlegesen) jelenik meg?
+- Irni egy szörnyet, aki követ engem, és mellettem harcol.
+- Hogyan és miért működik a Record felvétel?
+- Átirni az eseménykezelést Q3-típusúra (minden eseményt átalakítok egy közös belső event típura, hasonló a Windows eseménykezeléséhez)
+- a kurzor által mutatott szörny méretének módosítása.
+- Hogyan működik a Medic nevű szörny aurája?
 
 A második stádiumban portolom, refaktorálom az alkalmazást [Kotlin][kotlin]-ra, Tiszta Kódot használva. A Jake2 az eredeti kód tükörmásolata, minden rossz tulajdonságát megtartva. Tele van nehezen érthető változó- és metódusnevekkel, globális változókkal, nem hatékony/kényelmes adatstruktúrák használatával.
 
 ## Jake2 futtatása [IntelliJ][intellij] alól
+Néhány perc alatt IDE-ből képesek leszünk debug módban futtatni a kódot. Kipróbálhatjuk, tanulmányozhatjuk és kedvnünkre módosíthatjuk (akár futás közben) ezt a legendás játékot, van jobb mód a tanulásra? :)
+
 Töltsd le és csomagold ki a [forráskódot](https://github.com/flibitijibibo/LWJake2)
 
 > git clone https://github.com/flibitijibibo/LWJake2.git
